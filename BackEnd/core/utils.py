@@ -30,6 +30,10 @@ def get_places_in_city_foursquare(city):
         return {'error': str(e)}
     
 def get_places(lat, lng, radius, categories=None):
+    '''
+    Fetch places (attractions, events, etc.) from the Google Places API based on location and radius.
+    '''
+    
     api_url = "https://places.googleapis.com/v1/places:searchNearby"
 
     # Define the JSON body of the request

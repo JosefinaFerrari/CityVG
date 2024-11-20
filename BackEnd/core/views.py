@@ -4,6 +4,30 @@ from .utils import get_places  # Import the function from utils.py
 from rapidfuzz import fuzz
 from geopy.distance import geodesic
 
+# Define the mapping dictionary
+category_mapping = {
+    "Museums and Galleries": ["museum", "art_gallery"],
+    "Historical Sites": ["historical_place", "monument", "cultural_landmark"],
+    "Performing Arts": ["performing_arts_theater", "concert_hall", "opera_house"],
+    "Parks and Gardens": ["park", "botanical_garden", "state_park", "national_park", "garden"],
+    "Amusement Parks": ["amusement_park", "water_park", "roller_coaster"],
+    "Zoos and Aquariums": ["zoo", "aquarium", "wildlife_park"],
+    "Adventure Activities": ["hiking_area", "off_roading_area", "adventure_sports_center"],
+    "Beaches": ["beach"],
+    "Hiking and Outdoors": ["national_park", "hiking_area"],
+    "Playgrounds": ["playground"],
+    "Nightlife": ["night_club", "bar", "comedy_club", "karaoke"],
+    "Kids Entertainment": ["amusement_center", "childrens_camp"],
+    "Local Cuisine": ["restaurant", "fine_dining_restaurant"]
+}
+
+def get_types_for_category(category):
+    """
+    Given a category, return the corresponding types.
+    """
+    return category_mapping.get(category, [])
+
+
 def places(request):
     """
     Fetch places from Google Places API and return them as JSON.
