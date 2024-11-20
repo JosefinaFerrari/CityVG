@@ -64,7 +64,7 @@ def get_places(lat, lng, radius, categories=None):
             "aquarium"
         ],
         "maxResultCount": 20,
-        # "rankPreference": "POPULARITY"  # Removed as it's not supported in Nearby Search (New)
+        "rankPreference": "POPULARITY"  # Removed as it's not supported in Nearby Search (New)
     }
     
     # Apply categories filter if provided
