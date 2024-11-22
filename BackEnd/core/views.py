@@ -1,3 +1,6 @@
+from collections import Counter
+import re
+from string import punctuation
 from django.http import JsonResponse
 from .utils import get_tiqets_products  # Import the function from utils.py
 from .utils import get_places  # Import the function from utils.py
@@ -137,34 +140,60 @@ def merge_tiqets_and_places(request):
     # Group products by venue
     grouped_products = group_products_by_venue(tiqets_data)
 
-    # Merge data from both sources
-    merged_data = []
+    # Initialize categories
+    tiqetsXplaces = []  # Matches between Tiqets and Places
+    places_only = []    # Places without a matching Tiqets venue
+    tiqets_only = []    # Tiqets venues without a matching Plac
 
     for place in places_data:
         for venue_name, venue_info in grouped_products.items():
+            average_price = get_average_price_from_tiqets(venue_info.get('products'))
+            tiqets_by_price_asc = order_tiqets_by_price(venue_info.get('products'))
+            average_rating = get_average_rating_from_tiqets(venue_info.get('products'))
+
             score = match_score(venue_info, place)
             if score > 0.7:
-                merged_data.append({
-                    'place': place['displayName']['text'],
-                    'venue': venue_info.get('name'),
+                tiqetsXplaces.append({
+                    'place': place['displayName']['text'],                    
+                    'venue': venue_info.get('name'),                  
+                    'average_price': average_price, 
+                    'tiqets_by_price': tiqets_by_price_asc,                  
+                    'rating': place.get('rating'),
+                    'tiqets_average_rating': average_rating,
+                    'categories': place.get('types'),
                     'score': score
                 })
     
     for place in places_data:
-        if not any(place['displayName']['text'] in item['place'] for item in merged_data):
-            merged_data.append({
+        if not any(place['displayName']['text'] in item['place'] for item in tiqetsXplaces):
+            places_only.append({
                 'place': place['displayName']['text'],
+                'rating': place.get('rating'),
+                'categories': place.get('types'),
                 'venue': "No matching Venue",
+                'average_price': None,
                 'score': 0
             })
 
     for venue_name, venue_info in grouped_products.items():
-        if not any(venue_info.get('name') in item['venue'] for item in merged_data):
-            merged_data.append({
-                'place': "No matching Place",
+        if not any(venue_info.get('name') in item['venue'] for item in tiqetsXplaces):
+            
+            descriptions = get_descriptions(venue_info.get('products'))
+            average_price = get_average_price_from_tiqets(venue_info.get('products'))
+            tiqets_by_price_asc = order_tiqets_by_price(venue_info.get('products'))
+            average_rating = get_average_rating_from_tiqets(venue_info.get('products'))
+
+            tiqets_only.append({
                 'venue': venue_info.get('name'),
+                'average_price': average_price, 
+                'tiqets_by_price': tiqets_by_price_asc, 
+                'tiqets_average_rating': average_rating,
+                'place': "No matching Place", 
+                'description':  descriptions,
                 'score': 0
             })
+
+    merged_data= {"tiqetsXplaces": tiqetsXplaces, "places_only":places_only, "tiqets_only":tiqets_only}
     return JsonResponse(merged_data, safe=False)
 
 def tiqets_products(request):
@@ -192,3 +221,156 @@ def tiqets_products(request):
     products_data = get_tiqets_products(lat, lng, radius)
 
     return JsonResponse(products_data)
+
+def get_average_price_from_tiqets(venue_products):
+    total = 0
+    count = 0 
+    for product in venue_products:
+        if product.get('price'):
+            count += 1
+            total += product.get('price')
+
+    if count> 0:
+        return total/count
+    
+def get_average_rating_from_tiqets(venue_products):
+    total = 0
+    count = 0 
+    for product in venue_products:
+        if product.get('ratings'):
+            count += 1
+            total += product.get('ratings').get('average')
+
+    if count> 0:
+        return total/count
+    
+    return 0
+
+def order_tiqets_by_price(venue_products):
+    sorted_products = sorted(
+        venue_products, 
+        key=lambda product: product.get('price', float('inf'))  # Use 'inf' if price is missing
+    )
+    
+    sorted_id_price_pairs = [(product.get('id'), product.get('price')) for product in sorted_products]
+    
+    return sorted_id_price_pairs
+
+def extract_keywords(text):
+    text = text.lower()
+    
+    text = re.sub(f"[{re.escape(punctuation)}]", "", text)
+    
+    words = text.split()
+    
+    stopwords = {"the", "a", "an", "and", "or", "to", "as", "you", "your", "of", "its", "it", "in", "is", "for", "on"}
+    filtered_words = [word for word in words if word not in stopwords]
+    word_counts = Counter(filtered_words)
+
+    return list(word_counts.keys())
+
+def get_descriptions(products):
+    all_keywords = []
+
+    for prod in products:
+        if prod.get('tagline'):
+            desc = prod.get('tagline')
+            
+            # Extract keywords from the tagline
+            keywords = extract_keywords(desc)
+            all_keywords.extend(keywords)
+
+    keyword_counts = Counter(all_keywords)
+    
+    return list(all_keywords)
+
+
+def recommend(user_preferences):
+        lat = user_preferences.get('lat')
+        lng = user_preferences.get('lng')
+        radius = user_preferences.get('radius')
+        dates = user_preferences.get('dates')
+        participants = user_preferences.get('participants')
+        categories = user_preferences.get('categories')
+        budget = user_preferences.get('budget')
+
+        merged_data = merge_tiqets_and_places(lat, lng, radius)
+
+        recommendations = []
+
+        for tiqetXplace in merged_data.get("tiqetsXplaces"):
+                recommendation_score = 0
+                
+                rating = tiqetXplace.get('rating', 0) # rating value between 0 and 5
+                normalized_rating = rating / 5 # rating value between 0 and 1
+                
+                category_score = calculate_place_common_categories(tiqetXplace.get('categories', []), categories) # category accuracy value between 0 and 1
+                
+                recommendation_score = (normalized_rating * 0.4) + (category_score * 0.6)
+
+                recommendations.append({
+                        'type': 'tiqetsXplaces',
+                        'place': tiqetXplace.get('place'),
+                        'venue': tiqetXplace.get('venue'),                        
+                        'average_price': tiqetXplace.get('average_price'),
+                        'recommended_score': recommendation_score
+                })   
+
+        for place in merged_data.get("places_only"):
+                recommendation_score = 0
+                
+                rating = place.get('rating', 0)  # rating value between 0 and 5
+                normalized_rating = rating / 5 # rating value between 0 and 1
+
+                category_score = calculate_place_common_categories(place.get('categories', []), categories) # category accuracy value between 0 and 1
+                
+                recommendation_score = (normalized_rating * 0.4) + (category_score * 0.6)
+                
+                recommendations.append({
+                        'type': 'places_only',
+                        'place': place.get('place'),                   
+                        'venue': place.get('venue'),                             
+                        'average_price': place.get('average_price'),
+                        'recommended_score': recommendation_score
+                })
+
+        for tiqet in merged_data.get("tiqets_only"):       
+
+                recommendation_score = 0
+                
+                rating = tiqet.get('tiqets_average_rating', 0) # rating value between 0 and 10
+                normalized_rating = rating / 5 # rating value between 0 and 1
+
+                category_score = calculate_place_common_categories(tiqet.get('categories', []), categories)
+                                
+                recommendation_score = (normalized_rating * 0.4) + (category_score * 0.6)
+
+                recommendations.append({
+                        'type': 'tiqets_only',
+                        'place': tiqet.get('place'),                  
+                        'venue': tiqet.get('venue'),                            
+                        'average_price': tiqet.get('average_price'),
+                        'recommended_score': recommendation_score
+                })
+
+        if budget == 'Cheap':
+                recommendations = sorted(
+                        (rec for rec in recommendations if rec.get('average_price') is not None),
+                        key=lambda rec: rec['average_price']
+                )
+
+        top_recommendations = sorted(
+                recommendations, 
+                key=lambda rec: rec['recommended_score'], 
+                reverse=True)[:10]
+
+
+        return top_recommendations
+    
+def calculate_place_common_categories(place_categories, user_preferred_categories):
+    if (len(user_preferred_categories)>0):
+        user_preferred_categories_set = set(user_preferred_categories)
+
+        common = user_preferred_categories_set.intersection(place_categories)
+        return len(common) / len(user_preferred_categories)
+    return 0
