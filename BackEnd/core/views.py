@@ -1,7 +1,10 @@
 from django.http import JsonResponse
 from .utils import get_tiqets_products  # Import the function from utils.py
 from .utils import get_places  # Import the function from utils.py
+from .utils import generate_itinerary  # Import the function from utils.py
+from .utils import get_gemini_response  # Import the function from utils.py
 from rapidfuzz import fuzz
+import json
 from geopy.distance import geodesic
 
 # Define the mapping dictionary
@@ -50,6 +53,161 @@ def places(request):
     places_data = get_places(lat, lng, radius)
 
     return JsonResponse(places_data, safe=False)
+def gemini(request):
+    """
+    Fetch places from Google Places API and return them as JSON.
+    Example URL: /gemini/?lat=45.4642&lng=9.1900&radius=5
+    """
+    # Extract query parameters from the request
+    lat = request.GET.get('lat')
+    lng = request.GET.get('lng')
+    radius = request.GET.get('radius')  # Default to 5000 meters if not provided
+    
+    # Convert lat, lng, and radius to the correct types
+    try:
+        lat = float(lat)
+        lng = float(lng)
+        radius = int(radius)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid latitude, longitude, or radius values.'}, status=400)
+    
+    # Fetch data from Google Places API using the utility function
+    gemini_data = get_gemini_response(lat, lng, radius)
+    
+    return JsonResponse(gemini_data, safe=False)
+
+def get_itinerary(request):
+    """
+    Fetch places from Google Places API and return them as JSON.
+    Example URL: /generate/?lat=48.864716&lng=2.349014&radius=10&start_date=2024-11-23&end_date=2024-11-30&start_time=9&end_time=15&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=low
+    """
+    # Extract query parameters from the request
+    lat = request.GET.get('lat')
+    lng = request.GET.get('lng')
+    radius = request.GET.get('radius')  # Default to 5000 meters if not provided
+    categories = request.GET.get('categories', [])  # Default to empty array if not provided
+    start_date = request.GET.get('start_date')  # Default to None if not provided
+    end_date = request.GET.get('end_date')  # Default to None if not provided
+    start_time = request.GET.get('start_time')  # Default to None if not provided
+    end_time = request.GET.get('end_time')  # Default to None if not provided
+    num_seniors = request.GET.get('num_seniors')  # Default to 0 if not provided
+    num_adults = request.GET.get('num_adults')  # Default to 0 if not provided
+    num_youth = request.GET.get('num_youth')  # Default to 0 if not provided
+    num_children = request.GET.get('num_children')  # Default to 0 if not provided
+    budget = request.GET.get('budget', '')  # Default to '' if not provided
+
+    # Convert lat, lng, and radius to the correct types
+    try:
+        lat = float(lat)
+        lng = float(lng)
+        radius = int(radius)
+        start_date = str(start_date)
+        end_date = str(end_date)
+        start_time = int(start_time)
+        end_time = int(end_time)
+        num_seniors = int(num_seniors)
+        num_adults = int(num_adults)
+        num_youth = int(num_youth)
+        num_children = int(num_children)
+        budget = str(budget)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid values.'}, status=400)
+    
+    
+    # Fetch data from Google Places API using the utility function
+    places_data = get_places(lat, lng, radius, categories).get('places', [])
+    
+    # Fetch data from Tiqets API using the utility function
+    tiqets_data = get_tiqets_products(lat, lng, radius).get('products', [])
+    
+    merged = merge_places_tiqets(places_data, tiqets_data)
+
+    itinerary = generate_itinerary(lat, lng, start_date, end_date, start_time, end_time, num_seniors, num_adults, num_youth, num_children, budget, merged)
+    
+    merged_data = merge_gemini_places(merged, itinerary) 
+
+    return JsonResponse(merged_data, safe=False)
+
+def merge_gemini_places(merged_places, gemini_response_str):
+    merged_data = {}
+
+    gemini_response = json.loads(gemini_response_str)
+    
+    for itinerary in gemini_response["itineraries"]:
+        for attraction in itinerary["attractions"]:
+            name = attraction["name"]
+
+            if name in merged_places:
+                attraction.update({
+                    "lat": merged_places[name]["lat"],
+                    "lng": merged_places[name]["lng"],
+                    "city": merged_places[name]['products'][list(merged_places[name]['products'].keys())[0]]['city'],
+                    "country": merged_places[name]['products'][list(merged_places[name]['products'].keys())[0]]['country'],
+                    "description": merged_places[name].get("description", "No description available"),
+                    "product": None  # Initialize product as None
+                })
+
+                # Check if the attraction has a product
+                if "productName" in attraction:
+                    product_name = attraction["productName"]
+                    product_info = merged_places[name]["products"].get(product_name)
+                    # Set or overwrite the product field with the current product
+                    attraction["product"] = product_info
+
+
+    return gemini_response
+        
+def merge_places_tiqets(places_data, tiqets_data):    
+    # Group products by venue
+    grouped_products = group_products_by_venue(tiqets_data)
+
+    # Merge data from both sources
+    merged_data = []
+    merged = {}
+
+    for place in places_data:
+        for venue_name, venue_info in grouped_products.items():
+            score = match_score(venue_info, place)
+            if score > 0.7:
+                merged[place['displayName']['text']] = {
+                    'place': place['displayName']['text'],
+                    'lat': place['location']['latitude'],
+                    'lng': place['location']['longitude'],
+                    'photos': place.get('photos', []),
+                    'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
+                    'venue': venue_info.get('name'),
+                    'products': {product['title']: {
+                            'title': product.get('title', 'N/A'),
+                            'price': product.get('price', 'N/A'),
+                            'summary': product.get('summary', 'N/A'),
+                            'city': product.get('city_name', 'N/A'),
+                            'country': product.get('country_name', 'N/A'),
+                            'product_checkout_url': product.get('product_checkout_url', 'N/A'),
+                            'duration': product.get('duration', 'N/A'),
+                            'rating': product['ratings'].get('average', 'N/A'),
+                            'images': product.get('images', []),
+                            'whats_included': product.get('whats_included', 'N/A'),
+                            'sale_status': product.get('sale_status', 'N/A'),
+                            } for product in grouped_products[venue_info.get('name')].get('products')}
+                }
+    
+    for place in places_data:
+        if not any(place['displayName']['text'] in item['place'] for item in merged_data):
+            merged_data.append({
+                'place': place['displayName']['text'],
+                'venue': "No matching Venue",
+                'score': 0
+            })
+
+    for venue_name, venue_info in grouped_products.items():
+        if not any(venue_info.get('name') in item['venue'] for item in merged_data):
+            merged_data.append({
+                'place': "No matching Place",
+                'venue': venue_info.get('name'),
+                'score': 0
+            })
+
+    return merged
 
 def group_products_by_venue(products):
     """
@@ -86,14 +244,14 @@ def match_score(venue, place):
     The score is calculated as the number of common words between the two names.
     """
     
-    name_score = fuzz.token_sort_ratio(place['displayName']['text'].lower(), venue['name'].lower()) / 100
+    name_score = fuzz.token_set_ratio(place['displayName']['text'].lower(), venue['name'].lower()) / 100
 
     # Compare addresses (you could use a more sophisticated method for address normalization)
     venue_address1 = f"{venue['address']}, {venue['city']}"
     venue_address2 = f"{venue['name']}, {venue['address']}, {venue['city']}"
 
-    address_score1 = fuzz.token_sort_ratio(venue_address1, place['shortFormattedAddress'])
-    address_score2 = fuzz.token_sort_ratio(venue_address2, place['shortFormattedAddress'])
+    address_score1 = fuzz.token_sort_ratio(venue_address1.lower(), place['shortFormattedAddress'].lower())
+    address_score2 = fuzz.token_sort_ratio(venue_address2.lower(), place['shortFormattedAddress'].lower())
 
     address_score = max(address_score1, address_score2) / 100
 
@@ -106,9 +264,35 @@ def match_score(venue, place):
     coord_score = max(0, 1 - (distance / 1000))  # Normalize to a max distance of 1 km
 
     # Calculate total score (weight based on importance)
-    total_score = (name_score * 0.4) + (address_score * 0.4) + (coord_score * 0.2)
-
+    total_score = (name_score * 0.5) + (address_score * 0.3) + (coord_score * 0.2)
+        
     return total_score
+
+def tiqets(request):
+    """
+    Fetch products from Tiqets API and return them as JSON.
+    Example URL: /tiqets-products/?lat=52.3676&lng=4.9041&radius=5000
+    """
+    # Extract query parameters from the request
+    lat = request.GET.get('lat')
+    lng = request.GET.get('lng')
+    radius = request.GET.get('radius', 5000)  # Default to 5000 meters if not provided
+    
+    if lat is None or lng is None:
+        return JsonResponse({'error': 'Latitude and Longitude are required.'}, status=400)
+    
+    # Convert lat, lng, and radius to the correct types
+    try:
+        lat = float(lat)
+        lng = float(lng)
+        radius = int(radius)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid latitude, longitude, or radius values.'}, status=400)
+
+    # Fetch data from Tiqets API using the utility function
+    products_data = get_tiqets_products(lat, lng, radius)
+
+    return JsonResponse(products_data)
 
 def merge_tiqets_and_places(request):
     """
@@ -139,6 +323,7 @@ def merge_tiqets_and_places(request):
 
     # Merge data from both sources
     merged_data = []
+    merged = {}
 
     for place in places_data:
         for venue_name, venue_info in grouped_products.items():
@@ -146,9 +331,33 @@ def merge_tiqets_and_places(request):
             if score > 0.7:
                 merged_data.append({
                     'place': place['displayName']['text'],
+                    'lat': place['location']['latitude'],
+                    'lng': place['location']['longitude'],
                     'venue': venue_info.get('name'),
+                    'products': venue_info.get('products'),
                     'score': score
                 })
+
+                merged[place['displayName']['text']] = {
+                    'place': place['displayName']['text'],
+                    'lat': place['location']['latitude'],
+                    'lng': place['location']['longitude'],
+                    'photos': place.get('photos', []),
+                    'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
+                    'venue': venue_info.get('name'),
+                    'products': {product['title']: {
+                            'price': product.get('price', 'N/A'),
+                            'summary': product.get('summary', 'N/A'),
+                            'city': product.get('city_name', 'N/A'),
+                            'country': product.get('country_name', 'N/A'),
+                            'product_checkout_url': product.get('product_checkout_url', 'N/A'),
+                            'duration': product.get('duration', 'N/A'),
+                            'rating': product['ratings'].get('average', 'N/A'),
+                            'images': product.get('images', []),
+                            'whats_included': product.get('whats_included', 'N/A'),
+                            'sale_status': product.get('sale_status', 'N/A'),
+                            } for product in grouped_products[venue_info.get('name')].get('products')}
+                }
     
     for place in places_data:
         if not any(place['displayName']['text'] in item['place'] for item in merged_data):
@@ -165,30 +374,5 @@ def merge_tiqets_and_places(request):
                 'venue': venue_info.get('name'),
                 'score': 0
             })
-    return JsonResponse(merged_data, safe=False)
 
-def tiqets_products(request):
-    """
-    Fetch products from Tiqets API and return them as JSON.
-    Example URL: /tiqets-products/?lat=52.3676&lng=4.9041&radius=5000
-    """
-    # Extract query parameters from the request
-    lat = request.GET.get('lat')
-    lng = request.GET.get('lng')
-    radius = request.GET.get('radius', 5000)  # Default to 5000 meters if not provided
-    
-    if lat is None or lng is None:
-        return JsonResponse({'error': 'Latitude and Longitude are required.'}, status=400)
-    
-    # Convert lat, lng, and radius to the correct types
-    try:
-        lat = float(lat)
-        lng = float(lng)
-        radius = int(radius)
-    except ValueError:
-        return JsonResponse({'error': 'Invalid latitude, longitude, or radius values.'}, status=400)
-
-    # Fetch data from Tiqets API using the utility function
-    products_data = get_tiqets_products(lat, lng, radius)
-
-    return JsonResponse(products_data)
+    return JsonResponse(merged, safe=False)
