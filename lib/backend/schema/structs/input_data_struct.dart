@@ -11,14 +11,12 @@ class InputDataStruct extends FFFirebaseStruct {
   InputDataStruct({
     PlaceInfoStruct? placeSelected,
     double? radius,
-    DataSelectionStruct? dataSelected,
     NumberOfPeopleStruct? peopleSelected,
     List<String>? preferencesSelected,
     String? budgetSelected,
     FirestoreUtilData firestoreUtilData = const FirestoreUtilData(),
   })  : _placeSelected = placeSelected,
         _radius = radius,
-        _dataSelected = dataSelected,
         _peopleSelected = peopleSelected,
         _preferencesSelected = preferencesSelected,
         _budgetSelected = budgetSelected,
@@ -43,18 +41,6 @@ class InputDataStruct extends FFFirebaseStruct {
   void incrementRadius(double amount) => radius = radius + amount;
 
   bool hasRadius() => _radius != null;
-
-  // "dataSelected" field.
-  DataSelectionStruct? _dataSelected;
-  DataSelectionStruct get dataSelected =>
-      _dataSelected ?? DataSelectionStruct();
-  set dataSelected(DataSelectionStruct? val) => _dataSelected = val;
-
-  void updateDataSelected(Function(DataSelectionStruct) updateFn) {
-    updateFn(_dataSelected ??= DataSelectionStruct());
-  }
-
-  bool hasDataSelected() => _dataSelected != null;
 
   // "peopleSelected" field.
   NumberOfPeopleStruct? _peopleSelected;
@@ -89,7 +75,6 @@ class InputDataStruct extends FFFirebaseStruct {
   static InputDataStruct fromMap(Map<String, dynamic> data) => InputDataStruct(
         placeSelected: PlaceInfoStruct.maybeFromMap(data['placeSelected']),
         radius: castToType<double>(data['radius']),
-        dataSelected: DataSelectionStruct.maybeFromMap(data['dataSelected']),
         peopleSelected:
             NumberOfPeopleStruct.maybeFromMap(data['peopleSelected']),
         preferencesSelected: getDataList(data['preferencesSelected']),
@@ -103,7 +88,6 @@ class InputDataStruct extends FFFirebaseStruct {
   Map<String, dynamic> toMap() => {
         'placeSelected': _placeSelected?.toMap(),
         'radius': _radius,
-        'dataSelected': _dataSelected?.toMap(),
         'peopleSelected': _peopleSelected?.toMap(),
         'preferencesSelected': _preferencesSelected,
         'budgetSelected': _budgetSelected,
@@ -118,10 +102,6 @@ class InputDataStruct extends FFFirebaseStruct {
         'radius': serializeParam(
           _radius,
           ParamType.double,
-        ),
-        'dataSelected': serializeParam(
-          _dataSelected,
-          ParamType.DataStruct,
         ),
         'peopleSelected': serializeParam(
           _peopleSelected,
@@ -151,12 +131,6 @@ class InputDataStruct extends FFFirebaseStruct {
           ParamType.double,
           false,
         ),
-        dataSelected: deserializeStructParam(
-          data['dataSelected'],
-          ParamType.DataStruct,
-          false,
-          structBuilder: DataSelectionStruct.fromSerializableMap,
-        ),
         peopleSelected: deserializeStructParam(
           data['peopleSelected'],
           ParamType.DataStruct,
@@ -184,7 +158,6 @@ class InputDataStruct extends FFFirebaseStruct {
     return other is InputDataStruct &&
         placeSelected == other.placeSelected &&
         radius == other.radius &&
-        dataSelected == other.dataSelected &&
         peopleSelected == other.peopleSelected &&
         listEquality.equals(preferencesSelected, other.preferencesSelected) &&
         budgetSelected == other.budgetSelected;
@@ -194,7 +167,6 @@ class InputDataStruct extends FFFirebaseStruct {
   int get hashCode => const ListEquality().hash([
         placeSelected,
         radius,
-        dataSelected,
         peopleSelected,
         preferencesSelected,
         budgetSelected
@@ -204,7 +176,6 @@ class InputDataStruct extends FFFirebaseStruct {
 InputDataStruct createInputDataStruct({
   PlaceInfoStruct? placeSelected,
   double? radius,
-  DataSelectionStruct? dataSelected,
   NumberOfPeopleStruct? peopleSelected,
   String? budgetSelected,
   Map<String, dynamic> fieldValues = const {},
@@ -216,8 +187,6 @@ InputDataStruct createInputDataStruct({
       placeSelected:
           placeSelected ?? (clearUnsetFields ? PlaceInfoStruct() : null),
       radius: radius,
-      dataSelected:
-          dataSelected ?? (clearUnsetFields ? DataSelectionStruct() : null),
       peopleSelected:
           peopleSelected ?? (clearUnsetFields ? NumberOfPeopleStruct() : null),
       budgetSelected: budgetSelected,
@@ -281,14 +250,6 @@ Map<String, dynamic> getInputDataFirestoreData(
     firestoreData,
     inputData.hasPlaceSelected() ? inputData.placeSelected : null,
     'placeSelected',
-    forFieldValue,
-  );
-
-  // Handle nested data for "dataSelected" field.
-  addDataSelectionStructData(
-    firestoreData,
-    inputData.hasDataSelected() ? inputData.dataSelected : null,
-    'dataSelected',
     forFieldValue,
   );
 

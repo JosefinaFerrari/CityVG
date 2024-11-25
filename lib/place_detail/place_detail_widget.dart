@@ -1,3 +1,4 @@
+import '/backend/schema/structs/index.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -8,7 +9,12 @@ import 'place_detail_model.dart';
 export 'place_detail_model.dart';
 
 class PlaceDetailWidget extends StatefulWidget {
-  const PlaceDetailWidget({super.key});
+  const PlaceDetailWidget({
+    super.key,
+    required this.attraction,
+  });
+
+  final AttractionStruct? attraction;
 
   @override
   State<PlaceDetailWidget> createState() => _PlaceDetailWidgetState();
@@ -56,7 +62,9 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                     topRight: Radius.circular(0.0),
                   ),
                   child: Image.network(
-                    'https://firebasestorage.googleapis.com/v0/b/cityvg-1f3e7.firebasestorage.app/o/DemoImages%2Fimage%2018.png?alt=media&token=06b088ef-3c81-4144-90a9-aeeb9d364173',
+                    widget.attraction!.images.isNotEmpty
+                        ? widget.attraction!.images.first
+                        : 'https://images.travelandleisureasia.com/wp-content/uploads/sites/2/2023/11/20122038/ljublianica.jpeg',
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
@@ -69,7 +77,10 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'The Duomo (Milan Cathedral)',
+                        valueOrDefault<String>(
+                          widget.attraction?.name,
+                          'Duomo',
+                        ),
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               fontFamily: 'Poppins',
                               fontSize: 24.0,
@@ -86,7 +97,7 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                             size: 18.0,
                           ),
                           Text(
-                            '08:00 - 9:00 AM',
+                            '${widget.attraction?.startingHour} - ${widget.attraction?.endingHour}',
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
@@ -123,7 +134,7 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                               size: 24.0,
                             ),
                             Text(
-                              'Open hours:  9 AM - 7 PM',
+                              'Open hours: ${widget.attraction?.startingHour} - ${widget.attraction?.endingHour}',
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
@@ -150,7 +161,7 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                               ),
                             ),
                             Text(
-                              'Milan, Italy ',
+                              '${widget.attraction?.city}, ${widget.attraction?.country}',
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
@@ -234,7 +245,7 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                                         ),
                                       ),
                                       Text(
-                                        'Basic entry: € 5',
+                                        'Basic entry: € ${widget.attraction?.productPrice.toString()}',
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .override(
@@ -245,60 +256,62 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                                     ].divide(const SizedBox(width: 10.0)),
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 5.0, 0.0, 10.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Container(
-                                        width: 5.0,
-                                        height: 5.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          shape: BoxShape.circle,
+                                if (false)
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 5.0, 0.0, 10.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Container(
+                                          width: 5.0,
+                                          height: 5.0,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                            shape: BoxShape.circle,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        'Rooftop access: € 15',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'Poppins',
-                                              letterSpacing: 0.0,
-                                            ),
-                                      ),
-                                    ].divide(const SizedBox(width: 10.0)),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 5.0, 0.0, 10.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Container(
-                                        width: 5.0,
-                                        height: 5.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          shape: BoxShape.circle,
+                                        Text(
+                                          'Rooftop access: € 15',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                fontFamily: 'Poppins',
+                                                letterSpacing: 0.0,
+                                              ),
                                         ),
-                                      ),
-                                      Text(
-                                        'Skip-the-line: € 25',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'Poppins',
-                                              letterSpacing: 0.0,
-                                            ),
-                                      ),
-                                    ].divide(const SizedBox(width: 10.0)),
+                                      ].divide(const SizedBox(width: 10.0)),
+                                    ),
                                   ),
-                                ),
+                                if (false)
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 5.0, 0.0, 10.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Container(
+                                          width: 5.0,
+                                          height: 5.0,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Skip-the-line: € 25',
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                fontFamily: 'Poppins',
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                      ].divide(const SizedBox(width: 10.0)),
+                                    ),
+                                  ),
                               ],
                             ),
                             Column(
@@ -307,15 +320,18 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(18.0),
                                   child: Image.network(
-                                    'https://firebasestorage.googleapis.com/v0/b/cityvg-1f3e7.firebasestorage.app/o/DemoImages%2Fimage%2023.png?alt=media&token=90d3455c-6cdd-4433-a331-cc27f5d6ea67',
+                                    widget.attraction!.images.isNotEmpty
+                                        ? widget.attraction!.images.last
+                                        : 'https://images.travelandleisureasia.com/wp-content/uploads/sites/2/2023/11/20122038/ljublianica.jpeg',
                                     width: 147.0,
                                     height: 120.0,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
                                 FFButtonWidget(
-                                  onPressed: () {
-                                    print('Button pressed ...');
+                                  onPressed: () async {
+                                    await launchURL(
+                                        widget.attraction!.productCheckoutUrl);
                                   },
                                   text: 'BUY TICKETS',
                                   options: FFButtonOptions(
@@ -361,7 +377,25 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                         padding:
                             const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                         child: Text(
-                          'The Duomo di Milano is a magnificent Gothic cathedral and Milan’s most iconic landmark. Known for its ornate façade, towering spires, and stunning stained glass windows, it offers visitors a breathtaking blend of art, history, and architecture. Don’t miss the rooftop terrace for sweeping views of Milan and a close-up look at the intricate sculptures that adorn this remarkable structure.',
+                          valueOrDefault<String>(
+                            widget.attraction?.description,
+                            'Description',
+                          ),
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    fontFamily: 'Poppins',
+                                    letterSpacing: 0.0,
+                                  ),
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                        child: Text(
+                          valueOrDefault<String>(
+                            widget.attraction?.productSummary,
+                            'Summary',
+                          ),
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
                                     fontFamily: 'Poppins',
@@ -521,25 +555,36 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                               color: FlutterFlowTheme.of(context).primary,
                               borderRadius: BorderRadius.circular(12.0),
                             ),
-                            child: FlutterFlowGoogleMap(
-                              controller: _model.googleMapsController,
-                              onCameraIdle: (latLng) =>
-                                  _model.googleMapsCenter = latLng,
-                              initialLocation: _model.googleMapsCenter ??=
-                                  const LatLng(13.106061, -59.613158),
-                              markerColor: GoogleMarkerColor.violet,
-                              mapType: MapType.normal,
-                              style: GoogleMapStyle.standard,
-                              initialZoom: 14.0,
-                              allowInteraction: true,
-                              allowZoom: true,
-                              showZoomControls: false,
-                              showLocation: true,
-                              showCompass: false,
-                              showMapToolbar: false,
-                              showTraffic: false,
-                              centerMapOnMarkerTap: true,
-                            ),
+                            child: Builder(builder: (context) {
+                              final googleMapMarker =
+                                  widget.attraction?.location;
+                              return FlutterFlowGoogleMap(
+                                controller: _model.googleMapsController,
+                                onCameraIdle: (latLng) =>
+                                    _model.googleMapsCenter = latLng,
+                                initialLocation: _model.googleMapsCenter ??=
+                                    widget.attraction!.location!,
+                                markers: [
+                                  if (googleMapMarker != null)
+                                    FlutterFlowMarker(
+                                      googleMapMarker.serialize(),
+                                      googleMapMarker,
+                                    ),
+                                ],
+                                markerColor: GoogleMarkerColor.violet,
+                                mapType: MapType.normal,
+                                style: GoogleMapStyle.standard,
+                                initialZoom: 14.0,
+                                allowInteraction: true,
+                                allowZoom: true,
+                                showZoomControls: false,
+                                showLocation: true,
+                                showCompass: false,
+                                showMapToolbar: false,
+                                showTraffic: false,
+                                centerMapOnMarkerTap: true,
+                              );
+                            }),
                           ),
                         ),
                       ),

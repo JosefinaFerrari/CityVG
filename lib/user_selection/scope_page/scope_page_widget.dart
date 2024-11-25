@@ -33,6 +33,7 @@ class _ScopePageWidgetState extends State<ScopePageWidget>
     animationsMap.addAll({
       'buttonOnPageLoadAnimation': AnimationInfo(
         trigger: AnimationTrigger.onPageLoad,
+        applyInitialState: true,
         effectsBuilder: () => [
           FadeEffect(
             curve: Curves.easeInOut,
@@ -43,7 +44,26 @@ class _ScopePageWidgetState extends State<ScopePageWidget>
           ),
         ],
       ),
+      'buttonOnActionTriggerAnimation': AnimationInfo(
+        trigger: AnimationTrigger.onActionTrigger,
+        applyInitialState: true,
+        effectsBuilder: () => [
+          ScaleEffect(
+            curve: Curves.easeInOut,
+            delay: 0.0.ms,
+            duration: 700.0.ms,
+            begin: const Offset(1.0, 1.0),
+            end: const Offset(1.04, 1.04),
+          ),
+        ],
+      ),
     });
+    setupAnimations(
+      animationsMap.values.where((anim) =>
+          anim.trigger == AnimationTrigger.onActionTrigger ||
+          !anim.applyInitialState),
+      this,
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -338,37 +358,60 @@ class _ScopePageWidgetState extends State<ScopePageWidget>
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    FFButtonWidget(
-                      onPressed: () async {
-                        context.pushNamed('daypickerPage');
-
-                        FFAppState().updateDataSelectedStruct(
-                          (e) => e
-                            ..radius = functions.getRadius(_model.sliderValue!),
-                        );
-                        safeSetState(() {});
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onLongPress: () async {
+                        if (animationsMap['buttonOnActionTriggerAnimation'] !=
+                            null) {
+                          await animationsMap['buttonOnActionTriggerAnimation']!
+                              .controller
+                              .forward(from: 0.0)
+                              .whenComplete(animationsMap[
+                                      'buttonOnActionTriggerAnimation']!
+                                  .controller
+                                  .reverse);
+                        }
                       },
-                      text: 'NEXT',
-                      options: FFButtonOptions(
-                        width: 260.0,
-                        height: 55.0,
-                        padding: const EdgeInsets.all(0.0),
-                        iconPadding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: FlutterFlowTheme.of(context).primary,
-                        textStyle:
-                            FlutterFlowTheme.of(context).titleSmall.override(
-                                  fontFamily: 'Poppins',
-                                  color: Colors.white,
-                                  fontSize: 20.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                        elevation: 0.0,
-                        borderRadius: BorderRadius.circular(30.0),
+                      child: FFButtonWidget(
+                        onPressed: () async {
+                          context.pushNamed('daypickerPage');
+
+                          FFAppState().updateDataSelectedStruct(
+                            (e) => e
+                              ..radius =
+                                  functions.getRadius(_model.sliderValue!),
+                          );
+                          safeSetState(() {});
+                        },
+                        text: 'NEXT',
+                        options: FFButtonOptions(
+                          width: 260.0,
+                          height: 55.0,
+                          padding: const EdgeInsets.all(0.0),
+                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 0.0, 0.0),
+                          color: FlutterFlowTheme.of(context).primary,
+                          textStyle:
+                              FlutterFlowTheme.of(context).titleSmall.override(
+                                    fontFamily: 'Poppins',
+                                    color: Colors.white,
+                                    fontSize: 20.0,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                          elevation: 0.0,
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
                       ),
-                    ).animateOnPageLoad(
-                        animationsMap['buttonOnPageLoadAnimation']!),
+                    )
+                        .animateOnPageLoad(
+                            animationsMap['buttonOnPageLoadAnimation']!)
+                        .animateOnActionTrigger(
+                          animationsMap['buttonOnActionTriggerAnimation']!,
+                        ),
                   ],
                 ),
               ),

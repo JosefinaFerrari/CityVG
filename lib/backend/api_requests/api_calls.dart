@@ -155,6 +155,75 @@ class RecommenderCall {
   }
 }
 
+class TestCall {
+  static Future<ApiCallResponse> call() async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'test',
+      apiUrl:
+          'http://127.0.0.1:8000/tiqets/?lat=48.864716&lng=2.349014&radius=10',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class LocalhostCall {
+  static Future<ApiCallResponse> call({
+    double? lat = 48.864716,
+    double? lng = 2.349014,
+    int? radius = 10,
+    String? startDate = '2024-11-23',
+    String? endDate = '2024-11-30',
+    int? startTime = 9,
+    int? endTime = 15,
+    int? numSeniors = 0,
+    int? numAdults = 2,
+    int? numYouth = 0,
+    int? numChildren = 1,
+    String? budget = 'low',
+  }) async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'localhost',
+      apiUrl: 'http://127.0.0.1:8000/generate/',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {
+        'lat': lat,
+        'lng': lng,
+        'radius': radius,
+        'start_date': startDate,
+        'end_date': endDate,
+        'start_time': startTime,
+        'end_time': endTime,
+        'num_seniors': numSeniors,
+        'num_adults': numAdults,
+        'num_youth': numYouth,
+        'num_children': numChildren,
+        'budget': budget,
+      },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+
+  static List? itineraries(dynamic response) => getJsonField(
+        response,
+        r'''$.itineraries''',
+        true,
+      ) as List?;
+}
+
 class ApiPagingParams {
   int nextPageNumber = 0;
   int numItems = 0;

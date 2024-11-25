@@ -303,52 +303,74 @@ class _PreferencesPageWidgetState extends State<PreferencesPageWidget>
                 ],
               ),
               Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Align(
-                      alignment: const AlignmentDirectional(0.0, -1.0),
-                      child: Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
-                        child: Container(
-                          width: 335.0,
-                          height: 400.0,
-                          decoration: const BoxDecoration(),
-                          child: Align(
-                            alignment: const AlignmentDirectional(0.0, -1.0),
-                            child: Builder(
-                              builder: (context) {
-                                final listOfPreferences =
-                                    FFAppConstants.listOfPreferences.toList();
+                child: Padding(
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(30.0, 40.0, 30.0, 50.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Align(
+                          alignment: const AlignmentDirectional(0.0, -1.0),
+                          child: Builder(
+                            builder: (context) {
+                              final listOfPreferences =
+                                  FFAppConstants.listOfPreferences.toList();
 
-                                return Wrap(
-                                  spacing: 24.0,
-                                  runSpacing: 18.0,
-                                  alignment: WrapAlignment.start,
-                                  crossAxisAlignment: WrapCrossAlignment.start,
-                                  direction: Axis.horizontal,
-                                  runAlignment: WrapAlignment.start,
-                                  verticalDirection: VerticalDirection.down,
-                                  clipBehavior: Clip.none,
-                                  children:
-                                      List.generate(listOfPreferences.length,
-                                          (listOfPreferencesIndex) {
-                                    final listOfPreferencesItem =
-                                        listOfPreferences[
-                                            listOfPreferencesIndex];
-                                    return InkWell(
-                                      splashColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onTap: () async {
-                                        if (_model.isSelectedList[
-                                            listOfPreferencesIndex]) {
+                              return Wrap(
+                                spacing: 18.0,
+                                runSpacing: 16.0,
+                                alignment: WrapAlignment.center,
+                                crossAxisAlignment: WrapCrossAlignment.start,
+                                direction: Axis.horizontal,
+                                runAlignment: WrapAlignment.center,
+                                verticalDirection: VerticalDirection.down,
+                                clipBehavior: Clip.none,
+                                children:
+                                    List.generate(listOfPreferences.length,
+                                        (listOfPreferencesIndex) {
+                                  final listOfPreferencesItem =
+                                      listOfPreferences[listOfPreferencesIndex];
+                                  return InkWell(
+                                    splashColor: Colors.transparent,
+                                    focusColor: Colors.transparent,
+                                    hoverColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                    onTap: () async {
+                                      if (_model.isSelectedList[
+                                          listOfPreferencesIndex]) {
+                                        FFAppState().updateDataSelectedStruct(
+                                          (e) => e
+                                            ..updatePreferencesSelected(
+                                              (e) => e.remove(FFAppConstants
+                                                      .listOfPreferences[
+                                                  listOfPreferencesIndex]),
+                                            ),
+                                        );
+                                        safeSetState(() {});
+                                        _model.updateIsSelectedListAtIndex(
+                                          listOfPreferencesIndex,
+                                          (_) => false,
+                                        );
+                                        safeSetState(() {});
+                                        _model.counter = _model.counter! + -1;
+                                        safeSetState(() {});
+                                        if (_model.counter == 0) {
+                                          if (animationsMap[
+                                                  'buttonOnActionTriggerAnimation'] !=
+                                              null) {
+                                            await animationsMap[
+                                                    'buttonOnActionTriggerAnimation']!
+                                                .controller
+                                                .reverse();
+                                          }
+                                        }
+                                      } else {
+                                        if (_model.counter! < 5) {
                                           FFAppState().updateDataSelectedStruct(
                                             (e) => e
                                               ..updatePreferencesSelected(
-                                                (e) => e.remove(FFAppConstants
+                                                (e) => e.add(FFAppConstants
                                                         .listOfPreferences[
                                                     listOfPreferencesIndex]),
                                               ),
@@ -356,116 +378,84 @@ class _PreferencesPageWidgetState extends State<PreferencesPageWidget>
                                           safeSetState(() {});
                                           _model.updateIsSelectedListAtIndex(
                                             listOfPreferencesIndex,
-                                            (_) => false,
+                                            (_) => true,
                                           );
                                           safeSetState(() {});
-                                          _model.counter = _model.counter! + -1;
+                                          _model.counter = _model.counter! + 1;
                                           safeSetState(() {});
-                                          if (_model.counter == 0) {
+                                          if (_model.counter == 1) {
                                             if (animationsMap[
                                                     'buttonOnActionTriggerAnimation'] !=
                                                 null) {
                                               await animationsMap[
                                                       'buttonOnActionTriggerAnimation']!
                                                   .controller
-                                                  .reverse();
+                                                  .forward(from: 0.0);
                                             }
                                           }
                                         } else {
-                                          if (_model.counter! < 5) {
-                                            FFAppState()
-                                                .updateDataSelectedStruct(
-                                              (e) => e
-                                                ..updatePreferencesSelected(
-                                                  (e) => e.add(FFAppConstants
-                                                          .listOfPreferences[
-                                                      listOfPreferencesIndex]),
-                                                ),
-                                            );
-                                            safeSetState(() {});
-                                            _model.updateIsSelectedListAtIndex(
-                                              listOfPreferencesIndex,
-                                              (_) => true,
-                                            );
-                                            safeSetState(() {});
-                                            _model.counter =
-                                                _model.counter! + 1;
-                                            safeSetState(() {});
-                                            if (_model.counter == 1) {
-                                              if (animationsMap[
-                                                      'buttonOnActionTriggerAnimation'] !=
-                                                  null) {
-                                                await animationsMap[
-                                                        'buttonOnActionTriggerAnimation']!
-                                                    .controller
-                                                    .forward(from: 0.0);
-                                              }
-                                            }
-                                          } else {
-                                            await showDialog(
-                                              context: context,
-                                              builder: (alertDialogContext) {
-                                                return AlertDialog(
-                                                  title: const Text('Error Message'),
-                                                  content:
-                                                      const Text('Max 5 elements'),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              alertDialogContext),
-                                                      child: const Text('Ok'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
-                                          }
+                                          await showDialog(
+                                            context: context,
+                                            builder: (alertDialogContext) {
+                                              return AlertDialog(
+                                                title: const Text('Error Message'),
+                                                content: const Text('Max 5 elements'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.pop(
+                                                            alertDialogContext),
+                                                    child: const Text('Ok'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
                                         }
-                                      },
-                                      child: Container(
-                                        width: functions
-                                            .getStringText(FFAppConstants
-                                                    .listOfPreferences[
-                                                listOfPreferencesIndex])
-                                            ?.toDouble(),
-                                        height: 36.0,
-                                        decoration: BoxDecoration(
-                                          color: valueOrDefault<Color>(
-                                            !_model.isSelectedList[
-                                                    listOfPreferencesIndex]
-                                                ? const Color(0xFFD9D9D9)
-                                                : const Color(0xFFD4E8D1),
-                                            const Color(0xFFD9D9D9),
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(24.0),
+                                      }
+                                    },
+                                    child: Container(
+                                      width: functions
+                                          .getStringText(
+                                              FFAppConstants.listOfPreferences[
+                                                  listOfPreferencesIndex])
+                                          ?.toDouble(),
+                                      height: 36.0,
+                                      decoration: BoxDecoration(
+                                        color: valueOrDefault<Color>(
+                                          !_model.isSelectedList[
+                                                  listOfPreferencesIndex]
+                                              ? const Color(0xFFD9D9D9)
+                                              : const Color(0xFFD4E8D1),
+                                          const Color(0xFFD9D9D9),
                                         ),
-                                        child: Align(
-                                          alignment:
-                                              const AlignmentDirectional(0.0, 0.0),
-                                          child: Text(
-                                            FFAppConstants.listOfPreferences[
-                                                listOfPreferencesIndex],
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily: 'Poppins',
-                                                  letterSpacing: 0.0,
-                                                ),
-                                          ),
+                                        borderRadius:
+                                            BorderRadius.circular(24.0),
+                                      ),
+                                      child: Align(
+                                        alignment:
+                                            const AlignmentDirectional(0.0, 0.0),
+                                        child: Text(
+                                          FFAppConstants.listOfPreferences[
+                                              listOfPreferencesIndex],
+                                          style: FlutterFlowTheme.of(context)
+                                              .bodyMedium
+                                              .override(
+                                                fontFamily: 'Poppins',
+                                                letterSpacing: 0.0,
+                                              ),
                                         ),
                                       ),
-                                    );
-                                  }),
-                                );
-                              },
-                            ),
+                                    ),
+                                  );
+                                }),
+                              );
+                            },
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
               Padding(

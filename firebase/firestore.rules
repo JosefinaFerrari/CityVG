@@ -7,5 +7,12 @@ service cloud.firestore {
       allow write: if false;
       allow delete: if false;
     }
+
+    match /itineraries_api/{document} {
+      allow create: if true;
+      allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '/backend/backend.dart';
-import '/backend/schema/structs/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 
@@ -30,6 +29,9 @@ class FFAppState extends ChangeNotifier {
         }
       }
     });
+    _safeInit(() {
+      _searchId = prefs.getString('ff_searchId') ?? _searchId;
+    });
   }
 
   void update(VoidCallback callback) {
@@ -50,6 +52,31 @@ class FFAppState extends ChangeNotifier {
   void updateDataSelectedStruct(Function(InputDataStruct) updateFn) {
     updateFn(_dataSelected);
     prefs.setString('ff_dataSelected', _dataSelected.serialize());
+  }
+
+  DateTime? _startDate;
+  DateTime? get startDate => _startDate;
+  set startDate(DateTime? value) {
+    _startDate = value;
+  }
+
+  DateTime? _endDate;
+  DateTime? get endDate => _endDate;
+  set endDate(DateTime? value) {
+    _endDate = value;
+  }
+
+  String _searchId = '0';
+  String get searchId => _searchId;
+  set searchId(String value) {
+    _searchId = value;
+    prefs.setString('ff_searchId', value);
+  }
+
+  LatLng? _location;
+  LatLng? get location => _location;
+  set location(LatLng? value) {
+    _location = value;
   }
 }
 

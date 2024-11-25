@@ -1,9 +1,12 @@
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/random_data_util.dart' as random_data;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 import 'welcome_model.dart';
 export 'welcome_model.dart';
 
@@ -26,6 +29,20 @@ class _WelcomeWidgetState extends State<WelcomeWidget>
   void initState() {
     super.initState();
     _model = createModel(context, () => WelcomeModel());
+
+    // On page load action.
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (FFAppState().searchId == '0') {
+        FFAppState().searchId = random_data.randomString(
+          10,
+          10,
+          true,
+          true,
+          true,
+        );
+        FFAppState().update(() {});
+      }
+    });
 
     animationsMap.addAll({
       'transformOnPageLoadAnimation': AnimationInfo(
@@ -54,6 +71,8 @@ class _WelcomeWidgetState extends State<WelcomeWidget>
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(

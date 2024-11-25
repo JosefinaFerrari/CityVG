@@ -125,7 +125,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                 ),
                 Padding(
                   padding:
-                      const EdgeInsetsDirectional.fromSTEB(10.0, 35.0, 10.0, 0.0),
+                      const EdgeInsetsDirectional.fromSTEB(12.0, 30.0, 12.0, 0.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -167,17 +167,6 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                             fontSize: 20.0,
                                             letterSpacing: 0.0,
                                             fontWeight: FontWeight.w500,
-                                          ),
-                                    ),
-                                    TextSpan(
-                                      text: '\n',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 5.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w300,
                                           ),
                                     ),
                                     TextSpan(
@@ -238,7 +227,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                           ),
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 12.0, 0.0, 0.0),
+                                0.0, 8.0, 0.0, 0.0),
                             child: Container(
                               width: 350.0,
                               height: 0.6,
@@ -251,7 +240,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                       ),
                       Padding(
                         padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                         child: Wrap(
                           spacing: 0.0,
                           runSpacing: 0.0,
@@ -266,7 +255,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 2.0, 0.0, 0.0),
                               child: Icon(
-                                Icons.people_alt,
+                                Icons.calendar_month_rounded,
                                 color: FlutterFlowTheme.of(context).primary,
                                 size: 25.0,
                               ),
@@ -282,7 +271,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                   text: TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: 'Partecipants\n',
+                                        text: 'Days\n',
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .override(
@@ -293,24 +282,34 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                             ),
                                       ),
                                       TextSpan(
-                                        text: '\n',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 5.0,
-                                              letterSpacing: 0.0,
-                                              fontWeight: FontWeight.w300,
-                                            ),
-                                      ),
-                                      TextSpan(
-                                        text: functions.getPeopleString(
-                                            FFAppState()
-                                                .dataSelected
-                                                .peopleSelected),
+                                        text: dateTimeFormat(
+                                            "yMMMd", FFAppState().startDate),
                                         style: GoogleFonts.getFont(
                                           'Poppins',
                                           color: Colors.black,
+                                          fontWeight: FontWeight.w300,
+                                          fontSize: 18.0,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: FFAppState().startDate !=
+                                                FFAppState().endDate
+                                            ? ' - '
+                                            : ' ',
+                                        style: GoogleFonts.getFont(
+                                          'Poppins',
+                                          fontWeight: FontWeight.w300,
+                                          fontSize: 18.0,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: FFAppState().startDate !=
+                                                FFAppState().endDate
+                                            ? dateTimeFormat(
+                                                "yMMMd", FFAppState().endDate)
+                                            : ' ',
+                                        style: GoogleFonts.getFont(
+                                          'Poppins',
                                           fontWeight: FontWeight.w300,
                                           fontSize: 18.0,
                                         ),
@@ -342,7 +341,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                             ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 12.0, 0.0, 0.0),
+                                  0.0, 8.0, 0.0, 0.0),
                               child: Container(
                                 width: 350.0,
                                 height: 0.6,
@@ -356,7 +355,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                       ),
                       Padding(
                         padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                         child: Wrap(
                           spacing: 0.0,
                           runSpacing: 0.0,
@@ -398,22 +397,21 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                             ),
                                       ),
                                       TextSpan(
-                                        text: '\n',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 5.0,
-                                              letterSpacing: 0.0,
-                                              fontWeight: FontWeight.w300,
-                                            ),
-                                      ),
-                                      TextSpan(
-                                        text: functions.getDistanceText(
-                                            FFAppState().dataSelected.radius),
+                                        text: FFAppState()
+                                            .dataSelected
+                                            .radius
+                                            .toString(),
                                         style: GoogleFonts.getFont(
                                           'Poppins',
                                           color: Colors.black,
+                                          fontWeight: FontWeight.w300,
+                                          fontSize: 18.0,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: ' km ',
+                                        style: GoogleFonts.getFont(
+                                          'Poppins',
                                           fontWeight: FontWeight.w300,
                                           fontSize: 18.0,
                                         ),
@@ -459,7 +457,101 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                       ),
                       Padding(
                         padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                        child: Wrap(
+                          spacing: 0.0,
+                          runSpacing: 0.0,
+                          alignment: WrapAlignment.start,
+                          crossAxisAlignment: WrapCrossAlignment.start,
+                          direction: Axis.horizontal,
+                          runAlignment: WrapAlignment.start,
+                          verticalDirection: VerticalDirection.down,
+                          clipBehavior: Clip.none,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 2.0, 0.0, 0.0),
+                              child: Icon(
+                                Icons.people_alt,
+                                color: FlutterFlowTheme.of(context).primary,
+                                size: 25.0,
+                              ),
+                            ),
+                            Container(
+                              width: 295.0,
+                              decoration: const BoxDecoration(),
+                              child: Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
+                                    12.0, 0.0, 0.0, 0.0),
+                                child: RichText(
+                                  textScaler: MediaQuery.of(context).textScaler,
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: 'Partecipants\n',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: 'Poppins',
+                                              fontSize: 20.0,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                      TextSpan(
+                                        text: functions.getPeopleString(
+                                            FFAppState()
+                                                .dataSelected
+                                                .peopleSelected),
+                                        style: GoogleFonts.getFont(
+                                          'Poppins',
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w300,
+                                          fontSize: 18.0,
+                                        ),
+                                      )
+                                    ],
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Inter',
+                                          letterSpacing: 0.0,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 30.0,
+                              height: 30.0,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context).primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.edit,
+                                color: FlutterFlowTheme.of(context)
+                                    .primaryBackground,
+                                size: 20.0,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 8.0, 0.0, 0.0),
+                              child: Container(
+                                width: 350.0,
+                                height: 0.6,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context).primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -552,172 +644,162 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                 ],
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 5.0, 0.0, 0.0),
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      width: 130.0,
-                                      height: 80.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            child: Image.network(
-                                              'https://firebasestorage.googleapis.com/v0/b/cityvg-1f3e7.firebasestorage.app/o/DemoImages%2Fimage%2022.png?alt=media&token=bd8a9912-afc8-4ee3-bce7-cf79b5e31617',
-                                              width: 200.0,
-                                              height: 200.0,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    5.0, 5.0, 0.0, 0.0),
-                                            child: Text(
-                                              'Navigli Distric',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                fontFamily: 'Poppins',
-                                                color: Colors.white,
-                                                fontSize: 15.0,
-                                                letterSpacing: 0.0,
-                                                fontWeight: FontWeight.w500,
-                                                shadows: [
-                                                  const Shadow(
-                                                    color: Color(0xFF2D2D2D),
-                                                    offset: Offset(1.0, 1.0),
-                                                    blurRadius: 3.0,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 130.0,
+                                    height: 80.0,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      borderRadius: BorderRadius.circular(12.0),
                                     ),
-                                    Container(
-                                      width: 130.0,
-                                      height: 80.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            child: Image.network(
-                                              'https://firebasestorage.googleapis.com/v0/b/cityvg-1f3e7.firebasestorage.app/o/DemoImages%2Fimage-2.png?alt=media&token=b4598efe-8489-44a4-82ee-3b9d261b8c5a',
-                                              width: 200.0,
-                                              height: 200.0,
-                                              fit: BoxFit.cover,
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          child: Image.network(
+                                            'https://firebasestorage.googleapis.com/v0/b/cityvg-1f3e7.firebasestorage.app/o/DemoImages%2Fimage%2022.png?alt=media&token=bd8a9912-afc8-4ee3-bce7-cf79b5e31617',
+                                            width: 200.0,
+                                            height: 200.0,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsetsDirectional.fromSTEB(
+                                                  5.0, 5.0, 0.0, 0.0),
+                                          child: Text(
+                                            'Navigli Distric',
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                              fontFamily: 'Poppins',
+                                              color: Colors.white,
+                                              fontSize: 15.0,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w500,
+                                              shadows: [
+                                                const Shadow(
+                                                  color: Color(0xFF2D2D2D),
+                                                  offset: Offset(1.0, 1.0),
+                                                  blurRadius: 3.0,
+                                                )
+                                              ],
                                             ),
                                           ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    5.0, 5.0, 0.0, 0.0),
-                                            child: Text(
-                                              'Castello Sforzesco',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                fontFamily: 'Poppins',
-                                                color: Colors.white,
-                                                fontSize: 15.0,
-                                                letterSpacing: 0.0,
-                                                fontWeight: FontWeight.w500,
-                                                shadows: [
-                                                  const Shadow(
-                                                    color: Color(0xFF2D2D2D),
-                                                    offset: Offset(1.0, 1.0),
-                                                    blurRadius: 3.0,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                    Container(
-                                      width: 130.0,
-                                      height: 80.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            child: Image.network(
-                                              'https://firebasestorage.googleapis.com/v0/b/cityvg-1f3e7.firebasestorage.app/o/DemoImages%2Fimage%2018.png?alt=media&token=06b088ef-3c81-4144-90a9-aeeb9d364173',
-                                              width: 200.0,
-                                              height: 200.0,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    5.0, 5.0, 0.0, 0.0),
-                                            child: Text(
-                                              'The Duomo',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                fontFamily: 'Poppins',
-                                                color: Colors.white,
-                                                fontSize: 14.0,
-                                                letterSpacing: 0.0,
-                                                fontWeight: FontWeight.w500,
-                                                shadows: [
-                                                  const Shadow(
-                                                    color: Color(0xFF2D2D2D),
-                                                    offset: Offset(1.0, 1.0),
-                                                    blurRadius: 3.0,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                  ),
+                                  Container(
+                                    width: 130.0,
+                                    height: 80.0,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      borderRadius: BorderRadius.circular(12.0),
                                     ),
-                                  ]
-                                      .divide(const SizedBox(width: 20.0))
-                                      .addToStart(const SizedBox(width: 30.0))
-                                      .addToEnd(const SizedBox(width: 30.0)),
-                                ),
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          child: Image.network(
+                                            'https://firebasestorage.googleapis.com/v0/b/cityvg-1f3e7.firebasestorage.app/o/DemoImages%2Fimage-2.png?alt=media&token=b4598efe-8489-44a4-82ee-3b9d261b8c5a',
+                                            width: 200.0,
+                                            height: 200.0,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsetsDirectional.fromSTEB(
+                                                  5.0, 5.0, 0.0, 0.0),
+                                          child: Text(
+                                            'Castello Sforzesco',
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                              fontFamily: 'Poppins',
+                                              color: Colors.white,
+                                              fontSize: 15.0,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w500,
+                                              shadows: [
+                                                const Shadow(
+                                                  color: Color(0xFF2D2D2D),
+                                                  offset: Offset(1.0, 1.0),
+                                                  blurRadius: 3.0,
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 130.0,
+                                    height: 80.0,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          child: Image.network(
+                                            'https://firebasestorage.googleapis.com/v0/b/cityvg-1f3e7.firebasestorage.app/o/DemoImages%2Fimage%2018.png?alt=media&token=06b088ef-3c81-4144-90a9-aeeb9d364173',
+                                            width: 200.0,
+                                            height: 200.0,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsetsDirectional.fromSTEB(
+                                                  5.0, 5.0, 0.0, 0.0),
+                                          child: Text(
+                                            'The Duomo',
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodyMedium
+                                                .override(
+                                              fontFamily: 'Poppins',
+                                              color: Colors.white,
+                                              fontSize: 14.0,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w500,
+                                              shadows: [
+                                                const Shadow(
+                                                  color: Color(0xFF2D2D2D),
+                                                  offset: Offset(1.0, 1.0),
+                                                  blurRadius: 3.0,
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ]
+                                    .divide(const SizedBox(width: 20.0))
+                                    .addToStart(const SizedBox(width: 30.0))
+                                    .addToEnd(const SizedBox(width: 30.0)),
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 15.0, 0.0, 0.0),
+                                  0.0, 10.0, 0.0, 0.0),
                               child: Container(
                                 width: 350.0,
                                 height: 0.6,
@@ -731,7 +813,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                       ),
                       Padding(
                         padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -766,7 +848,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                       text: TextSpan(
                                         children: [
                                           TextSpan(
-                                            text: 'Preferences\n',
+                                            text: 'Preferences',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -774,17 +856,6 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                                   fontSize: 20.0,
                                                   letterSpacing: 0.0,
                                                   fontWeight: FontWeight.w500,
-                                                ),
-                                          ),
-                                          TextSpan(
-                                            text: '\n',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize: 5.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.w300,
                                                 ),
                                           )
                                         ],
@@ -823,7 +894,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                   alignment: const AlignmentDirectional(0.0, 0.0),
                                   child: Padding(
                                     padding: const EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
+                                        16.0, 10.0, 16.0, 0.0),
                                     child: Builder(
                                       builder: (context) {
                                         final listOfPreferences = FFAppState()
@@ -834,7 +905,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                         return Wrap(
                                           spacing: 14.0,
                                           runSpacing: 10.0,
-                                          alignment: WrapAlignment.start,
+                                          alignment: WrapAlignment.center,
                                           crossAxisAlignment:
                                               WrapCrossAlignment.start,
                                           direction: Axis.horizontal,
@@ -891,7 +962,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                             ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 15.0, 0.0, 0.0),
+                                  0.0, 10.0, 0.0, 0.0),
                               child: Container(
                                 width: 350.0,
                                 height: 0.6,
@@ -905,7 +976,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                       ),
                       Padding(
                         padding:
-                            const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
+                            const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -941,7 +1012,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                       text: TextSpan(
                                         children: [
                                           TextSpan(
-                                            text: 'Budget\n',
+                                            text: 'Budget',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -949,17 +1020,6 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                                                   fontSize: 20.0,
                                                   letterSpacing: 0.0,
                                                   fontWeight: FontWeight.w500,
-                                                ),
-                                          ),
-                                          TextSpan(
-                                            text: '\n',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize: 5.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.w300,
                                                 ),
                                           )
                                         ],
@@ -991,7 +1051,7 @@ class _SummaryPageWidgetState extends State<SummaryPageWidget> {
                             ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 5.0, 0.0, 0.0),
+                                  0.0, 10.0, 0.0, 0.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.center,

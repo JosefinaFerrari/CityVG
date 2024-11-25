@@ -95,7 +95,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier, [Widget? entryPage]) =>
         FFRoute(
           name: 'tripDetail',
           path: '/tripDetail',
-          builder: (context, params) => const TripDetailWidget(),
+          builder: (context, params) => TripDetailWidget(
+            tripRef: params.getParam(
+              'tripRef',
+              ParamType.DocumentReference,
+              isList: false,
+              collectionNamePath: ['itineraries_api'],
+            ),
+          ),
         ),
         FFRoute(
           name: 'ScopePage',
@@ -145,7 +152,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier, [Widget? entryPage]) =>
         FFRoute(
           name: 'placeDetail',
           path: '/placeDetail',
-          builder: (context, params) => const PlaceDetailWidget(),
+          builder: (context, params) => PlaceDetailWidget(
+            attraction: params.getParam(
+              'attraction',
+              ParamType.DataStruct,
+              isList: false,
+              structBuilder: AttractionStruct.fromSerializableMap,
+            ),
+          ),
         ),
         FFRoute(
           name: 'top10',
@@ -166,6 +180,36 @@ GoRouter createRouter(AppStateNotifier appStateNotifier, [Widget? entryPage]) =>
           name: 'mapDirectionsTest',
           path: '/mapDirectionsTest',
           builder: (context, params) => const MapDirectionsTestWidget(),
+        ),
+        FFRoute(
+          name: 'Languages',
+          path: '/languages',
+          builder: (context, params) => const LanguagesWidget(),
+        ),
+        FFRoute(
+          name: 'DarkMode2',
+          path: '/darkMode2',
+          builder: (context, params) => const DarkMode2Widget(),
+        ),
+        FFRoute(
+          name: 'BugReport',
+          path: '/bugReport',
+          builder: (context, params) => const BugReportWidget(),
+        ),
+        FFRoute(
+          name: 'AboutUs',
+          path: '/aboutUs',
+          builder: (context, params) => const AboutUsWidget(),
+        ),
+        FFRoute(
+          name: 'SuggestIdeas',
+          path: '/suggestIdeas',
+          builder: (context, params) => const SuggestIdeasWidget(),
+        ),
+        FFRoute(
+          name: 'LoadApi',
+          path: '/loadApi',
+          builder: (context, params) => const LoadApiWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

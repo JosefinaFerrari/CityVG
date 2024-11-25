@@ -1,3 +1,4 @@
+import '/components/place_card_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'main_page_widget.dart' show MainPageWidget;
 import 'package:flutter/material.dart';
@@ -7,9 +8,18 @@ class MainPageModel extends FlutterFlowModel<MainPageWidget> {
 
   bool isPresent = true;
 
-  @override
-  void initState(BuildContext context) {}
+  ///  State fields for stateful widgets in this page.
+
+  // Model for placeCard component.
+  late PlaceCardModel placeCardModel;
 
   @override
-  void dispose() {}
+  void initState(BuildContext context) {
+    placeCardModel = createModel(context, () => PlaceCardModel());
+  }
+
+  @override
+  void dispose() {
+    placeCardModel.dispose();
+  }
 }

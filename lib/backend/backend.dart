@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'schema/util/firestore_util.dart';
 
 import 'schema/test_record.dart';
+import 'schema/itineraries_api_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
@@ -12,6 +13,7 @@ export 'schema/util/firestore_util.dart';
 export 'schema/util/schema_util.dart';
 
 export 'schema/test_record.dart';
+export 'schema/itineraries_api_record.dart';
 
 /// Functions to query TestRecords (as a Stream and as a Future).
 Future<int> queryTestRecordCount({
@@ -45,6 +47,43 @@ Future<List<TestRecord>> queryTestRecordOnce({
     queryCollectionOnce(
       TestRecord.collection,
       TestRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query ItinerariesApiRecords (as a Stream and as a Future).
+Future<int> queryItinerariesApiRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      ItinerariesApiRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<ItinerariesApiRecord>> queryItinerariesApiRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      ItinerariesApiRecord.collection,
+      ItinerariesApiRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<ItinerariesApiRecord>> queryItinerariesApiRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      ItinerariesApiRecord.collection,
+      ItinerariesApiRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,
