@@ -111,6 +111,7 @@ Ensure you have the following installed:
 ## Troubleshooting
 
 - **Virtual Environment Activation Issues:** Ensure you are in the correct directory before activating the environment.
+- **Credential File:** Ensure you have the .env file with the API keys
 - **Dependency Errors:** If `pip install -r requirements.txt` fails, ensure `pip` is updated using:
 
    ```bash
@@ -123,6 +124,7 @@ Ensure you have the following installed:
 
 - The `migrate` command is necessary if your project involves a database, as it applies any changes defined in Django's models.
 - Always use the virtual environment to avoid conflicts with global Python packages.
+  
 
 ---
 
