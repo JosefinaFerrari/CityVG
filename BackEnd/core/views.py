@@ -399,13 +399,13 @@ def amount_of_open_days(opening_hours, arrival_date, departure_date):
 
 
 
-def remove_unavailable_places(merged_data, user_dates):
+def remove_unavailable_places(merged_data, start_date, end_date):
     """
     Remove places that do not match with the user's dates
     """
     
-    start_date = datetime.strptime(user_dates.get('start_date'), '%Y-%m-%dT%H:%M:%S')
-    end_date = datetime.strptime(user_dates.get('end_date'), '%Y-%m-%dT%H:%M:%S')
+    start_date = datetime.strptime(start_date, '%Y-%m-%dT%H:%M:%S')
+    end_date = datetime.strptime(end_date.get('end_date'), '%Y-%m-%dT%H:%M:%S')
 
     for tiqetXplace in merged_data.get("tiqetsXplaces"):
         opening_hours = tiqetXplace.get('opening_hours')
@@ -437,19 +437,24 @@ def calculate_weighted_rating(rating, num_reviews, global_average_rating, min_re
     return weighted_rating
 
 
-def recommend(user_preferences):
-    lat = user_preferences.get('lat')
-    lng = user_preferences.get('lng')
-    radius = user_preferences.get('radius')
-    dates = user_preferences.get('dates')
-    participants = user_preferences.get('participants')
-    categories = user_preferences.get('categories')
-    budget = user_preferences.get('budget')
+def get_recommendations(request):
+    """
+    Fetch places from Google Places API and return them as JSON.
+    Example URL: /recommendations/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-25T10:00:00&end_date=2024-11-27T18:00:00&categories=Museums%20and%20Galleries,Historical%20Sites&budget=Cheap
+    """
+    # Extract query parameters from the request
+    lat = request.GET.get('lat')
+    lng = request.GET.get('lng')
+    radius = request.GET.get('radius')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    categories = request.GET.get('categories')
+    budget = request.GET.get('budget')
 
     merged_data = merge_tiqets_and_places(lat, lng, radius)
 
     # Remove places that are never open during the user's visit
-    merged_data = remove_unavailable_places(merged_data, dates)
+    merged_data = remove_unavailable_places(merged_data, start_date, end_date)
 
     recommendations = []
 
