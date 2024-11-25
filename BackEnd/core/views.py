@@ -150,15 +150,22 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str):
     for itinerary in gemini_response["itineraries"]:
         for attraction in itinerary["attractions"]:
             name = attraction["name"]
+            date = attraction["day"]
+            time = attraction["startingHour"]
 
             if name in merged_places_x_tiqets:
+
+                url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
+                url += f"?selected_date={date}&selected_timeslot_id={time}"
+
                 attraction.update({
                     "lat": merged_places_x_tiqets[name]["lat"],
                     "lng": merged_places_x_tiqets[name]["lng"],
                     "city": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['city'],
                     "country": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['country'],
                     "product name": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['title'],
-                    "checkout url": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url'],
+                    "price": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['price'],
+                    "checkout url": url,
                 })
 
                 # Check if the attraction has a product
