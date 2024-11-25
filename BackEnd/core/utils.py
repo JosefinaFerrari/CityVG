@@ -5,60 +5,7 @@ import json
 import google.generativeai as genai
 
 # Documentation for google places nearby search https://developers.google.com/maps/documentation/places/web-service/nearby-search?hl=it
-
-def read_places_from_json(file_path):
-    """
-    Reads places from a JSON file and returns them as a JSON string.
-    """
-    file_path = os.path.join(os.path.dirname(__file__), 'places.json')
-
-    with open(file_path, 'r') as file:
-        places = json.load(file)
-    places_json = json.dumps(places, indent=4)
-    return places_json
-
-def get_gemini_response(lat, lng, radius):
-    places = read_places_from_json('places.json')
-    start_date = '24/11/2022'
-    end_date = '26/11/2022'
-    start_hour = '09:00'
-    end_hour = '18:00'
-    num_seniors = 0
-    num_adults = 2
-    num_youth = 0
-    num_children = 1
-    budget = 'low'
-
-    genai.configure(api_key=settings.GEMINI_API_KEY)
-
-    generation_config = {
-    "temperature": 0.5,
-    "top_p": 0.95,
-    "top_k": 40,
-    "max_output_tokens": 8192,
-    "response_mime_type": "application/json",
-    }
-
-    model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    generation_config=generation_config,
-    system_instruction="Consider a scenario in which a user wants to visit a place for a given number of days X. You will receive a JSON containing a list of attractions to visit in a city and also the preferences selected by a user. These preferences may include factors such as price range, the number of participants, the trip duration, and a sublist of places the user wants to visit for sure. Based on this information, you must return 3 different itineraries. An itinerary lasts X days and starts when the user arrives (time of arrival) and ends when he/she departs (time of departure). \nEach itinerary should include the places you consider the best to visit, based on reviews and ratings of those places. Arrange the places in an order that allows the user to visit them in the most efficient way. In addition, for each attraction, make an estimation of average time spent to visit the attraction and assign the starting Hours (that is when the visit starts )and ending Hours (that is when the visit should finish). You must schedule each visit to ensure there is some spare time (of at least an hour) between any two consecutive visits. Give a name to each generated itinerary.\nSome of the places will also have a list of available products (such as tours or visits to a place). If there are multiple products, select the one that fits better based on the user preferences. If there are products that include multiple attractions give the productName in just the first attraction.\n\nThe returned JSON must follow this structure: {\"itineraries\": [{\"itineraryName\", \"attractions\": [{\"name\", \"productName\"(optional), \"startingHour\", \"endingHour\", \"day\"}]]}",
-    )
-
-    chat_session = model.start_chat(
-    history=[
-    ]
-    )
-
-    places_str = json.dumps(places)
-    input = f'City: lat={lat} lng={lng}\nStart Date: {start_date}\nEnd Date: {end_date}\nStart Hour: {start_hour}\nEnd Hour: {end_hour}\nNumber of Seniors: {num_seniors}\nNumber of Adults: {num_adults}\nNumber of Youth: {num_youth}\nNumber of Children: {num_children}\nBudget: {budget}\nPlaces: {places_str}'
-    
-    response = chat_session.send_message(input)
-
-    print(response.text)
-
-    return response.text
-  
+ 
 def get_places(lat, lng, radius, categories=None):
     '''
     Fetch places (attractions, events, etc.) from the Google Places API based on location and radius.

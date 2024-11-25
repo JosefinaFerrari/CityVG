@@ -7,7 +7,6 @@ from django.http import JsonResponse
 from .utils import get_tiqets_products  # Import the function from utils.py
 from .utils import get_places  # Import the function from utils.py
 from .utils import generate_itinerary  # Import the function from utils.py
-from .utils import get_gemini_response  # Import the function from utils.py
 from rapidfuzz import fuzz
 import json
 from geopy.distance import geodesic
@@ -29,13 +28,6 @@ category_mapping = {
     "Kids Entertainment": ["amusement_center", "childrens_camp"],
     "Local Cuisine": ["restaurant", "fine_dining_restaurant"]
 }
-
-
-def get_types_for_category(category):
-    """
-    Given a category, return the corresponding types.
-    """
-    return category_mapping.get(category, [])
 
 
 def places(request):
