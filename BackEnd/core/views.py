@@ -618,7 +618,7 @@ def calculate_weighted_rating(rating, num_reviews, global_average_rating, min_re
 def get_recommendations(request):
     """
     Fetch places from Google Places API and return them as JSON.
-    Example URL: /recommendations/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-25T10:00:00&end_date=2024-11-27T18:00:00&categories=Museums%20and%20Galleries,Historical%20Sites&budget=Cheap
+    Example URL: http://127.0.0.1:8000/recommendations/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-25T10:00:00&end_date=2024-11-27T18:00:00&categories=Museums%20and%20Galleries,Historical%20Sites&budget=Cheap
     """
     # Extract query parameters from the request
     lat = request.GET.get('lat')
@@ -650,7 +650,8 @@ def get_recommendations(request):
             'place': tiqetXplace.get('place'),
             'venue': tiqetXplace.get('venue'),
             'average_price': tiqetXplace.get('average_price'),
-            'recommended_score': recommendation_score
+            'recommended_score': recommendation_score,
+            'saved':False
         })
 
     for place in merged_data.get("places_only"):
@@ -667,7 +668,8 @@ def get_recommendations(request):
             'place': place.get('place'),
             'venue': place.get('venue'),
             'average_price': place.get('average_price'),
-            'recommended_score': recommendation_score
+            'recommended_score': recommendation_score,
+            'saved':False
         })
 
     global_average_rating = sum(item['tiqets_average_rating'] 
@@ -690,7 +692,8 @@ def get_recommendations(request):
             'place': tiqet.get('place'),
             'venue': tiqet.get('venue'),
             'average_price': tiqet.get('average_price'),
-            'recommended_score': recommendation_score
+            'recommended_score': recommendation_score,
+            'saved':False
         })
 
     if budget == 'Cheap':
@@ -703,5 +706,4 @@ def get_recommendations(request):
     top_recommendations = sorted(recommendations, key=lambda rec: rec['recommended_score'], reverse=True)[:10]
 
     return JsonResponse(top_recommendations, safe=False)
-
 
