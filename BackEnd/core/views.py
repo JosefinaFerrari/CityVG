@@ -332,21 +332,12 @@ def get_average_rating_from_tiqets(venue_products):
 
 
 def extract_keywords(text):
-    # Convert text to lowercase
     text = text.lower()
-
-    # Remove punctuation
     text = re.sub(f"[{re.escape(punctuation)}]", "", text)
-
-    # Tokenize the words (split by whitespace)
     words = text.split()
-
-    # Remove common stop words
     stopwords = {"the", "a", "an", "and", "or", "to", "as", "you", "your", "of", "its", "it", "in", "is", "for", "on"}
     filtered_words = [word for word in words if word not in stopwords]
 
-
-    # Return unique keywords
     return list(filtered_words)
 
 
@@ -356,12 +347,9 @@ def get_descriptions(products):
     for prod in products:
         if prod.get('tagline'):
             desc = prod.get('tagline')
-
-            # Extract keywords from the tagline
             keywords = extract_keywords(desc)
             all_keywords.extend(keywords)
             
-    # Return as a list of tuples (word, count)
     return list(all_keywords)
 
 
@@ -551,6 +539,7 @@ def merge_tiqets_and_places(lat, lng, radius):
     merged_data = {"tiqetsXplaces": tiqetsXplaces, "places_only":places_only, "tiqets_only":tiqets_only}
     return merged_data
 
+from datetime import time
 
 def is_open(date, hours):
     """
@@ -566,9 +555,13 @@ def is_open(date, hours):
     for period in hours:
         day = period['open']['day']
         if day == day_of_week:
-            # Use time instead of datetime to store only the time part
-            open_time = datetime_time(hour=period['open']['hour'], minute=period['open']['minute'])
-            close_time = datetime_time(hour=period['close']['hour'], minute=period['close']['minute'])
+            open_hour = int(period['open']['hour'])
+            open_minute = int(period['open']['minute'])
+            open_time = time(open_hour,open_minute)
+            
+            close_hour = int(period['close']['hour'])
+            close_minute = int(period['close']['minute'])
+            close_time = time(close_hour, close_minute)
 
             # Check if the current time falls within the open and close times
             if open_time <= date.time() <= close_time:
@@ -642,7 +635,7 @@ def recommend(lat, lng, radius, start_date, end_date, categories, budget):
     merged_data = merge_tiqets_and_places(lat, lng, radius)
 
     # Remove places that are never open during the user's visit
-    # merged_data = remove_unavailable_places(merged_data, start_date, end_date)
+    merged_data = remove_unavailable_places(merged_data, start_date, end_date)
 
     recommendations = []
 
