@@ -1,5 +1,4 @@
-from collections import Counter
-from datetime import datetime
+from datetime import time as datetime_time, datetime, timedelta
 import re
 from string import punctuation
 import time
@@ -28,6 +27,7 @@ category_mapping = {
     "Kids Entertainment": ["amusement_center", "childrens_camp"],
     "Local Cuisine": ["restaurant", "fine_dining_restaurant"]
 }
+
 
 def get_types_for_category(category):
     """
@@ -58,6 +58,8 @@ def places(request):
     places_data = get_places(lat, lng, radius)
 
     return JsonResponse(places_data, safe=False)
+
+
 def gemini(request):
     """
     Fetch places from Google Places API and return them as JSON.
@@ -80,6 +82,7 @@ def gemini(request):
     gemini_data = get_gemini_response(lat, lng, radius)
     
     return JsonResponse(gemini_data, safe=False)
+
 
 def get_itinerary(request):
     """
@@ -133,6 +136,7 @@ def get_itinerary(request):
 
     return JsonResponse(merged_data, safe=False)
 
+
 def merge_gemini_places(merged_places, gemini_response_str):
     merged_data = {}
 
@@ -161,7 +165,8 @@ def merge_gemini_places(merged_places, gemini_response_str):
 
 
     return gemini_response
-        
+
+
 def merge_places_tiqets(places_data, tiqets_data):    
     # Group products by venue
     grouped_products = group_products_by_venue(tiqets_data)
@@ -214,6 +219,7 @@ def merge_places_tiqets(places_data, tiqets_data):
 
     return merged
 
+
 def group_products_by_venue(products):
     """
     Group products by venue and return a dictionary with the grouped products.
@@ -242,6 +248,7 @@ def group_products_by_venue(products):
         venue_info['products'].append(product)
 
     return grouped_products
+
 
 def match_score(venue, place):
     """
@@ -310,6 +317,7 @@ def get_average_rating_from_tiqets(venue_products):
 
     return 0
 
+
 def extract_keywords(text):
     # Convert text to lowercase
     text = text.lower()
@@ -327,6 +335,7 @@ def extract_keywords(text):
 
     # Return unique keywords
     return list(filtered_words)
+
 
 def get_descriptions(products):
     all_keywords = []
@@ -392,6 +401,7 @@ def get_place_opening_hours(place):
 
   return opening_hours
 
+
 def tiqets(request):
     """
     Fetch products from Tiqets API and return them as JSON.
@@ -417,6 +427,7 @@ def tiqets(request):
     products_data = get_tiqets_products(lat, lng, radius)
 
     return JsonResponse(products_data)
+
 
 def tiqets_products(request):
     """
@@ -444,23 +455,21 @@ def tiqets_products(request):
 
     return JsonResponse(products_data)
 
+
 def merge_tiqets_and_places(lat, lng, radius):
     """
     Fetch places from Google Places API and Tiqets API and return them as JSON.
-    Example URL: /merge-tiqets-places/?lat=45.4642&lng=9.1900&radius=5
+    Example URL: /merge/?lat=45.4642&lng=9.1900&radius=5
     """
-
-    
-
     # Fetch data from Google Places API using the utility function
     places_data = get_places(lat, lng, radius).get('places', [])
 
     # Fetch data from Tiqets API using the utility function
     tiqets_data = get_tiqets_products(lat, lng, radius).get('products', [])
-
+    
     # Group products by venue
     grouped_products = group_products_by_venue(tiqets_data)
-
+    
      # Initialize categories
     tiqetsXplaces = []  # Matches between Tiqets and Places
     places_only = []    # Places without a matching Tiqets venue
@@ -529,6 +538,7 @@ def merge_tiqets_and_places(lat, lng, radius):
     merged_data = {"tiqetsXplaces": tiqetsXplaces, "places_only":places_only, "tiqets_only":tiqets_only}
     return merged_data
 
+
 def is_open(date, hours):
     """
     Given the date and the opening hours, check if the place is open at some time of the day
@@ -542,12 +552,12 @@ def is_open(date, hours):
 
     for period in hours:
         if period['open']['day'] == day_of_week:
-            # Extract opening and closing times for this day
-            open_time = time(hour=period['open']['hour'], minute=period['open']['minute'])
-            close_time = time(hour=period['close']['hour'], minute=period['close']['minute'])
+            # Use time instead of datetime to store only the time part
+            open_time = datetime_time(hour=period['open']['hour'], minute=period['open']['minute'])
+            close_time = datetime_time(hour=period['close']['hour'], minute=period['close']['minute'])
 
             # Check if the current time falls within the open and close times
-            if open_time < date.time() or date.time() < close_time:
+            if open_time <= date.time() <= close_time:
                 return True
     return False
 
@@ -568,13 +578,15 @@ def amount_of_open_days(opening_hours, arrival_date, departure_date):
         ):
             count += 1
         else:
-            if any(is_open(datetime.combine(current_date.date(), time(hour=h['open']['hour'], minute=h['open']['minute'])), opening_hours) for h in opening_hours):
+            if any(is_open(
+                        datetime.combine(current_date.date(), time(hour=h['open']['hour'], minute=h['open']['minute'])), 
+                        opening_hours) 
+                    for h in opening_hours):
                 count += 1
 
-        current_date += datetime.timedelta(days=1)
+        current_date += timedelta(days=1)
 
     return count
-
 
 
 def remove_unavailable_places(merged_data, start_date, end_date):
@@ -606,6 +618,7 @@ def calculate_place_common_categories(place_categories, user_preferred_categorie
         return len(common) / len(user_preferred_categories)
     return 0
 
+
 def calculate_weighted_rating(rating, num_reviews, global_average_rating, min_reviews=10):
 
     if num_reviews == 0:
@@ -629,10 +642,17 @@ def get_recommendations(request):
     categories = request.GET.get('categories')
     budget = request.GET.get('budget')
 
+    try:
+        lat = float(lat)
+        lng = float(lng)
+        radius = int(radius)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid latitude, longitude, or radius values.'}, status=400)
+
     merged_data = merge_tiqets_and_places(lat, lng, radius)
 
     # Remove places that are never open during the user's visit
-    merged_data = remove_unavailable_places(merged_data, start_date, end_date)
+    # merged_data = remove_unavailable_places(merged_data, start_date, end_date)
 
     recommendations = []
 
@@ -651,7 +671,7 @@ def get_recommendations(request):
             'venue': tiqetXplace.get('venue'),
             'average_price': tiqetXplace.get('average_price'),
             'recommended_score': recommendation_score,
-            'saved':False
+            'saved':True
         })
 
     for place in merged_data.get("places_only"):
@@ -669,7 +689,7 @@ def get_recommendations(request):
             'venue': place.get('venue'),
             'average_price': place.get('average_price'),
             'recommended_score': recommendation_score,
-            'saved':False
+            'saved':True
         })
 
     global_average_rating = sum(item['tiqets_average_rating'] 
@@ -693,7 +713,7 @@ def get_recommendations(request):
             'venue': tiqet.get('venue'),
             'average_price': tiqet.get('average_price'),
             'recommended_score': recommendation_score,
-            'saved':False
+            'saved':True
         })
 
     if budget == 'Cheap':

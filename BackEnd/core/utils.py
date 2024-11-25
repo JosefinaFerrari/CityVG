@@ -63,7 +63,6 @@ def get_places(lat, lng, radius, categories=None):
     '''
     Fetch places (attractions, events, etc.) from the Google Places API based on location and radius.
     '''
-    
     api_url = "https://places.googleapis.com/v1/places:searchNearby"
 
     # Define the JSON body of the request
@@ -96,7 +95,7 @@ def get_places(lat, lng, radius, categories=None):
         "maxResultCount": 20,
         "rankPreference": "POPULARITY"  # Removed as it's not supported in Nearby Search (New)
     }
-    
+
     # Apply categories filter if provided
     if categories:
         request_body["includedTypes"] = categories
@@ -107,8 +106,8 @@ def get_places(lat, lng, radius, categories=None):
     # Headers, including the API key and FieldMask
     headers = {
         "Content-Type": "application/json",
-        "X-Goog-Api-Key": settings.GOOGLE_PLACES_API_KEY,
-        "X-Goog-FieldMask": field_mask, 
+        "X-Goog-Api-Key":  settings.GOOGLE_PLACES_API_KEY,
+        "X-Goog-FieldMask": field_mask,
     }
 
     try:
@@ -117,7 +116,7 @@ def get_places(lat, lng, radius, categories=None):
 
         # Check if the response status is OK
         if response.status_code == 200:
-            return response.json() 
+            return response.json()
         else:
             return {'error': 'Failed to fetch data from Places API', 'status_code': response.status_code}
     except Exception as e:
