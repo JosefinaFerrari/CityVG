@@ -21,6 +21,8 @@ from core.views import places
 #from core.views import merge_tiqets_and_places
 from core.views import gemini
 from core.views import get_itinerary
+from core.views import merge_tiqets_and_places
+from core.views import get_recommendations
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +31,5 @@ urlpatterns = [
     #path('merge/', merge_tiqets_and_places, name='merge_tiqets_places'),
     path('gemini/', gemini, name='gemini'),
     path('generate/', get_itinerary, name='get_itinerary'),
+    path('recommendations/',get_recommendations, name="get_recommendations")
 ]
