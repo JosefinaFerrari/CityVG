@@ -99,8 +99,6 @@ def get_itinerary(request):
     categories = request.GET.get('categories', [])  # Default to empty array if not provided
     start_date = request.GET.get('start_date')  # Default to None if not provided
     end_date = request.GET.get('end_date')  # Default to None if not provided
-    start_time = request.GET.get('start_time')  # Default to None if not provided
-    end_time = request.GET.get('end_time')  # Default to None if not provided
     num_seniors = request.GET.get('num_seniors')  # Default to 0 if not provided
     num_adults = request.GET.get('num_adults')  # Default to 0 if not provided
     num_youth = request.GET.get('num_youth')  # Default to 0 if not provided
@@ -112,10 +110,10 @@ def get_itinerary(request):
         lat = float(lat)
         lng = float(lng)
         radius = int(radius)
-        start_date = str(start_date)
-        end_date = str(end_date)
-        start_time = int(start_time)
-        end_time = int(end_time)
+        start_date = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+        end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+        start_time = str(start_time)
+        end_time = str(end_time)
         num_seniors = int(num_seniors)
         num_adults = int(num_adults)
         num_youth = int(num_youth)
@@ -539,7 +537,6 @@ def merge_tiqets_and_places(lat, lng, radius):
     merged_data = {"tiqetsXplaces": tiqetsXplaces, "places_only":places_only, "tiqets_only":tiqets_only}
     return merged_data
 
-from datetime import time
 
 def is_open(date, hours):
     """
@@ -558,7 +555,7 @@ def is_open(date, hours):
             open_hour = int(period['open']['hour'])
             open_minute = int(period['open']['minute'])
             open_time = time(open_hour,open_minute)
-            
+
             close_hour = int(period['close']['hour'])
             close_minute = int(period['close']['minute'])
             close_time = time(close_hour, close_minute)
