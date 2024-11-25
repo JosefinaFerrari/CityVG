@@ -54,30 +54,6 @@ def places(request):
     return JsonResponse(places_data, safe=False)
 
 
-def gemini(request):
-    """
-    Fetch places from Google Places API and return them as JSON.
-    Example URL: /gemini/?lat=45.4642&lng=9.1900&radius=5
-    """
-    # Extract query parameters from the request
-    lat = request.GET.get('lat')
-    lng = request.GET.get('lng')
-    radius = request.GET.get('radius')  # Default to 5000 meters if not provided
-    
-    # Convert lat, lng, and radius to the correct types
-    try:
-        lat = float(lat)
-        lng = float(lng)
-        radius = int(radius)
-    except ValueError:
-        return JsonResponse({'error': 'Invalid latitude, longitude, or radius values.'}, status=400)
-    
-    # Fetch data from Google Places API using the utility function
-    gemini_data = get_gemini_response(lat, lng, radius)
-    
-    return JsonResponse(gemini_data, safe=False)
-
-
 def get_itinerary(request):
     """
     Fetch places from Google Places API and return them as JSON.
