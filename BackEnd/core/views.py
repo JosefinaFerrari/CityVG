@@ -1,5 +1,5 @@
 from collections import Counter
-import datetime
+from datetime import datetime
 import re
 from string import punctuation
 import time
@@ -444,19 +444,13 @@ def tiqets_products(request):
 
     return JsonResponse(products_data)
 
-def merge_tiqets_and_places(request):
+def merge_tiqets_and_places(lat, lng, radius):
     """
     Fetch places from Google Places API and Tiqets API and return them as JSON.
     Example URL: /merge-tiqets-places/?lat=45.4642&lng=9.1900&radius=5
     """
 
-    # Convert lat, lng, and radius to the correct types
-    try:
-        lat = float(lat)
-        lng = float(lng)
-        radius = int(radius)
-    except ValueError:
-        return JsonResponse({'error': 'Invalid latitude, longitude, or radius values.'}, status=400)
+    
 
     # Fetch data from Google Places API using the utility function
     places_data = get_places(lat, lng, radius).get('places', [])
@@ -589,7 +583,7 @@ def remove_unavailable_places(merged_data, start_date, end_date):
     """
     
     start_date = datetime.strptime(start_date, '%Y-%m-%dT%H:%M:%S')
-    end_date = datetime.strptime(end_date.get('end_date'), '%Y-%m-%dT%H:%M:%S')
+    end_date = datetime.strptime(end_date, '%Y-%m-%dT%H:%M:%S')
 
     for tiqetXplace in merged_data.get("tiqetsXplaces"):
         opening_hours = tiqetXplace.get('opening_hours')
@@ -708,6 +702,6 @@ def get_recommendations(request):
 
     top_recommendations = sorted(recommendations, key=lambda rec: rec['recommended_score'], reverse=True)[:10]
 
-    return top_recommendations
+    return JsonResponse(top_recommendations, safe=False)
 
 
