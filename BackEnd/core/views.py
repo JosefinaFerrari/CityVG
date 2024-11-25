@@ -60,52 +60,54 @@ def get_itinerary(request):
     Example URL: http://127.0.0.1:8000/generate/?lat=48.864716&lng=2.349014&radius=10&start_date=2024-11-23&end_date=2024-11-30&start_time=9&end_time=15&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap
                  http://127.0.0.1:8000/generate/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-23&end_date=2024-11-30&start_time=9&end_time=15&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap
     """
-    # Extract query parameters from the request
-    lat = request.GET.get('lat')
-    lng = request.GET.get('lng')
-    radius = request.GET.get('radius')  # Default to 5000 meters if not provided
-    categories = request.GET.get('categories', [])  # Default to empty array if not provided
-    start_date = request.GET.get('start_date')  # Default to None if not provided
-    end_date = request.GET.get('end_date')  # Default to None if not provided
-    num_seniors = request.GET.get('num_seniors')  # Default to 0 if not provided
-    num_adults = request.GET.get('num_adults')  # Default to 0 if not provided
-    num_youth = request.GET.get('num_youth')  # Default to 0 if not provided
-    num_children = request.GET.get('num_children')  # Default to 0 if not provided
-    budget = request.GET.get('budget', '')  # Default to '' if not provided
-
-    # Convert lat, lng, and radius to the correct types
     try:
-        lat = float(lat)
-        lng = float(lng)
-        radius = int(radius)
-        start_date = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
-        end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
-        start_time = str(start_time)
-        end_time = str(end_time)
-        num_seniors = int(num_seniors)
-        num_adults = int(num_adults)
-        num_youth = int(num_youth)
-        num_children = int(num_children)
-        budget = str(budget)
-    except ValueError:
-        return JsonResponse({'error': 'Invalid values.'}, status=400)
-    
-    
-    # Fetch data from Google Places API using the utility function
-    places_data = get_places(lat, lng, radius, categories).get('places', [])
-    
-    # Fetch data from Tiqets API using the utility function
-    tiqets_data = get_tiqets_products(lat, lng, radius).get('products', [])
-    
-    merged = merge_places_tiqets(places_data, tiqets_data)
+        # Extract and validate query parameters
+        lat = float(request.GET.get('lat', 0))
+        lng = float(request.GET.get('lng', 0))
+        radius = int(request.GET.get('radius', 5000))  # Default radius = 5000 meters
+        categories = request.GET.getlist('categories', [])  # Fetch as list if provided
+        start_date = datetime.strptime(request.GET.get('start_date'), "%Y-%m-%dT%H:%M:%S")
+        
+        end_date = datetime.strptime(request.GET.get('end_date'), "%Y-%m-%dT%H:%M:%S")
+        num_seniors = int(request.GET.get('num_seniors', 0))
+        num_adults = int(request.GET.get('num_adults', 0))
+        num_youth = int(request.GET.get('num_youth', 0))
+        num_children = int(request.GET.get('num_children', 0))
+        budget = request.GET.get('budget', '').lower()  # Normalize budget string
 
-    recommendations = recommend (lat, lng,radius, start_date, end_date, categories, budget)
-
-    itinerary = generate_itinerary(lat, lng, start_date, end_date, start_time, end_time, num_seniors, num_adults, num_youth, num_children, budget, recommendations)
+        # Validate logical constraints
+        if start_date >= end_date:
+            return JsonResponse({'error': 'start_date must be before end_date.'}, status=400)
+        if radius <= 0:
+            return JsonResponse({'error': 'radius must be a positive integer.'}, status=400)
+    except (ValueError, TypeError) as e:
+        return JsonResponse({'error': f'Invalid input: {str(e)}'}, status=400)
     
-    merged_data = merge_gemini_places(merged, itinerary) 
+    
+    try:
+        # Fetch data from external sources
+        places_data = get_places(lat, lng, radius, categories).get('places', [])
+        tiqets_data = get_tiqets_products(lat, lng, radius).get('products', [])
+        merged_data = merge_places_tiqets(places_data, tiqets_data)
 
-    return JsonResponse(merged_data, safe=False)
+        # Generate recommendations and itinerary
+        start_day = start_date.date()
+        start_hour = start_date.time()
+        end_day = end_date.date()
+        end_hour = end_date.time()
+        recommendations = recommend(lat, lng, radius, start_date, end_date, categories, budget)
+        itinerary = generate_itinerary(
+            lat, lng, start_day, end_day, start_hour, end_hour,
+            num_seniors, num_adults, num_youth, num_children, budget, recommendations
+        )
+
+        # Merge itinerary with additional data if necessary
+        final_output = merge_gemini_places(merged_data, itinerary)
+
+        return JsonResponse(final_output, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
 
 
 def merge_gemini_places(merged_places_x_tiqets, gemini_response_str):
@@ -520,16 +522,16 @@ def is_open(date, hours):
     for period in hours:
         day = period['open']['day']
         if day == day_of_week:
-            open_hour = int(period['open']['hour'])
-            open_minute = int(period['open']['minute'])
-            open_time = time(open_hour,open_minute)
+            #open_hour = int(period['open']['hour'])
+            #open_minute = int(period['open']['minute'])
+            #open_time = datetime_time(open_hour,open_minute)
 
-            close_hour = int(period['close']['hour'])
-            close_minute = int(period['close']['minute'])
-            close_time = time(close_hour, close_minute)
+            #close_hour = int(period['close']['hour'])
+           # close_minute = int(period['close']['minute'])
+            #close_time = datetime_time(close_hour, close_minute)
 
             # Check if the current time falls within the open and close times
-            if open_time <= date.time() <= close_time:
+            #if open_time <= date.time() <= close_time:
                 return True
     return False
 
@@ -600,7 +602,7 @@ def recommend(lat, lng, radius, start_date, end_date, categories, budget):
     merged_data = merge_tiqets_and_places(lat, lng, radius)
 
     # Remove places that are never open during the user's visit
-    merged_data = remove_unavailable_places(merged_data, start_date, end_date)
+    # merged_data = remove_unavailable_places(merged_data, start_date, end_date)
 
     recommendations = []
 
