@@ -1,4 +1,5 @@
-from datetime import time as datetime_time, datetime, timedelta
+from datetime import time as datetime_time  
+from datetime import datetime, timedelta
 import re
 from string import punctuation
 import time
@@ -10,6 +11,7 @@ from .utils import get_gemini_response  # Import the function from utils.py
 from rapidfuzz import fuzz
 import json
 from geopy.distance import geodesic
+
 
 # Define the mapping dictionary
 category_mapping = {
@@ -87,7 +89,8 @@ def gemini(request):
 def get_itinerary(request):
     """
     Fetch places from Google Places API and return them as JSON.
-    Example URL: /generate/?lat=48.864716&lng=2.349014&radius=10&start_date=2024-11-23&end_date=2024-11-30&start_time=9&end_time=15&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=low
+    Example URL: http://127.0.0.1:8000/generate/?lat=48.864716&lng=2.349014&radius=10&start_date=2024-11-23&end_date=2024-11-30&start_time=9&end_time=15&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap
+                 http://127.0.0.1:8000/generate/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-23&end_date=2024-11-30&start_time=9&end_time=15&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap
     """
     # Extract query parameters from the request
     lat = request.GET.get('lat')
@@ -130,14 +133,16 @@ def get_itinerary(request):
     
     merged = merge_places_tiqets(places_data, tiqets_data)
 
-    itinerary = generate_itinerary(lat, lng, start_date, end_date, start_time, end_time, num_seniors, num_adults, num_youth, num_children, budget, merged)
+    recommendations = recommend (lat, lng,radius, start_date, end_date, categories, budget)
+
+    itinerary = generate_itinerary(lat, lng, start_date, end_date, start_time, end_time, num_seniors, num_adults, num_youth, num_children, budget, recommendations)
     
     merged_data = merge_gemini_places(merged, itinerary) 
 
     return JsonResponse(merged_data, safe=False)
 
 
-def merge_gemini_places(merged_places, gemini_response_str):
+def merge_gemini_places(merged_places_x_tiqets, gemini_response_str):
     merged_data = {}
 
     gemini_response = json.loads(gemini_response_str)
@@ -146,20 +151,20 @@ def merge_gemini_places(merged_places, gemini_response_str):
         for attraction in itinerary["attractions"]:
             name = attraction["name"]
 
-            if name in merged_places:
+            if name in merged_places_x_tiqets:
                 attraction.update({
-                    "lat": merged_places[name]["lat"],
-                    "lng": merged_places[name]["lng"],
-                    "city": merged_places[name]['products'][list(merged_places[name]['products'].keys())[0]]['city'],
-                    "country": merged_places[name]['products'][list(merged_places[name]['products'].keys())[0]]['country'],
-                    "description": merged_places[name].get("description", "No description available"),
-                    "product": None  # Initialize product as None
+                    "lat": merged_places_x_tiqets[name]["lat"],
+                    "lng": merged_places_x_tiqets[name]["lng"],
+                    "city": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['city'],
+                    "country": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['country'],
+                    "product name": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['title'],
+                    "checkout url": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url'],
                 })
 
                 # Check if the attraction has a product
                 if "productName" in attraction:
                     product_name = attraction["productName"]
-                    product_info = merged_places[name]["products"].get(product_name)
+                    product_info = merged_places_x_tiqets[name]["products"].get(product_name)
                     # Set or overwrite the product field with the current product
                     attraction["product"] = product_info
 
@@ -195,6 +200,7 @@ def merge_places_tiqets(places_data, tiqets_data):
                             'product_checkout_url': product.get('product_checkout_url', 'N/A'),
                             'duration': product.get('duration', 'N/A'),
                             'rating': product['ratings'].get('average', 'N/A'),
+                            'description': product.get('tagline', ''),
                             'images': product.get('images', []),
                             'whats_included': product.get('whats_included', 'N/A'),
                             'sale_status': product.get('sale_status', 'N/A'),
@@ -551,7 +557,8 @@ def is_open(date, hours):
     day_of_week = (date.weekday() + 1) % 7
 
     for period in hours:
-        if period['open']['day'] == day_of_week:
+        day = period['open']['day']
+        if day == day_of_week:
             # Use time instead of datetime to store only the time part
             open_time = datetime_time(hour=period['open']['hour'], minute=period['open']['minute'])
             close_time = datetime_time(hour=period['close']['hour'], minute=period['close']['minute'])
@@ -593,10 +600,6 @@ def remove_unavailable_places(merged_data, start_date, end_date):
     """
     Remove places that do not match with the user's dates
     """
-    
-    start_date = datetime.strptime(start_date, '%Y-%m-%dT%H:%M:%S')
-    end_date = datetime.strptime(end_date, '%Y-%m-%dT%H:%M:%S')
-
     for tiqetXplace in merged_data.get("tiqetsXplaces"):
         opening_hours = tiqetXplace.get('opening_hours')
         if amount_of_open_days(opening_hours, start_date, end_date) == 0:
@@ -628,27 +631,7 @@ def calculate_weighted_rating(rating, num_reviews, global_average_rating, min_re
     return weighted_rating
 
 
-def get_recommendations(request):
-    """
-    Fetch places from Google Places API and return them as JSON.
-    Example URL: http://127.0.0.1:8000/recommendations/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-25T10:00:00&end_date=2024-11-27T18:00:00&categories=Museums%20and%20Galleries,Historical%20Sites&budget=Cheap
-    """
-    # Extract query parameters from the request
-    lat = request.GET.get('lat')
-    lng = request.GET.get('lng')
-    radius = request.GET.get('radius')
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    categories = request.GET.get('categories')
-    budget = request.GET.get('budget')
-
-    try:
-        lat = float(lat)
-        lng = float(lng)
-        radius = int(radius)
-    except ValueError:
-        return JsonResponse({'error': 'Invalid latitude, longitude, or radius values.'}, status=400)
-
+def recommend(lat, lng, radius, start_date, end_date, categories, budget):
     merged_data = merge_tiqets_and_places(lat, lng, radius)
 
     # Remove places that are never open during the user's visit
@@ -725,5 +708,33 @@ def get_recommendations(request):
 
     top_recommendations = sorted(recommendations, key=lambda rec: rec['recommended_score'], reverse=True)[:10]
 
-    return JsonResponse(top_recommendations, safe=False)
+    return top_recommendations
+
+
+def get_recommendations(request):
+    """
+    Fetch places from Google Places API and return them as JSON.
+    Example URL: http://127.0.0.1:8000/recommendations/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-29T10:00:00&end_date=2024-11-30T18:00:00&categories=Museums%20and%20Galleries,Historical%20Sites&budget=Cheap
+    """
+    # Extract query parameters from the request
+    lat = request.GET.get('lat')
+    lng = request.GET.get('lng')
+    radius = request.GET.get('radius')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    categories = request.GET.get('categories', [])
+    budget = request.GET.get('budget')
+
+    try:
+        lat = float(lat)
+        lng = float(lng)
+        radius = int(radius)
+        start_date = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S")
+        end_date = datetime.strptime(end_date, "%Y-%m-%dT%H:%M:%S")
+    except ValueError:
+        return JsonResponse({'error': 'Invalid latitude, longitude, or radius values.'}, status=400)
+
+    recomendations = recommend(lat, lng, radius, start_date, end_date, categories, budget)
+
+    return JsonResponse(recomendations, safe=False)
 
