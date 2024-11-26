@@ -169,15 +169,16 @@ class _PlaceDetailWidgetState extends State<PlaceDetailWidget> {
                                     letterSpacing: 0.0,
                                   ),
                             ),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: Image.asset(
-                                'assets/images/twemoji_flag-italy.png',
-                                width: 26.0,
-                                height: 26.0,
-                                fit: BoxFit.cover,
+                            if (false)
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Image.asset(
+                                  'assets/images/twemoji_flag-italy.png',
+                                  width: 26.0,
+                                  height: 26.0,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
                           ].divide(const SizedBox(width: 10.0)),
                         ),
                       ),

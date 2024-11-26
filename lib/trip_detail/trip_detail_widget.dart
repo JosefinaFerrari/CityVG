@@ -209,15 +209,16 @@ class _TripDetailWidgetState extends State<TripDetailWidget> {
                                         fontWeight: FontWeight.w500,
                                       ),
                                 ),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: Image.asset(
-                                    'assets/images/twemoji_flag-italy.png',
-                                    width: 26.0,
-                                    height: 26.0,
-                                    fit: BoxFit.cover,
+                                if (false)
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.asset(
+                                      'assets/images/twemoji_flag-italy.png',
+                                      width: 26.0,
+                                      height: 26.0,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
-                                ),
                                 Expanded(
                                   child: Align(
                                     alignment: const AlignmentDirectional(1.0, 0.0),

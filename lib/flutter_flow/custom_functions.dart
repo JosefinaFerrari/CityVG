@@ -106,6 +106,15 @@ LatLng convertLatLng(
 List<AttractionStruct> attractionsFromJson(List<dynamic> attractionsJson) {
   List<AttractionStruct> attractionsList = [];
 
+  String? castToString(dynamic value) {
+    if (value is int) {
+      return value.toString(); // Convert int to String
+    } else if (value is String) {
+      return value; // Return as is if already a String
+    }
+    return null; // Handle null or unexpected types
+  }
+
   for (int i = 0; i < attractionsJson.length; i++) {
     dynamic json = attractionsJson[i];
 
@@ -115,8 +124,8 @@ List<AttractionStruct> attractionsFromJson(List<dynamic> attractionsJson) {
     AttractionStruct newAttraction = AttractionStruct(
       name: json["name"],
       productName: json["productName"],
-      startingHour: json["startingHour"],
-      endingHour: json["endingHour"],
+      startingHour: castToString(json["startingHour"]),
+      endingHour: castToString(json["endingHour"]),
       day: DateTime.parse(json["day"]),
       location: LatLng(json["lat"], json["lng"]),
       city: json["city"],
