@@ -2,6 +2,7 @@ import requests
 from django.conf import settings
 import os
 import json
+from google.ai.generativelanguage_v1beta.types import content
 import google.generativeai as genai
 
 # Documentation for google places nearby search https://developers.google.com/maps/documentation/places/web-service/nearby-search?hl=it
@@ -116,18 +117,60 @@ def get_tiqets_products(lat, lng, radius, page=1, page_size=100):
 def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num_seniors, num_adults, num_youth, num_children, budget, places):
     genai.configure(api_key=settings.GEMINI_API_KEY)
 
+    # Create the model
     generation_config = {
     "temperature": 0.5,
     "top_p": 0.95,
     "top_k": 40,
     "max_output_tokens": 8192,
+    "response_schema": content.Schema(
+        type = content.Type.OBJECT,
+        properties = {
+        "response": content.Schema(
+            type = content.Type.OBJECT,
+            properties = {
+            "itineraries": content.Schema(
+                type = content.Type.ARRAY,
+                items = content.Schema(
+                type = content.Type.OBJECT,
+                properties = {
+                    "itineraryName": content.Schema(
+                    type = content.Type.STRING,
+                    ),
+                    "attractions": content.Schema(
+                    type = content.Type.ARRAY,
+                    items = content.Schema(
+                        type = content.Type.OBJECT,
+                        properties = {
+                        "name": content.Schema(
+                            type = content.Type.STRING,
+                        ),
+                        "startingHour": content.Schema(
+                            type = content.Type.STRING,
+                        ),
+                        "endingHour": content.Schema(
+                            type = content.Type.STRING,
+                        ),
+                        "day": content.Schema(
+                            type = content.Type.STRING,
+                        ),
+                        },
+                    ),
+                    ),
+                },
+                ),
+            ),
+            },
+        ),
+        },
+    ),
     "response_mime_type": "application/json",
     }
 
     model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
     generation_config=generation_config,
-    system_instruction="Consider a scenario in which a user wants to visit a place for a given number of days X. You will receive a JSON containing a list of attractions to visit in a city and also the preferences selected by a user. These preferences may include factors such as price range, the number of participants, the trip duration, and a sublist of places the user wants to visit for sure. Based on this information, you must return 3 different itineraries. An itinerary lasts X days and starts when the user arrives (time of arrival) and ends when he/she departs (time of departure). \nEach itinerary should include the places you consider the best to visit, based on reviews and ratings of those places. Arrange the places in an order that allows the user to visit them in the most efficient way. In addition, for each attraction, make an estimation of average time spent to visit the attraction and assign the starting Hours (that is when the visit starts )and ending Hours (that is when the visit should finish). You must schedule each visit to ensure there is some spare time (of at least an hour) between any two consecutive visits. Give a name to each generated itinerary.\All the places will also have a list of available products (such as tours or visits to a place). If there are multiple products, select the one that fits better based on the user preferences. If there are products that include multiple attractions do not consider them (for example a package of tours). Each place has to have the chosen product between the given ones.\n\nThe returned JSON must follow this structure: {\"itineraries\": [{\"itineraryName\", \"attractions\": [{\"name\", \"productName\"(optional), \"startingHour\", \"endingHour\", \"day\"}]]}",
+    system_instruction="Consider a scenario in which a user wants to visit a place for a given number of days X. You will receive an object with those fields: \n        'City: lat={lat} lng={lng}' (latitude and longitude of the city)\n        'Start Date: {start_date}' (when the user will arrive in the city)\n        'End Date: {end_date}' (when the user will leave the city)\n        'Start Hour: {start_hour}' (the hour the user will arrive)\n        'End Hour: {end_hour}' (the hour the user is going to leave)\n        'Number of Seniors: {num_seniors}' (65 or above)\n        'Number of Adults: {num_adults}' (24 - 65)\n        'Number of Youth: {num_youth}' (13 - 24)\n        'Number of Children: {num_children}' (younger than 24)\n        'Budget: {budget}' (Cheap/Balanced/Luxury/Flexible)\n        'Places: {places_str}'\nplaces_str will contain a list of attractions to visit in a city.\nBased on this information, you must return 3 different itineraries. An itinerary lasts X days and starts when the user arrives (time of arrival) and ends when he/she departs (time of departure). \nEach itinerary should include the places you consider the best to visit, based on reviews and ratings of those places, and each one should differ from the other and focus more on different attractions. Arrange the places in an order that allows the user to visit them in the most efficient way. In addition, for each attraction, make an estimation of average time spent to visit the attraction and assign the starting_hours (that is when the visit starts )and ending_hours (that is when the visit should finish). You must schedule each visit to ensure there is some spare time (of at least an hour) between any two consecutive visits and consider the time to reach the next attraction. Give a name to each generated itinerary.\nSome of the places will also have a list of available products (such as tours or visits to a place). If there are multiple products, select the one that fits better based on the user preferences. If there are products that include multiple attractions give the productName in just the first attraction.\n",
     )
 
     chat_session = model.start_chat(
@@ -150,6 +193,8 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
         f'Budget: {budget}\n'
         f'Places: {places_str}'
     )
+
     response = chat_session.send_message(input)
 
+    print(response.text)
     return response.text
