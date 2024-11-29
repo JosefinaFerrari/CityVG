@@ -1,0 +1,1 @@
+ /Users/alexandranicaj7/Desktop/CityVG/.dart_tool/flutter_build/d1a7b0427007c3eed234e63276858a18/native_assets.yaml: 
