@@ -213,35 +213,19 @@ def merge_places_tiqets(places_data, tiqets_data):
                 # Construct products dictionary
                 products_dict = {
                     product["title"]: {
-                        "title": product.get("title", "N/A"),
-                        "price": product.get("price", "N/A"),
-                        "summary": product.get("summary", "N/A"),
-                        "city": product.get("city_name", "N/A"),
-                        "country": product.get("country_name", "N/A"),
-                        "product_checkout_url": product.get(
-                            "product_checkout_url", "N/A"
-                        ),
-                        "duration": product.get("duration", "N/A"),
-                        "rating": product.get("ratings", {}).get("average", "N/A"),
-                        "description": product.get("tagline", ""),
+                        
                         "images": product.get("images", []),
-                        "whats_included": product.get("whats_included", "N/A"),
-                        "sale_status": product.get("sale_status", "N/A"),
+                       
                     }
                     for product in venue_info.get("products", [])
                 }
 
                 merged[place["displayName"]["text"]] = {
-                    "place": place["displayName"]["text"],
-                    "lat": place["location"]["latitude"],
-                    "lng": place["location"]["longitude"],
+                   
                     "photos": place.get("photos", []),
-                    "currentOpeningHours": place.get("currentOpeningHours", "N/A"),
-                    "venue": venue_info.get("name"),
+                 
                     "products": products_dict,
-                    "rating": place.get("rating", 0),
-                    "categories": place.get("types", []),
-                    "average_price": average_price,
+                 
                 }
                 matched = True
                 break  # Stop after the first match
@@ -249,16 +233,9 @@ def merge_places_tiqets(places_data, tiqets_data):
         if not matched:
             # Include places without matching venues
             merged[place["displayName"]["text"]] = {
-                "place": place["displayName"]["text"],
-                "lat": place["location"]["latitude"],
-                "lng": place["location"]["longitude"],
+              
                 "photos": place.get("photos", []),
-                "currentOpeningHours": place.get("currentOpeningHours", "N/A"),
-                "venue": "No matching Venue",
-                "products": {},
-                "rating": place.get("rating", 0),
-                "categories": place.get("types", []),
-                "average_price": None,
+               
             }
 
     return merged
@@ -712,6 +689,7 @@ def calculate_weighted_rating(
     )
     return weighted_rating
 
+
 # Restructure products to remove place names as keys
 def restructure_products(merged_data):
     flattened_products = {}
@@ -724,6 +702,7 @@ def restructure_products(merged_data):
         flattened_products.update(place_products)
 
     return flattened_products
+
 
 def recommend(user_preferences):
     lat = user_preferences.get("lat")
@@ -792,7 +771,7 @@ def recommend(user_preferences):
                 "venue": place.get("venue"),
                 "average_price": place.get("average_price"),
                 "recommended_score": recommendation_score,
-                "products": flattened_products
+                "products": flattened_products,
             }
         )
 
@@ -821,28 +800,29 @@ def recommend(user_preferences):
 
         recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
 
-
-
         # Restructure the products inline
         flattened_products = {}
         for place_name, place_info in merged_dataa.items():
             inner_products = place_info.get("products", {})
             for product_name, product in inner_products.items():
-                # Only include the 'city' field for each product
-                flattened_products[product_name] = product
-
+                # Get the 'images' list and fetch the first image's 'extra_large' URL
+                images = product.get("images", [])
+                extra_large_image = images[0].get("extra_large") if images else None
+                
+                # Add the required fields to the flattened_products structure
+                flattened_products[product_name] = {
+                   
+                    "images": {
+                        "extra_large": extra_large_image
+                    }
+                }
 
         recommendations.append(
             {
-                "type": "tiqets_only",
-                "lat": lat,
-                "lng": lng,
-                "place": tiqet.get("place"),
-                "venue": tiqet.get("venue"),
+                "place": tiqet.get("venue"),
                 "average_price": tiqet.get("average_price"),
                 "recommended_score": recommendation_score,
-                "products": flattened_products
-
+                "products": flattened_products,
             }
         )
 
@@ -857,8 +837,6 @@ def recommend(user_preferences):
     )[:10]
 
     return top_recommendations
-
-
 
 
 def get_recommendations(request):
@@ -904,7 +882,5 @@ def get_recommendations(request):
             "dates": {"start_date": start_date, "end_date": end_date},
         }
     )
-
- 
 
     return JsonResponse(recommendations, safe=False)
