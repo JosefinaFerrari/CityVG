@@ -59,6 +59,8 @@ def get_itinerary(request):
     Fetch places from Google Places API and return them as JSON.
     Example URL: http://127.0.0.1:8000/generate/?lat=48.864716&lng=2.349014&radius=10&start_date=2024-11-23&end_date=2024-11-30&start_time=9&end_time=15&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap
                  http://127.0.0.1:8000/generate/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-23&end_date=2024-11-30&start_time=9&end_time=15&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap
+                 http://127.0.0.1:8000/generate/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-23&end_date=2024-11-30&start_time=9:00&end_time=15:00&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap&required_places=Duomo%20di%Milano&required_places=Pinacoteca%20di%20Brera&removed_places=Sforzesco%20Castle
+                 http://127.0.0.1:8000/generate/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-23&end_date=2024-11-30&start_time=9:00&end_time=15:00&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap&required_places=Sforzesco%20Castle&required_places=Pinaoteca%20di%20Brera&removed_places=Duomo%20di%20Milano
     """
     try:
         # Extract and validate query parameters
@@ -75,6 +77,8 @@ def get_itinerary(request):
         num_youth = int(request.GET.get('num_youth', 0))
         num_children = int(request.GET.get('num_children', 0))
         budget = request.GET.get('budget', '').lower()  # Normalize budget string
+        required_places = request.GET.getlist('required_places', [])  # Fetch as list if provided
+        removed_places = request.GET.getlist('removed_places', [])  # Fetch as list if provided
 
         # Validate logical constraints
         if start_date >= end_date:
@@ -117,7 +121,7 @@ def get_itinerary(request):
         start_time = time.time()
         itinerary = generate_itinerary(
             lat, lng, start_day, end_day, start_hour, end_hour,
-            num_seniors, num_adults, num_youth, num_children, budget, places_info
+            num_seniors, num_adults, num_youth, num_children, budget, places_info, required_places, removed_places
         )
         end_time = time.time()
 
