@@ -159,9 +159,13 @@ def get_places_info(merged_data):
 
 def merge_gemini_places(merged_places_x_tiqets, gemini_response_str):
     gemini_response = json.loads(gemini_response_str)
-    gemini_response = gemini_response["response"]
     
+    gemini_response = gemini_response["response"]
+
+    print(gemini_response["itineraries"][0])
+
     for itinerary in gemini_response["itineraries"]:
+        print(itinerary)
         for attraction in itinerary["attractions"]:
             name = attraction["name"]
             date = attraction["day"]

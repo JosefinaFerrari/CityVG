@@ -119,8 +119,8 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
 
     # Create the model
     generation_config = {
-    "temperature": 0.5,
-    "top_p": 0.95,
+    "temperature": 0.3,
+    "top_p": 0.8,
     "top_k": 40,
     "max_output_tokens": 8192,
     "response_schema": content.Schema(
@@ -168,9 +168,48 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
     }
 
     model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    generation_config=generation_config,
-    system_instruction="Consider a scenario in which a user wants to visit a place for a given number of days X. You will receive an object with those fields: \n        'City: lat={lat} lng={lng}' (latitude and longitude of the city)\n        'Start Date: {start_date}' (when the user will arrive in the city)\n        'End Date: {end_date}' (when the user will leave the city)\n        'Start Hour: {start_hour}' (the hour the user will arrive)\n        'End Hour: {end_hour}' (the hour the user is going to leave)\n        'Number of Seniors: {num_seniors}' (65 or above)\n        'Number of Adults: {num_adults}' (24 - 65)\n        'Number of Youth: {num_youth}' (13 - 24)\n        'Number of Children: {num_children}' (younger than 24)\n        'Budget: {budget}' (Cheap/Balanced/Luxury/Flexible)\n        'Places: {places_str}'\n          'Required places: {required_places}'\n          'Removed places: {removed_places}'\nplaces_str will contain a list of attractions to visit in a city, required_places will contain a list of places that must always be included in an itinerary, and removed_places will contain a list of places that must never be included in an itinerary.\nBased on this information, you must return 3 different itineraries. An itinerary lasts X days and starts when the user arrives (time of arrival) and ends when he/she departs (time of departure). \nEach itinerary should include the places in required_places plus the places you consider the best to visit, based on reviews and ratings of those places, should not contain the places in removed_places, and each one should differ from the other and focus more on different attractions. Arrange the places in an order that allows the user to visit them in the most efficient way. In addition, for each attraction, make an estimation of average time spent to visit the attraction and assign the starting_hours (that is when the visit starts )and ending_hours (that is when the visit should finish). You must schedule each visit to ensure there is some spare time (of at least an hour) between any two consecutive visits and consider the time to reach the next attraction. Give a name to each generated itinerary.\nSome of the places will also have a list of available products (such as tours or visits to a place). If there are multiple products, select the one that fits better based on the user preferences. If there are products that include multiple attractions give the productName in just the first attraction.\n",
+        model_name="gemini-1.5-flash",
+        generation_config=generation_config,
+        system_instruction=(
+            "Consider a scenario where a user wants to visit a city for a specific number of days (X). "
+            "You will receive an object with the following fields:\n"
+            "- 'City': lat, lng (latitude and longitude of the city).\n"
+            "- 'Start Date': The user's arrival date.\n"
+            "- 'End Date': The user's departure date.\n"
+            "- 'Start Hour': The time the user will arrive.\n"
+            "- 'End Hour': The time the user will leave.\n"
+            "- 'Number of Seniors': Count of travelers aged 65 or above.\n"
+            "- 'Number of Adults': Count of travelers aged 24–65.\n"
+            "- 'Number of Youth': Count of travelers aged 13–24.\n"
+            "- 'Number of Children': Count of travelers younger than 13.\n"
+            "- 'Budget': User's preference (Cheap/Balanced/Luxury/Flexible).\n"
+            "- 'Places': A list of all available attractions in the city.\n"
+            "- 'Required Places': A list of must-see attractions (optional).\n"
+            "- 'Removed Places': A list of attractions to exclude (optional).\n"
+            
+            "Key Points to Consider:\n"
+            "- 'places_str' contains all attractions in the city.\n"
+            "- 'required_places' lists attractions that must always be included in the itinerary.\n"
+            "- 'removed_places' lists attractions that must never be included.\n"
+
+            "Your task is to generate 3 distinct itineraries:\n"
+            "1. Each itinerary spans X days and adheres to the user's arrival ('Start Hour') and departure ('End Hour') times.\n"
+            "2. All itineraries must include attractions in 'required_places' and exclude those in 'removed_places'.\n"
+            "3. Select additional attractions based on reviews, ratings, and user preferences to create balanced, high-quality experiences.\n"
+            "4. Ensure each itinerary focuses on different themes or categories of attractions (e.g., cultural, historical, adventure).\n"
+            
+            "Itinerary Details:\n"
+            "- Include starting and ending times for each visit.\n"
+            "- Provide an estimated average time for each attraction.\n"
+            "- Schedule at least 1 hour of spare time between consecutive visits to account for travel and breaks.\n"
+            "- Optimize the order of attractions for time efficiency.\n"
+            
+            "Additional Considerations:\n"
+            "- Some attractions may offer products (e.g., tours). Select the product that best matches user preferences.\n"
+            "- If a product includes multiple attractions, mention the product name only at the first applicable attraction.\n"
+
+            "The output must follow the response schema provided."
+        )
     )
 
     chat_session = model.start_chat(
