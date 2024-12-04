@@ -66,9 +66,10 @@ def get_itinerary(request):
         lng = float(request.GET.get('lng', 0))
         radius = int(request.GET.get('radius', 5000))  # Default radius = 5000 meters
         categories = request.GET.getlist('categories', [])  # Fetch as list if provided
-        start_date = datetime.strptime(request.GET.get('start_date'), "%Y-%m-%dT%H:%M:%S")
-        
-        end_date = datetime.strptime(request.GET.get('end_date'), "%Y-%m-%dT%H:%M:%S")
+        start_date = datetime.strptime(request.GET.get('start_date'), "%Y-%m-%d")
+        end_date = datetime.strptime(request.GET.get('end_date'), "%Y-%m-%d")
+        start_time = datetime.strptime(request.GET.get('start_time'), "%H:%M")
+        end_time = datetime.strptime(request.GET.get('end_time'), "%H:%M")
         num_seniors = int(request.GET.get('num_seniors', 0))
         num_adults = int(request.GET.get('num_adults', 0))
         num_youth = int(request.GET.get('num_youth', 0))
@@ -86,34 +87,75 @@ def get_itinerary(request):
     
     try:
         # Fetch data from external sources
-        places_data = get_places(lat, lng, radius, categories).get('places', [])
+        
+        start_time = time.time()
+        places_data = get_places(lat, lng, radius).get('places', [])
+        end_time = time.time()
+
+        print(f"Execution time for places: {end_time - start_time} seconds")
+
+        start_time = time.time()
         tiqets_data = get_tiqets_products(lat, lng, radius).get('products', [])
+        end_time = time.time()
+
+        print(f"Execution time for tiqets: {end_time - start_time} seconds")
+
+        start_time = time.time()
         merged_data = merge_places_tiqets(places_data, tiqets_data)
+        end_time = time.time()
+
+        print(f"Execution time for merging: {end_time - start_time} seconds")
 
         # Generate recommendations and itinerary
         start_day = start_date.date()
         start_hour = start_date.time()
         end_day = end_date.date()
         end_hour = end_date.time()
-        recommendations = recommend(lat, lng, radius, start_date, end_date, categories, budget)
+
+        places_info = get_places_info(merged_data)
+
+        start_time = time.time()
         itinerary = generate_itinerary(
             lat, lng, start_day, end_day, start_hour, end_hour,
-            num_seniors, num_adults, num_youth, num_children, budget, recommendations
+            num_seniors, num_adults, num_youth, num_children, budget, places_info
         )
+        end_time = time.time()
 
-        # Merge itinerary with additional data if necessary
+        print(f"Execution time for gemini: {end_time - start_time} seconds")
+
+        start_time = time.time()
         final_output = merge_gemini_places(merged_data, itinerary)
+        end_time = time.time()
+
+        print(f"Execution time for merging gemini and places: {end_time - start_time} seconds")
 
         return JsonResponse(final_output, safe=False)
     except Exception as e:
         return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
+def get_places_info(merged_data):
+    places_info = {}
 
+    for place_name, place_data in merged_data.items():
+        products = [
+            {
+                'name': product_data['title'],
+                'price': product_data['price']
+            }
+            for product_data in place_data['products'].values()
+        ]
+
+        place_info = {
+            'name': place_name,
+        }
+
+        places_info[place_name] = place_info
+
+    return places_info
 
 def merge_gemini_places(merged_places_x_tiqets, gemini_response_str):
-    merged_data = {}
-
     gemini_response = json.loads(gemini_response_str)
+    gemini_response = gemini_response["response"]
     
     for itinerary in gemini_response["itineraries"]:
         for attraction in itinerary["attractions"]:
@@ -122,7 +164,6 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str):
             time = attraction["startingHour"]
 
             if name in merged_places_x_tiqets:
-
                 url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
                 url += f"?selected_date={date}&selected_timeslot_id={time}"
 
@@ -131,36 +172,36 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str):
                     "lng": merged_places_x_tiqets[name]["lng"],
                     "city": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['city'],
                     "country": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['country'],
-                    "product name": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['title'],
-                    "price": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['price'],
-                    "checkout url": url,
+                    "products": [{
+                        "name": product["title"],
+                        "price": product["price"],
+                        "product_checkout_url": url,
+                        "images": merged_places_x_tiqets[name]['products'][product["title"]]["images"],
+                        "whats_included": merged_places_x_tiqets[name]['products'][product["title"]]["whats_included"],
+                        "sale_status": merged_places_x_tiqets[name]['products'][product["title"]]["sale_status"],
+                    } for product in merged_places_x_tiqets[name]["products"].values()],
                 })
 
-                # Check if the attraction has a product
-                if "productName" in attraction:
-                    product_name = attraction["productName"]
-                    product_info = merged_places_x_tiqets[name]["products"].get(product_name)
-                    # Set or overwrite the product field with the current product
-                    attraction["product"] = product_info
-
-
     return gemini_response
-
 
 def merge_places_tiqets(places_data, tiqets_data):    
     # Group products by venue
     grouped_products = group_products_by_venue(tiqets_data)
 
-    # Merge data from both sources
-    merged_data = []
     merged = {}
+    to_remove = []
 
-    for place in places_data:
+    to_remove = set()
+
+    # Create a dictionary for quick lookup of places by name
+    places_dict = {place['displayName']['text']: place for place in places_data}
+
+    for place_name, place in places_dict.items():
         for venue_name, venue_info in grouped_products.items():
             score = match_score(venue_info, place)
             if score > 0.7:
                 merged[place['displayName']['text']] = {
-                    'place': place['displayName']['text'],
+                    'place': place_name,
                     'lat': place['location']['latitude'],
                     'lng': place['location']['longitude'],
                     'photos': place.get('photos', []),
@@ -173,7 +214,6 @@ def merge_places_tiqets(places_data, tiqets_data):
                             'city': product.get('city_name', 'N/A'),
                             'country': product.get('country_name', 'N/A'),
                             'product_checkout_url': product.get('product_checkout_url', 'N/A'),
-                            'duration': product.get('duration', 'N/A'),
                             'rating': product['ratings'].get('average', 'N/A'),
                             'description': product.get('tagline', ''),
                             'images': product.get('images', []),
@@ -181,22 +221,14 @@ def merge_places_tiqets(places_data, tiqets_data):
                             'sale_status': product.get('sale_status', 'N/A'),
                             } for product in grouped_products[venue_info.get('name')].get('products')}
                 }
-    
-    for place in places_data:
-        if not any(place['displayName']['text'] in item['place'] for item in merged_data):
-            merged_data.append({
-                'place': place['displayName']['text'],
-                'venue': "No matching Venue",
-                'score': 0
-            })
 
-    for venue_name, venue_info in grouped_products.items():
-        if not any(venue_info.get('name') in item['venue'] for item in merged_data):
-            merged_data.append({
-                'place': "No matching Place",
-                'venue': venue_info.get('name'),
-                'score': 0
-            })
+                to_remove.add(venue_name)
+                break
+                
+                # Delete marked venues after iteration
+        for venue_name in to_remove:
+            grouped_products.pop(venue_name, None)
+                
 
     return merged
 
@@ -705,3 +737,227 @@ def get_recommendations(request):
 
     return JsonResponse(recomendations, safe=False)
 
+def merge_places_tiqets_top_10(places_data, tiqets_data):
+    # Group products by venue
+    grouped_products = group_products_by_venue(tiqets_data)
+
+    # Merge data from both sources
+    merged = {}
+
+    for place in places_data:
+        matched = False
+        for venue_name, venue_info in grouped_products.items():
+            score = match_score(venue_info, place)
+            if score > 0.7:
+                # Calculate average price and rating
+                average_price = get_average_price_from_tiqets(
+                    venue_info.get("products")
+                )
+                average_rating = get_average_rating_from_tiqets(
+                    venue_info.get("products")
+                )
+
+                # Construct products dictionary
+                products_dict = {
+                    product["title"]: {
+                        
+                        "images": product.get("images", []),
+                       
+                    }
+                    for product in venue_info.get("products", [])
+                }
+
+                merged[place["displayName"]["text"]] = {
+                   
+                    "photos": place.get("photos", []),
+                 
+                    "products": products_dict,
+                 
+                }
+                matched = True
+                break  # Stop after the first match
+
+        if not matched:
+            # Include places without matching venues
+            merged[place["displayName"]["text"]] = {
+              
+                "photos": place.get("photos", []),
+               
+            }
+
+    return merged
+
+def recommend_top_10(user_preferences):
+    lat = user_preferences.get("lat")
+    lng = user_preferences.get("lng")
+    radius = user_preferences.get("radius")
+    dates = user_preferences.get("dates")
+    participants = user_preferences.get("participants")
+    categories = user_preferences.get("categories")
+    budget = user_preferences.get("budget")
+
+    merged_data = merge_tiqets_and_places(lat, lng, radius)
+
+    latt = float(lat)
+    lngg = float(lng)
+    radiuss = int(radius)
+    # Fetch data from external sources
+    places_data = get_places(latt, lngg, radiuss, categories).get("places", [])
+    tiqets_data = get_tiqets_products(latt, lngg, radiuss).get("products", [])
+    merged_dataa = merge_places_tiqets_top_10(places_data, tiqets_data)
+
+
+    recommendations = []
+
+    for tiqetXplace in merged_data.get("tiqetsXplaces"):
+        rating = tiqetXplace.get('rating', 0) # rating value between 0 and 5
+        normalized_rating = rating / 5 # rating value between 0 and 1
+
+        category_score = calculate_place_common_categories(tiqetXplace.get('categories', []), categories) # category accuracy value between 0 and 1
+        
+        recommendation_score = 0
+        recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
+
+        recommendations.append({
+            'type': 'tiqetsXplaces',
+            'lat': lat,
+            'lng': lng,
+            'place': tiqetXplace.get('place'),
+            'venue': tiqetXplace.get('venue'),
+            'average_price': tiqetXplace.get('average_price'),
+            'recommended_score': round((recommendation_score * 4) + 1, 1),
+            'saved':True
+        })
+
+    for place in merged_data.get("places_only"):
+        recommendation_score = 0
+
+        rating = place.get("rating", 0)  # rating value between 0 and 5
+        normalized_rating = rating / 5  # rating value between 0 and 1
+
+        category_score = calculate_place_common_categories(
+            place.get("categories", []), categories
+        )  # category accuracy value between 0 and 1
+
+        recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
+
+
+        # Restructure the products inline
+        flattened_products = {}
+        for place_name, place_info in merged_dataa.items():
+            inner_products = place_info.get("products", {})
+            for product_name, product in inner_products.items():
+                # Get the 'images' list and fetch the first image's 'extra_large' URL
+                images = product.get("images", [])
+                extra_large_image = images[0].get("extra_large") if images else None
+                
+                # Add the required fields to the flattened_products structure
+                flattened_products[product_name] = {
+                   
+                    "images": {
+                        "extra_large": extra_large_image
+                    }
+                }
+
+        recommendations.append(
+            {
+                'lat': lat,
+                'lng': lng,
+                "place": tiqet.get("venue"),
+                "average_price": tiqet.get("average_price"),
+                "recommended_score": round((recommendation_score * 4) + 1, 1),
+                "products": flattened_products,
+            }
+        )
+
+    global_average_rating = sum(
+        item["tiqets_average_rating"]
+        for item in merged_data.get("tiqets_only", [])
+        if len(merged_data.get("tiqets_only", [])) > 0 and item["tiqets_average_rating"]
+    ) / len(merged_data.get("tiqets_only", []))
+
+    for tiqet in merged_data.get("tiqets_only"):
+
+        recommendation_score = 0
+
+        rating = tiqet.get("tiqets_average_rating", 0)  # rating value between 0 and 10
+        total_ratings = tiqet.get("total_ratings")
+
+        weighted_rating = calculate_weighted_rating(
+            rating, total_ratings, global_average_rating
+        )
+
+        normalized_rating = weighted_rating / 5  # rating value between 0 and 1
+
+        category_score = calculate_place_common_categories(
+            tiqet.get("categories", []), categories
+        )
+
+        recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
+
+        # Restructure the products inline
+        flattened_products = {}
+        for place_name, place_info in merged_dataa.items():
+            inner_products = place_info.get("products", {})
+            for product_name, product in inner_products.items():
+                # Get the 'images' list and fetch the first image's 'extra_large' URL
+                images = product.get("images", [])
+                extra_large_image = images[0].get("extra_large") if images else None
+                
+                # Add the required fields to the flattened_products structure
+                flattened_products[product_name] = {
+                   
+                    "images": {
+                        "extra_large": extra_large_image
+                    }
+                }
+
+        recommendations.append(
+            {
+                'lat': lat,
+                'lng': lng,
+                "place": tiqet.get("venue"),
+                "average_price": tiqet.get("average_price"),
+                "recommended_score": round((recommendation_score * 4) + 1, 1),
+                "products": flattened_products,
+            }
+        )
+
+    if budget == "Cheap":
+        recommendations = sorted(
+            (rec for rec in recommendations if rec.get("average_price") is not None),
+            key=lambda rec: rec["average_price"],
+        )
+
+    top_recommendations = sorted(
+        recommendations, key=lambda rec: rec["recommended_score"], reverse=True
+    )[:10]
+
+    return top_recommendations
+
+def get_recommendations_top_10(request):
+    """
+    Fetch places from Google Places API and return them as JSON.
+    Example URL: http://127.0.0.1:8000/recommendations/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-29T10:00:00&end_date=2024-11-30T18:00:00&categories=Museums%20and%20Galleries,Historical%20Sites&budget=Cheap
+    """
+    # Extract query parameters from the request
+    lat = request.GET.get("lat")
+    lng = request.GET.get("lng")
+    radius = request.GET.get("radius")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+    categories = request.GET.get("categories", [])
+    budget = request.GET.get("budget")
+
+    recommendations = recommend_top_10(
+        {
+            "lat": lat,
+            "lng": lng,
+            "radius": radius,
+            "categories": [],  # Add categories as an empty list
+            "budget": budget,
+            "dates": {"start_date": start_date, "end_date": end_date},
+        }
+    )
+
+    return JsonResponse(recommendations, safe=False)
