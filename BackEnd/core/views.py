@@ -118,6 +118,8 @@ def get_itinerary(request):
 
         places_info = get_places_info(merged_data)
 
+        print(places_info)
+
         start_time = time.time()
         itinerary = generate_itinerary(
             lat, lng, start_day, end_day, start_hour, end_hour,
@@ -138,24 +140,12 @@ def get_itinerary(request):
         return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
 def get_places_info(merged_data):
-    places_info = {}
+    places = []
 
     for place_name, place_data in merged_data.items():
-        products = [
-            {
-                'name': product_data['title'],
-                'price': product_data['price']
-            }
-            for product_data in place_data['products'].values()
-        ]
+        places.append(place_name)
 
-        place_info = {
-            'name': place_name,
-        }
-
-        places_info[place_name] = place_info
-
-    return places_info
+    return places
 
 def merge_gemini_places(merged_places_x_tiqets, gemini_response_str):
     gemini_response = json.loads(gemini_response_str)
