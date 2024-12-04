@@ -737,7 +737,55 @@ def get_recommendations(request):
 
     return JsonResponse(recomendations, safe=False)
 
+def merge_places_tiqets_top_10(places_data, tiqets_data):
+    # Group products by venue
+    grouped_products = group_products_by_venue(tiqets_data)
 
+    # Merge data from both sources
+    merged = {}
+
+    for place in places_data:
+        matched = False
+        for venue_name, venue_info in grouped_products.items():
+            score = match_score(venue_info, place)
+            if score > 0.7:
+                # Calculate average price and rating
+                average_price = get_average_price_from_tiqets(
+                    venue_info.get("products")
+                )
+                average_rating = get_average_rating_from_tiqets(
+                    venue_info.get("products")
+                )
+
+                # Construct products dictionary
+                products_dict = {
+                    product["title"]: {
+                        
+                        "images": product.get("images", []),
+                       
+                    }
+                    for product in venue_info.get("products", [])
+                }
+
+                merged[place["displayName"]["text"]] = {
+                   
+                    "photos": place.get("photos", []),
+                 
+                    "products": products_dict,
+                 
+                }
+                matched = True
+                break  # Stop after the first match
+
+        if not matched:
+            # Include places without matching venues
+            merged[place["displayName"]["text"]] = {
+              
+                "photos": place.get("photos", []),
+               
+            }
+
+    return merged
 
 def recommend_top_10(user_preferences):
     lat = user_preferences.get("lat")
@@ -756,7 +804,7 @@ def recommend_top_10(user_preferences):
     # Fetch data from external sources
     places_data = get_places(latt, lngg, radiuss, categories).get("places", [])
     tiqets_data = get_tiqets_products(latt, lngg, radiuss).get("products", [])
-    merged_dataa = merge_places_tiqets(places_data, tiqets_data)
+    merged_dataa = merge_places_tiqets_top_10(places_data, tiqets_data)
 
 
     recommendations = []
