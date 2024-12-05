@@ -2,10 +2,49 @@ import requests
 from django.conf import settings
 import os
 import json
+from django.conf import settings
 from google.ai.generativelanguage_v1beta.types import content
 import google.generativeai as genai
 
 # Documentation for google places nearby search https://developers.google.com/maps/documentation/places/web-service/nearby-search?hl=it
+
+from django.conf import settings
+import requests
+import os
+
+def fetch_unsplash_image(query):
+    """
+    Fetch the first image URL from Unsplash for a given query.
+
+    Args:
+        query (str): Search term for the image (e.g., "Eiffel Tower").
+    
+    Returns:
+        str: URL of the first image or a placeholder URL if no images are found.
+    """
+    UNSPLASH_API_KEY = settings.UNSPLASH_API_KEY  # Use settings to load the API key
+
+    print(f"Loaded API Key: {UNSPLASH_API_KEY}")  # Debugging: print the loaded API key
+
+    api_url = f"https://api.unsplash.com/search/photos?query={query}"
+
+    headers = {
+        'Authorization': f'Client-ID {UNSPLASH_API_KEY}',
+    }
+
+    try:
+        response = requests.get(api_url, headers=headers)
+        response.raise_for_status()  
+        data = response.json()
+
+        if data['results']:
+            return data['results'][0]['urls']['regular']
+    except Exception as e:
+        print(f"Error fetching image from Unsplash: {e}")
+
+    return "https://via.placeholder.com/300"
+
+
  
 def get_places(lat, lng, radius, categories=None):
     '''
@@ -210,3 +249,4 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
 
     print(response.text)
     return response.text
+

@@ -1,0 +1,41 @@
+{
+  "name": "FirebaseFirestore",
+  "version": "11.2.0",
+  "summary": "A replica Firebase Firestore podspec.",
+  "description": "A replica Firebase Firestore podspec that provides pre-compiled binaries/frameworks instead",
+  "homepage": "https://invertase.io",
+  "license": "Apache-2.0",
+  "source": {
+    "path": "."
+  },
+  "cocoapods_version": ">= 1.12.0",
+  "authors": "Invertase Limited",
+  "swift_versions": "5.3",
+  "libraries": "c++",
+  "platforms": {
+    "ios": "13.0",
+    "osx": "10.15",
+    "tvos": "13.0"
+  },
+  "ios": {
+    "frameworks": [
+      "SystemConfiguration",
+      "UIKit"
+    ]
+  },
+  "osx": {
+    "frameworks": "SystemConfiguration"
+  },
+  "tvos": {
+    "frameworks": [
+      "SystemConfiguration",
+      "UIKit"
+    ]
+  },
+  "dependencies": {
+    "FirebaseFirestoreBinary": [
+      "11.2.0"
+    ]
+  },
+  "swift_version": "5.3"
+}
