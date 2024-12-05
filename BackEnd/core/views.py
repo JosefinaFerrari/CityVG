@@ -97,8 +97,6 @@ def get_itinerary(request):
     
     try:
         # Fetch data from external sources
-        
-
         places_data = []
         tiqets_data = []
 
@@ -166,7 +164,7 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget):
                 url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
                 url += f"?selected_date={date}&selected_timeslot_id={time}"
 
-                product = get_product(merged_places_x_tiqets[name]["products"].values(), budget)
+                product = get_product(list(merged_places_x_tiqets[name]['products'].values()), budget)
 
                 attraction.update({
                     "lat": merged_places_x_tiqets[name]["lat"],
@@ -988,17 +986,23 @@ def get_recommendations_top_10(request):
     return JsonResponse(recommendations, safe=False)
 
 def get_top10(request):
-    # Convert lat, lng, and radius to the correct types
     try:
-        lat = float(request.GET.get("lat"))
-        lng = float(request.GET.get("lng"))
-        radius = int(request.GET.get("radius"))
-        start_date = datetime.strptime(request.GET['dates'].get('start_date'), "%Y-%m-%d")
-        end_date = datetime.strptime(request.GET['dates'].get('end_date'), "%Y-%m-%d")
+        # Extract and validate query parameters
+        lat = float(request.GET.get('lat', 0))
+        lng = float(request.GET.get('lng', 0))
+        radius = int(request.GET.get('radius', 5000))  # Default radius = 5000 meters
+        categories = request.GET.getlist('categories', [])  # Fetch as list if provided
+        start_date = datetime.strptime(request.GET.get('start_date'), "%Y-%m-%d")
+        end_date = datetime.strptime(request.GET.get('end_date'), "%Y-%m-%d")
         budget = request.GET.get('budget', '').lower()  # Normalize budget string
-        categories = request.GET.get('categories', [])  # Fetch as list if provided
-    except ValueError:
-        return JsonResponse({'error': 'Invalid parameters.'}, status=400)
+
+        # Validate logical constraints
+        if start_date >= end_date:
+            return JsonResponse({'error': 'start_date must be before end_date.'}, status=400)
+        if radius <= 0:
+            return JsonResponse({'error': 'radius must be a positive integer.'}, status=400)
+    except (ValueError, TypeError) as e:
+        return JsonResponse({'error': f'Invalid input: {str(e)}'}, status=400)
     
     places_data = get_places(lat, lng, radius, categories).get("places", [])
     tiqets_data = get_tiqets_products(lat, lng, radius).get("products", [])
@@ -1018,6 +1022,8 @@ def get_top10(request):
         recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
 
         place_data_with_score = place_data.copy()
+        place_data_with_score['product'] = get_product(list(place_data['products'].values()), budget)
+        place_data_with_score.pop('products', None)
         place_data_with_score['recommended_score'] = recommendation_score
 
         recommendations.append(place_data_with_score)
@@ -1026,4 +1032,4 @@ def get_top10(request):
         recommendations, key=lambda rec: rec["recommended_score"], reverse=True
     )[:10]
 
-    return top_recommendations
+    return JsonResponse(top_recommendations, safe=False)
