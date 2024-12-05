@@ -127,7 +127,7 @@ def get_itinerary(request):
         )
   
         
-        final_output = merge_gemini_places(merged_data, itinerary)
+        final_output = merge_gemini_places(merged_data, itinerary, budget)
 
         return JsonResponse(final_output, safe=False)
     except Exception as e:
@@ -141,7 +141,18 @@ def get_places_info(merged_data):
 
     return places
 
-def merge_gemini_places(merged_places_x_tiqets, gemini_response_str):
+# Get the product that fits the user's budget
+def get_product(products, budget):
+    print(products)
+
+    if budget == 'cheap':
+        return min(products, key=lambda x: x['price'])
+    elif budget == 'balanced':
+        return sorted(products, key=lambda x: x['price'])[len(products) // 2]
+    else:
+        return max(products, key=lambda x: x['rating'])
+
+def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget):
     gemini_response = json.loads(gemini_response_str)
     gemini_response = gemini_response["response"]
     
@@ -155,19 +166,14 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str):
                 url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
                 url += f"?selected_date={date}&selected_timeslot_id={time}"
 
+                product = get_product(merged_places_x_tiqets[name]["products"].values(), budget)
+
                 attraction.update({
                     "lat": merged_places_x_tiqets[name]["lat"],
                     "lng": merged_places_x_tiqets[name]["lng"],
                     "city": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['city'],
                     "country": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['country'],
-                    "products": [{
-                        "name": product["title"],
-                        "price": product["price"],
-                        "product_checkout_url": url,
-                        "images": merged_places_x_tiqets[name]['products'][product["title"]]["images"],
-                        "whats_included": merged_places_x_tiqets[name]['products'][product["title"]]["whats_included"],
-                        "sale_status": merged_places_x_tiqets[name]['products'][product["title"]]["sale_status"],
-                    } for product in merged_places_x_tiqets[name]["products"].values()],
+                    "product": product,
                 })
 
     return gemini_response
