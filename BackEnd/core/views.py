@@ -111,13 +111,12 @@ def get_itinerary(request):
 
         merged_data = merge_places_tiqets(places_data, tiqets_data)
 
-        # Generate recommendations and itinerary
-        start_day = start_date.date()
-        start_hour = start_date.time()
-        end_day = end_date.date()
-        end_hour = end_date.time()
+        places_info = get_places_info(merged_data, budget)
 
-        places_info = get_places_info(merged_data)
+        start_day = start_date.date()
+        end_day = end_date.date()
+        start_hour = start_time.time()
+        end_hour = end_time.time()
 
         itinerary = generate_itinerary(
             lat, lng, start_day, end_day, start_hour, end_hour,
@@ -130,11 +129,19 @@ def get_itinerary(request):
     except Exception as e:
         return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
-def get_places_info(merged_data):
+def get_places_info(merged_data, budget):
     places = []
 
     for place_name, place_data in merged_data.items():
-        places.append(place_name)
+        product = get_product(list(place_data['products'].values()), budget)
+
+        places.append({
+            'name': place_name,
+            'product_title': product['title'],
+            'price': product['price'],
+            'summary': product['summary'],
+            'whats_included': product['whats_included'],
+        })
 
     return places
 
