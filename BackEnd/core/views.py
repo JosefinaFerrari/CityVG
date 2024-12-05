@@ -1014,7 +1014,11 @@ def get_top10(request):
     for place_name, place_data in merged_data.items():
         rating = place_data.get('rating', 0) # rating value between 0 and 5
 
-        normalized_rating = rating / 5 # rating value between 0 and 1
+        num_reviews = place_data.get('num_reviews', 0)
+        global_average_rating = sum(item['rating'] for item in merged_data.values() if item['rating']) / len(merged_data)
+        weighted_rating = calculate_weighted_rating(rating, num_reviews, global_average_rating)
+        
+        normalized_rating = weighted_rating / 5 # rating value between 0 and 1
 
         category_score = calculate_place_common_categories(place_data.get('categories', []), categories) # category accuracy value between 0 and 1
         
