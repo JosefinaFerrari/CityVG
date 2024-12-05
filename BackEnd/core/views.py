@@ -10,6 +10,7 @@ from .utils import generate_itinerary  # Import the function from utils.py
 from rapidfuzz import fuzz
 import json
 from geopy.distance import geodesic
+import threading
 
 
 # Define the mapping dictionary
@@ -53,6 +54,11 @@ def places(request):
 
     return JsonResponse(places_data, safe=False)
 
+def fetch_places(lat, lng, radius):
+    return get_places(lat, lng, radius).get('places', [])
+
+def fetch_tiqets(lat, lng, radius):
+    return get_tiqets_products(lat, lng, radius).get('products', [])
 
 def get_itinerary(request):
     """
@@ -92,23 +98,20 @@ def get_itinerary(request):
     try:
         # Fetch data from external sources
         
-        start_time = time.time()
-        places_data = get_places(lat, lng, radius).get('places', [])
-        end_time = time.time()
 
-        print(f"Execution time for places: {end_time - start_time} seconds")
+        places_data = []
+        tiqets_data = []
 
-        start_time = time.time()
-        tiqets_data = get_tiqets_products(lat, lng, radius).get('products', [])
-        end_time = time.time()
+        places_thread = threading.Thread(target=lambda: places_data.extend(fetch_places(lat, lng, radius) or []))
+        tiqets_thread = threading.Thread(target=lambda: tiqets_data.extend(fetch_tiqets(lat, lng, radius) or []))
 
-        print(f"Execution time for tiqets: {end_time - start_time} seconds")
+        places_thread.start()
+        tiqets_thread.start()
 
-        start_time = time.time()
+        places_thread.join()
+        tiqets_thread.join()
+
         merged_data = merge_places_tiqets(places_data, tiqets_data)
-        end_time = time.time()
-
-        print(f"Execution time for merging: {end_time - start_time} seconds")
 
         # Generate recommendations and itinerary
         start_day = start_date.date()
@@ -118,22 +121,13 @@ def get_itinerary(request):
 
         places_info = get_places_info(merged_data)
 
-        print(places_info)
-
-        start_time = time.time()
         itinerary = generate_itinerary(
             lat, lng, start_day, end_day, start_hour, end_hour,
             num_seniors, num_adults, num_youth, num_children, budget, places_info, required_places, removed_places
         )
-        end_time = time.time()
-
-        print(f"Execution time for gemini: {end_time - start_time} seconds")
-
-        start_time = time.time()
+  
+        
         final_output = merge_gemini_places(merged_data, itinerary)
-        end_time = time.time()
-
-        print(f"Execution time for merging gemini and places: {end_time - start_time} seconds")
 
         return JsonResponse(final_output, safe=False)
     except Exception as e:
@@ -183,7 +177,6 @@ def merge_places_tiqets(places_data, tiqets_data):
     grouped_products = group_products_by_venue(tiqets_data)
 
     merged = {}
-    to_remove = []
 
     to_remove = set()
 
@@ -201,6 +194,9 @@ def merge_places_tiqets(places_data, tiqets_data):
                     'photos': place.get('photos', []),
                     'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
                     'venue': venue_info.get('name'),
+                    'categories': place.get('types', []),
+                    'rating': place.get('rating', 'N/A'),
+                    'num_reviews': place.get('userRatingCount', 'N/A'),
                     'products': {product['title']: {
                             'title': product.get('title', 'N/A'),
                             'price': product.get('price', 'N/A'),
@@ -223,6 +219,35 @@ def merge_places_tiqets(places_data, tiqets_data):
         for venue_name in to_remove:
             grouped_products.pop(venue_name, None)
                 
+        # Add remaining Tiqets venues that did not match any place
+        for venue_name, venue_info in grouped_products.items():
+            average_rating = get_average_rating_from_tiqets(venue_info.get('products'))
+            total_ratings = get_amount_of_rating_from_tiqets(venue_info.get('products'))
+            
+            merged[venue_name] = {
+                'place': venue_name,
+                'lat': venue_info['lat'],
+                'lng': venue_info['lng'],
+                'photos': [],
+                'currentOpeningHours': 'N/A',
+                'venue': venue_info.get('name'),
+                'categories': [],
+                'rating': average_rating,
+                'num_reviews': total_ratings,
+                'products': {product['title']: {
+                        'title': product.get('title', 'N/A'),
+                        'price': product.get('price', 'N/A'),
+                        'summary': product.get('summary', 'N/A'),
+                        'city': product.get('city_name', 'N/A'),
+                        'country': product.get('country_name', 'N/A'),
+                        'product_checkout_url': product.get('product_checkout_url', 'N/A'),
+                        'rating': product['ratings'].get('average', 'N/A'),
+                        'description': product.get('tagline', ''),
+                        'images': product.get('images', []),
+                        'whats_included': product.get('whats_included', 'N/A'),
+                        'sale_status': product.get('sale_status', 'N/A'),
+                        } for product in venue_info.get('products')}
+            }
 
     return merged
 
@@ -955,3 +980,44 @@ def get_recommendations_top_10(request):
     )
 
     return JsonResponse(recommendations, safe=False)
+
+def get_top10(request):
+    # Convert lat, lng, and radius to the correct types
+    try:
+        lat = float(request.GET.get("lat"))
+        lng = float(request.GET.get("lng"))
+        radius = int(request.GET.get("radius"))
+        start_date = datetime.strptime(request.GET['dates'].get('start_date'), "%Y-%m-%d")
+        end_date = datetime.strptime(request.GET['dates'].get('end_date'), "%Y-%m-%d")
+        budget = request.GET.get('budget', '').lower()  # Normalize budget string
+        categories = request.GET.get('categories', [])  # Fetch as list if provided
+    except ValueError:
+        return JsonResponse({'error': 'Invalid parameters.'}, status=400)
+    
+    places_data = get_places(lat, lng, radius, categories).get("places", [])
+    tiqets_data = get_tiqets_products(lat, lng, radius).get("products", [])
+
+    merged_data = merge_places_tiqets(places_data, tiqets_data)
+
+    recommendations = []
+
+    for place_name, place_data in merged_data.items():
+        rating = place_data.get('rating', 0) # rating value between 0 and 5
+
+        normalized_rating = rating / 5 # rating value between 0 and 1
+
+        category_score = calculate_place_common_categories(place_data.get('categories', []), categories) # category accuracy value between 0 and 1
+        
+        recommendation_score = 0
+        recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
+
+        place_data_with_score = place_data.copy()
+        place_data_with_score['recommended_score'] = recommendation_score
+
+        recommendations.append(place_data_with_score)
+
+    top_recommendations = sorted(
+        recommendations, key=lambda rec: rec["recommended_score"], reverse=True
+    )[:10]
+
+    return top_recommendations
