@@ -14,14 +14,22 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from the .env file
-load_dotenv()
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Explicitly specify the path to the .env file
+dotenv_path = BASE_DIR / ".env"
+load_dotenv(dotenv_path=dotenv_path)
 
 # Access the Tiqets API key
 TIQETS_API_KEY = os.getenv('TIQETS_API_KEY')
 FOURSQUARE_API_KEY = os.getenv('FOURSQUARE_API_KEY')
 GOOGLE_PLACES_API_KEY = os.getenv('GOOGLE_PLACES_API_KEY')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+UNSPLASH_API_KEY = os.getenv('UNSPLASH_API_KEY')
+print(f"UNSPLASH_API_KEY: {os.getenv('UNSPLASH_API_KEY')}")
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

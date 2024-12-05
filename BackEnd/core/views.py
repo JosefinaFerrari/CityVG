@@ -1014,6 +1014,7 @@ def get_top10(request):
         weighted_rating = calculate_weighted_rating(rating, num_reviews, global_average_rating)
         
         normalized_rating = weighted_rating / 5 # rating value between 0 and 1
+
         category_score = calculate_place_common_categories(place_data.get('categories', []), categories) # category accuracy value between 0 and 1
         
         recommendation_score = 0
