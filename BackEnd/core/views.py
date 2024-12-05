@@ -65,7 +65,7 @@ def get_itinerary(request):
     Fetch places from Google Places API and return them as JSON.
     Example URL: http://127.0.0.1:8000/generate/?lat=48.864716&lng=2.349014&radius=10&start_date=2024-11-23&end_date=2024-11-30&start_time=9&end_time=15&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap
                  http://127.0.0.1:8000/generate/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-23&end_date=2024-11-30&start_time=9&end_time=15&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap
-                 http://127.0.0.1:8000/generate/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-23&end_date=2024-11-30&start_time=9:00&end_time=15:00&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap&required_places=Duomo%20di%Milano&required_places=Pinacoteca%20di%20Brera&removed_places=Sforzesco%20Castle
+                 http://127.0.0.1:8000/generate/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-23&end_date=2024-11-30&start_time=9:00&end_time=15:00&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap&required_places=Duomo%20di%20Milano,Pinacoteca%20di%20Brera&removed_places=Sforzesco%20Castle
                  http://127.0.0.1:8000/generate/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-23&end_date=2024-11-30&start_time=9:00&end_time=15:00&num_seniors=0&num_adults=2&num_youth=0&num_children=1&budget=Cheap&required_places=Sforzesco%20Castle&required_places=Pinaoteca%20di%20Brera&removed_places=Duomo%20di%20Milano
     """
     try:
@@ -85,7 +85,7 @@ def get_itinerary(request):
         budget = request.GET.get('budget', '').lower()  # Normalize budget string
         required_places = request.GET.getlist('required_places', [])  # Fetch as list if provided
         removed_places = request.GET.getlist('removed_places', [])  # Fetch as list if provided
-
+        
         # Validate logical constraints
         if start_date >= end_date:
             return JsonResponse({'error': 'start_date must be before end_date.'}, status=400)
@@ -123,8 +123,7 @@ def get_itinerary(request):
             lat, lng, start_day, end_day, start_hour, end_hour,
             num_seniors, num_adults, num_youth, num_children, budget, places_info, required_places, removed_places
         )
-  
-        
+     
         final_output = merge_gemini_places(merged_data, itinerary, budget)
 
         return JsonResponse(final_output, safe=False)
@@ -141,8 +140,6 @@ def get_places_info(merged_data):
 
 # Get the product that fits the user's budget
 def get_product(products, budget):
-    print(products)
-
     if budget == 'cheap':
         return min(products, key=lambda x: x['price'])
     elif budget == 'balanced':
@@ -152,6 +149,8 @@ def get_product(products, budget):
 
 def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget):
     gemini_response = json.loads(gemini_response_str)
+    print(json.dumps(gemini_response, indent=2))
+
     gemini_response = gemini_response["response"]
     
     for itinerary in gemini_response["itineraries"]:
@@ -182,7 +181,8 @@ def merge_places_tiqets(places_data, tiqets_data):
 
     merged = {}
 
-    to_remove = set()
+    venue_to_remove = set()
+    places_to_remove = set()
 
     # Create a dictionary for quick lookup of places by name
     places_dict = {place['displayName']['text']: place for place in places_data}
@@ -216,42 +216,42 @@ def merge_places_tiqets(places_data, tiqets_data):
                             } for product in grouped_products[venue_info.get('name')].get('products')}
                 }
 
-                to_remove.add(venue_name)
+                venue_to_remove.add(venue_name)
                 break
                 
                 # Delete marked venues after iteration
-        for venue_name in to_remove:
+        for venue_name in venue_to_remove:
             grouped_products.pop(venue_name, None)
                 
-        # Add remaining Tiqets venues that did not match any place
-        for venue_name, venue_info in grouped_products.items():
-            average_rating = get_average_rating_from_tiqets(venue_info.get('products'))
-            total_ratings = get_amount_of_rating_from_tiqets(venue_info.get('products'))
-            
-            merged[venue_name] = {
-                'place': venue_name,
-                'lat': venue_info['lat'],
-                'lng': venue_info['lng'],
-                'photos': [],
-                'currentOpeningHours': 'N/A',
-                'venue': venue_info.get('name'),
-                'categories': [],
-                'rating': average_rating,
-                'num_reviews': total_ratings,
-                'products': {product['title']: {
-                        'title': product.get('title', 'N/A'),
-                        'price': product.get('price', 'N/A'),
-                        'summary': product.get('summary', 'N/A'),
-                        'city': product.get('city_name', 'N/A'),
-                        'country': product.get('country_name', 'N/A'),
-                        'product_checkout_url': product.get('product_checkout_url', 'N/A'),
-                        'rating': product['ratings'].get('average', 'N/A'),
-                        'description': product.get('tagline', ''),
-                        'images': product.get('images', []),
-                        'whats_included': product.get('whats_included', 'N/A'),
-                        'sale_status': product.get('sale_status', 'N/A'),
-                        } for product in venue_info.get('products')}
-            }
+    # Add remaining Tiqets venues that did not match any place
+    for venue_name, venue_info in grouped_products.items():
+        average_rating = get_average_rating_from_tiqets(venue_info.get('products'))
+        total_ratings = get_amount_of_rating_from_tiqets(venue_info.get('products'))
+        
+        merged[venue_name] = {
+            'place': venue_name,
+            'lat': venue_info['lat'],
+            'lng': venue_info['lng'],
+            'photos': [],
+            'currentOpeningHours': 'N/A',
+            'venue': venue_info.get('name'),
+            'categories': [],
+            'rating': average_rating,
+            'num_reviews': total_ratings,
+            'products': {product['title']: {
+                    'title': product.get('title', 'N/A'),
+                    'price': product.get('price', 'N/A'),
+                    'summary': product.get('summary', 'N/A'),
+                    'city': product.get('city_name', 'N/A'),
+                    'country': product.get('country_name', 'N/A'),
+                    'product_checkout_url': product.get('product_checkout_url', 'N/A'),
+                    'rating': product['ratings'].get('average', 'N/A'),
+                    'description': product.get('tagline', ''),
+                    'images': product.get('images', []),
+                    'whats_included': product.get('whats_included', 'N/A'),
+                    'sale_status': product.get('sale_status', 'N/A'),
+                    } for product in venue_info.get('products')}
+        }
 
     return merged
 
@@ -318,15 +318,11 @@ def match_score(venue, place):
 
 
 def get_average_price_from_tiqets(venue_products):
-    total = 0
-    count = 0
-    for product in venue_products:
-        if product.get('price'):
-            count += 1
-            total += product.get('price')
-
-    if count> 0:
-        return total/count
+    prices = [product.get('price') for product in venue_products if isinstance(product.get('price'), (int, float))]
+    
+    if prices:
+        return sum(prices) / len(prices)
+    return 0  # Return 0 if there are no products with prices
 
 
 def order_tiqets_by_price(venue_products):
@@ -1013,7 +1009,6 @@ def get_top10(request):
 
     for place_name, place_data in merged_data.items():
         rating = place_data.get('rating', 0) # rating value between 0 and 5
-
         num_reviews = place_data.get('num_reviews', 0)
         global_average_rating = sum(item['rating'] for item in merged_data.values() if item['rating']) / len(merged_data)
         weighted_rating = calculate_weighted_rating(rating, num_reviews, global_average_rating)
