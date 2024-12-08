@@ -15,19 +15,29 @@ import threading
 
 # Define the mapping dictionary
 category_mapping = {
-    "Museums and Galleries": ["museum", "art_gallery"],
-    "Historical Sites": ["historical_place", "monument", "cultural_landmark"],
-    "Performing Arts": ["performing_arts_theater", "concert_hall", "opera_house"],
-    "Parks and Gardens": ["park", "botanical_garden", "state_park", "national_park", "garden"],
-    "Amusement Parks": ["amusement_park", "water_park", "roller_coaster"],
-    "Zoos and Aquariums": ["zoo", "aquarium", "wildlife_park"],
-    "Adventure Activities": ["hiking_area", "off_roading_area", "adventure_sports_center"],
-    "Beaches": ["beach"],
-    "Hiking and Outdoors": ["national_park", "hiking_area"],
-    "Playgrounds": ["playground"],
-    "Nightlife": ["night_club", "bar", "comedy_club", "karaoke"],
-    "Kids Entertainment": ["amusement_center", "childrens_camp"],
-    "Local Cuisine": ["restaurant", "fine_dining_restaurant"]
+    "Art Gallery": ["art_gallery"],
+    "Museum": ["museum"],
+    "Monument": ["monument", "cultural_landmark", "historical_place"],
+    "Theater": ["performing_arts_theater", "auditorium", "opera_house", "amphitheatre"],
+    "Cinema": ["movie_theater"],
+    "Water Park": ["water_park"],
+    "Amusement Park": ["amusement_park", "roller_coaster"],
+    "Park": ["park", "state_park", "national_park", "garden"],
+    "Zoo": ["zoo"],
+    "Aquarium": ["aquarium"],
+    "Wildlife Park": ["wildlife_park", "wildlife_refuge"],
+    "Beach": ["beach"],
+    "Botanical Garden": ["botanical_garden"],
+    "Stadium": ["stadium", "arena", "sports_complex", "athletic_field"],
+    "Playground": ["playground"],
+    "Hiking Area": ["hiking_area", "adventure_sports_center", "off_roading_area"],
+    "Karaoke": ["karaoke"],
+    "Comedy Club": ["comedy_club"],
+    "Night Club": ["night_club", "dance_hall"],
+    "Casino": ["casino"],
+    "Restaurant": ["restaurant", "cafe", "fast_food_restaurant"],
+    "Steak House": ["steak_house", "bar_and_grill"],
+    "Local Cuisine": ["fine_dining_restaurant", "local_cuisine", "regional_restaurant", "bistro"]
 }
 
 
@@ -123,7 +133,7 @@ def get_itinerary(request):
             num_seniors, num_adults, num_youth, num_children, budget, places_info, required_places, removed_places
         )
      
-        final_output = merge_gemini_places(merged_data, itinerary, budget)
+        final_output = merge_gemini_places(merged_data, itinerary, budget, lat, lng)
 
         return JsonResponse(final_output, safe=False)
     except Exception as e:
@@ -154,9 +164,8 @@ def get_product(products, budget):
     else:
         return max(products, key=lambda x: x['rating'])
 
-def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget):
+def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat, lng):
     gemini_response = json.loads(gemini_response_str)
-    print(json.dumps(gemini_response, indent=2))
 
     gemini_response = gemini_response["response"]
     
@@ -178,6 +187,11 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget):
                     "city": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['city'],
                     "country": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['country'],
                     "product": product,
+                })
+            else:
+                attraction.update({
+                    "lat": lat,
+                    "lng": lng,
                 })
 
     return gemini_response
