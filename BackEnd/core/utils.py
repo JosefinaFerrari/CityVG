@@ -88,7 +88,7 @@ def get_places(lat, lng, radius, categories=None):
         request_body["includedTypes"] = categories
 
     # FieldMask to specify the fields to return (displayName is essential)
-    field_mask = "places.name,places.displayName,places.shortFormattedAddress,places.location,places.types,places.rating,places.regularOpeningHours,places.userRatingCount"
+    field_mask = "places.name,places.displayName,places.shortFormattedAddress,places.location,places.types,places.rating,places.regularOpeningHours,places.userRatingCount,places.formattedAddress,places.photos"
 
     # Headers, including the API key and FieldMask
     headers = {
@@ -101,6 +101,7 @@ def get_places(lat, lng, radius, categories=None):
         # Make the POST request
         response = requests.post(api_url, json=request_body, headers=headers)
 
+        print(response.json())
         # Check if the response status is OK
         if response.status_code == 200:
             return response.json()

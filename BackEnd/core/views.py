@@ -319,8 +319,12 @@ def match_score(venue, place):
     venue_address1 = f"{venue['address']}, {venue['city']}"
     venue_address2 = f"{venue['name']}, {venue['address']}, {venue['city']}"
 
-    address_score1 = fuzz.token_sort_ratio(venue_address1.lower(), place['shortFormattedAddress'].lower())
-    address_score2 = fuzz.token_sort_ratio(venue_address2.lower(), place['shortFormattedAddress'].lower())
+    if place.get('shortFormattedAddress'):
+        address_score1 = fuzz.token_sort_ratio(venue_address1.lower(), place['shortFormattedAddress'].lower())
+        address_score2 = fuzz.token_sort_ratio(venue_address2.lower(), place['shortFormattedAddress'].lower())
+    else:
+        address_score1 = fuzz.token_sort_ratio(venue_address1.lower(), place['formattedAddress'].lower())
+        address_score2 = fuzz.token_sort_ratio(venue_address1.lower(), place['formattedAddress'].lower())
 
     address_score = max(address_score1, address_score2) / 100
 
