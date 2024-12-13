@@ -10,6 +10,7 @@ from .utils import generate_itinerary  # Import the function from utils.py
 from rapidfuzz import fuzz
 import json
 from geopy.distance import geodesic
+from core.utils import fetch_unsplash_image
 import threading
 
 
@@ -178,7 +179,7 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
     gemini_response = json.loads(gemini_response_str)
 
     gemini_response = gemini_response["response"]
-    
+
     for itinerary in gemini_response["itineraries"]:
         for attraction in itinerary["attractions"]:
             name = attraction["name"]
@@ -189,7 +190,8 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
                 url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
                 url += f"?selected_date={date}"
 
-                # if the product exists, get the product
+                #unsplash_image = fetch_unsplash_image(name)
+
                 if merged_places_x_tiqets[name]['products'] != {}:
                     product = get_product(list(merged_places_x_tiqets[name]['products'].values()), budget)
                     product["product_checkout_url"] = url
@@ -233,6 +235,8 @@ def merge_places_tiqets(places_data, tiqets_data):
 
     venue_to_remove = set()
 
+
+    venue_to_remove = set()
     # Create a dictionary for quick lookup of places by name
     places_dict = {place['displayName']['text']: place for place in places_data}
 
@@ -240,11 +244,14 @@ def merge_places_tiqets(places_data, tiqets_data):
         for venue_name, venue_info in grouped_products.items():
             score = match_score(venue_info, place)
             if score > 0.7:
+              unsplash_image = fetch_unsplash_image(place['displayName']['text'])
+              
                 merged[place_name] = {
                     'place': place_name,
                     'lat': place['location']['latitude'],
                     'lng': place['location']['longitude'],
                     'photos': place.get('photos', []),
+                    'unsplash_image': unsplash_image,  # Add Unsplash image
                     'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
                     'venue': venue_info.get('name'),
                     'categories': place.get('types', []),
@@ -267,6 +274,7 @@ def merge_places_tiqets(places_data, tiqets_data):
 
                 venue_to_remove.add(venue_name)
                 break
+
                 
                 # Delete marked venues after iteration
         for venue_name in venue_to_remove:
@@ -320,6 +328,7 @@ def merge_places_tiqets(places_data, tiqets_data):
         }
 
     return merged
+
 
 
 def group_products_by_venue(products):
@@ -737,13 +746,16 @@ def recommend(lat, lng, radius, start_date, end_date, categories, budget):
     recommendations = []
 
     for tiqetXplace in merged_data.get("tiqetsXplaces"):
-        rating = tiqetXplace.get('rating', 0) # rating value between 0 and 5
-        normalized_rating = rating / 5 # rating value between 0 and 1
+        rating = tiqetXplace.get('rating', 0)  # rating value between 0 and 5
+        normalized_rating = rating / 5  # rating value between 0 and 1
 
-        category_score = calculate_place_common_categories(tiqetXplace.get('categories', []), categories) # category accuracy value between 0 and 1
-        
+        category_score = calculate_place_common_categories(tiqetXplace.get('categories', []), categories)  # category accuracy value between 0 and 1
+
         recommendation_score = 0
         recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
+
+        # *** Added Unsplash Integration ***
+        unsplash_image = fetch_unsplash_image(tiqetXplace.get('place'))
 
         recommendations.append({
             'type': 'tiqetsXplaces',
@@ -751,17 +763,21 @@ def recommend(lat, lng, radius, start_date, end_date, categories, budget):
             'venue': tiqetXplace.get('venue'),
             'average_price': tiqetXplace.get('average_price'),
             'recommended_score': recommendation_score,
-            'saved':True
+            'saved': True,
+            'image': unsplash_image  # Add Unsplash image to the response
         })
 
     for place in merged_data.get("places_only"):
         rating = place.get('rating', 0)  # rating value between 0 and 5
-        normalized_rating = rating / 5 # rating value between 0 and 1
-            
-        category_score = calculate_place_common_categories(place.get('categories', []), categories) # category accuracy value between 0 and 1
-            
+        normalized_rating = rating / 5  # rating value between 0 and 1
+
+        category_score = calculate_place_common_categories(place.get('categories', []), categories)  # category accuracy value between 0 and 1
+
         recommendation_score = 0
         recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
+
+        # *** Added Unsplash Integration ***
+        unsplash_image = fetch_unsplash_image(place.get('place'))
 
         recommendations.append({
             'type': 'places_only',
@@ -769,23 +785,27 @@ def recommend(lat, lng, radius, start_date, end_date, categories, budget):
             'venue': place.get('venue'),
             'average_price': place.get('average_price'),
             'recommended_score': recommendation_score,
-            'saved':True
+            'saved': True,
+            'image': unsplash_image  # Add Unsplash image to the response
         })
 
-    global_average_rating = sum(item['tiqets_average_rating'] 
-                                    for item in merged_data.get("tiqets_only") 
-                                    if item['tiqets_average_rating']) / len(merged_data.get("tiqets_only"))
-        
+    global_average_rating = sum(item['tiqets_average_rating']
+                                for item in merged_data.get("tiqets_only")
+                                if item['tiqets_average_rating']) / len(merged_data.get("tiqets_only"))
+
     for tiqet in merged_data.get("tiqets_only"):
-        rating = tiqet.get('tiqets_average_rating', 0) # rating value between 0 and 10
+        rating = tiqet.get('tiqets_average_rating', 0)  # rating value between 0 and 10
         total_ratings = tiqet.get('total_ratings')
-        weighted_rating = calculate_weighted_rating(rating, total_ratings,global_average_rating)
-        normalized_rating = weighted_rating / 5 # rating value between 0 and 1
-                
+        weighted_rating = calculate_weighted_rating(rating, total_ratings, global_average_rating)
+        normalized_rating = weighted_rating / 5  # rating value between 0 and 1
+
         category_score = calculate_place_common_categories(tiqet.get('categories', []), categories)
 
         recommendation_score = 0
         recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
+
+        # *** Added Unsplash Integration ***
+        unsplash_image = fetch_unsplash_image(tiqet.get('place'))
 
         recommendations.append({
             'type': 'tiqets_only',
@@ -793,19 +813,20 @@ def recommend(lat, lng, radius, start_date, end_date, categories, budget):
             'venue': tiqet.get('venue'),
             'average_price': tiqet.get('average_price'),
             'recommended_score': recommendation_score,
-            'saved':True
+            'saved': True,
+            'image': unsplash_image  # Add Unsplash image to the response
         })
 
     if budget == 'Cheap':
         recommendations = sorted(
-        (rec for rec in recommendations if rec.get('average_price') is not None),
-        key=lambda rec: rec['average_price']
-    )
-
+            (rec for rec in recommendations if rec.get('average_price') is not None),
+            key=lambda rec: rec['average_price']
+        )
 
     top_recommendations = sorted(recommendations, key=lambda rec: rec['recommended_score'], reverse=True)[:10]
 
     return top_recommendations
+
 
 
 def get_recommendations(request):
