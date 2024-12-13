@@ -40,7 +40,6 @@ category_mapping = {
     "Local Cuisine": ["fine_dining_restaurant", "local_cuisine", "regional_restaurant", "bistro"]
 }
 
-
 def places(request):
     """
     Fetch places from Google Places API and return them as JSON.
@@ -190,8 +189,12 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
                 url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
                 url += f"?selected_date={date}&selected_timeslot_id={time}"
 
-                product = get_product(list(merged_places_x_tiqets[name]['products'].values()), budget)
-
+                # if the product exists, get the product
+                if merged_places_x_tiqets[name]['products'] != {}:
+                    product = get_product(list(merged_places_x_tiqets[name]['products'].values()), budget)
+                else: 
+                    product = None
+                
                 attraction.update({
                     "lat": merged_places_x_tiqets[name]["lat"],
                     "lng": merged_places_x_tiqets[name]["lng"],
@@ -228,7 +231,6 @@ def merge_places_tiqets(places_data, tiqets_data):
     merged = {}
 
     venue_to_remove = set()
-    places_to_remove = set()
 
     # Create a dictionary for quick lookup of places by name
     places_dict = {place['displayName']['text']: place for place in places_data}
