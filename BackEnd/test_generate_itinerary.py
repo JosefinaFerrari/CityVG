@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime
 from core.utils import generate_itinerary
 from django.conf import settings
 
@@ -36,17 +37,21 @@ def test_generate_itinerary(mocker):
 
     mocker.patch("google.generativeai.GenerativeModel", return_value=mock_model)
 
-    # Call the function
+    # Convert date strings to datetime objects
+    start_date = datetime.strptime("2024-12-01", "%Y-%m-%d")
+    end_date = datetime.strptime("2024-12-02", "%Y-%m-%d")
+
+    # Call the function with categories included
     result = generate_itinerary(
         lat=40.7128, lng=-74.0060,
-        start_date="2024-12-01", end_date="2024-12-02",
+        start_date=start_date, end_date=end_date,  # Pass datetime objects
         start_hour="09:00", end_hour="18:00",
         num_seniors=0, num_adults=2, num_youth=0, num_children=1,
-        budget="Balanced", places=[], required_places=[], removed_places=[]
+        budget="Balanced", places=[], required_places=[], removed_places=[],
+        categories=[]
     )
 
-    # Parse the result as JSON
-    result = json.loads(result)  # Convert JSON string to dictionary
+    result = json.loads(result)
 
     # Assertions
     assert isinstance(result, dict)
