@@ -246,34 +246,34 @@ def merge_places_tiqets(places_data, tiqets_data):
             if score > 0.7:
               unsplash_image = fetch_unsplash_image(place['displayName']['text'])
               
-                merged[place_name] = {
-                    'place': place_name,
-                    'lat': place['location']['latitude'],
-                    'lng': place['location']['longitude'],
-                    'photos': place.get('photos', []),
-                    'unsplash_image': unsplash_image,  # Add Unsplash image
-                    'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
-                    'venue': venue_info.get('name'),
-                    'categories': place.get('types', []),
-                    'rating': place.get('rating', 'N/A'),
-                    'num_reviews': place.get('userRatingCount', 'N/A'),
-                    'products': {product['title']: {
-                            'title': product.get('title', 'N/A'),
-                            'price': product.get('price', 'N/A'),
-                            'summary': product.get('tagline', 'N/A'),
-                            'city': product.get('city_name', 'N/A'),
-                            'country': product.get('country_name', 'N/A'),
-                            'product_checkout_url': product.get('product_checkout_url', 'N/A'),
-                            'rating': product['ratings'].get('average', 'N/A'),
-                            'description': product.get('tagline', ''),
-                            'images': product.get('images', []),
-                            'whats_included': product.get('whats_included', 'N/A'),
-                            'sale_status': product.get('sale_status', 'N/A'),
-                            } for product in grouped_products[venue_info.get('name')].get('products')}
-                }
+            merged[place_name] = {
+                'place': place_name,
+                'lat': place['location']['latitude'],
+                'lng': place['location']['longitude'],
+                'photos': place.get('photos', []),
+                'unsplash_image': unsplash_image,  # Add Unsplash image
+                'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
+                'venue': venue_info.get('name'),
+                'categories': place.get('types', []),
+                'rating': place.get('rating', 'N/A'),
+                'num_reviews': place.get('userRatingCount', 'N/A'),
+                'products': {product['title']: {
+                        'title': product.get('title', 'N/A'),
+                        'price': product.get('price', 'N/A'),
+                        'summary': product.get('tagline', 'N/A'),
+                        'city': product.get('city_name', 'N/A'),
+                        'country': product.get('country_name', 'N/A'),
+                        'product_checkout_url': product.get('product_checkout_url', 'N/A'),
+                        'rating': product['ratings'].get('average', 'N/A'),
+                        'description': product.get('tagline', ''),
+                        'images': product.get('images', []),
+                        'whats_included': product.get('whats_included', 'N/A'),
+                        'sale_status': product.get('sale_status', 'N/A'),
+                        } for product in grouped_products[venue_info.get('name')].get('products')}
+            }
 
-                venue_to_remove.add(venue_name)
-                break
+            venue_to_remove.add(venue_name)
+            break
 
                 
                 # Delete marked venues after iteration
