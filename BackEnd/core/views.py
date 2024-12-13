@@ -190,7 +190,7 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
                 url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
                 url += f"?selected_date={date}"
 
-                unsplash_image = fetch_unsplash_image(name)
+                #unsplash_image = fetch_unsplash_image(name)
 
                 if merged_places_x_tiqets[name]['products'] != {}:
                     product = get_product(list(merged_places_x_tiqets[name]['products'].values()), budget)
@@ -203,16 +203,6 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
                     "lng": merged_places_x_tiqets[name]["lng"],
                     "city": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['city'],
                     "country": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['country'],
-                    "products": [{
-                        "name": product["title"],
-                        "price": product["price"],
-                        "product_checkout_url": url,
-                        "images": merged_places_x_tiqets[name]['products'][product["title"]]["images"],
-                        "whats_included": merged_places_x_tiqets[name]['products'][product["title"]]["whats_included"],
-                        "sale_status": merged_places_x_tiqets[name]['products'][product["title"]]["sale_status"],
-                    } for product in merged_places_x_tiqets[name]["products"].values()],
-                    # Adding Unsplash image
-                    "unsplash_image": unsplash_image
                     "product": product,
                 })
             else:
@@ -223,7 +213,6 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
 
     return gemini_response
 
- 
 def merge_places_tiqets(places_data, tiqets_data): 
     """
     Merges place data with Tiqets data based on matching scores.
@@ -244,7 +233,7 @@ def merge_places_tiqets(places_data, tiqets_data):
 
     merged = {}
 
-    to_remove = set()
+    venue_to_remove = set()
 
 
     venue_to_remove = set()
@@ -255,10 +244,8 @@ def merge_places_tiqets(places_data, tiqets_data):
         for venue_name, venue_info in grouped_products.items():
             score = match_score(venue_info, place)
             if score > 0.7:
-                unsplash_image = fetch_unsplash_image(place['displayName']['text'])
-
-                merged[place['displayName']['text']] = 
-                {
+              unsplash_image = fetch_unsplash_image(place['displayName']['text'])
+              
                 merged[place_name] = {
                     'place': place_name,
                     'lat': place['location']['latitude'],
@@ -287,20 +274,7 @@ def merge_places_tiqets(places_data, tiqets_data):
 
                 venue_to_remove.add(venue_name)
                 break
-<<<<<<< HEAD
 
-        # Delete marked venues after iteration
-        for venue_name in to_remove:
-            grouped_products.pop(venue_name, None)
-
-    # Process places that don't have matching venues
-    for place_name, place in places_dict.items():
-        if place_name not in merged:
-            # Fetch Unsplash image for unmatched place
-            unsplash_image = fetch_unsplash_image(place['displayName']['text'])
-
-            merged[place['displayName']['text']] = {
-=======
                 
                 # Delete marked venues after iteration
         for venue_name in venue_to_remove:
@@ -312,18 +286,10 @@ def merge_places_tiqets(places_data, tiqets_data):
             print(place_name)
 
             merged[place_name] = {
->>>>>>> 0ef34f20e4416d975c8c82f1925452fd0d2cd8e8
                 'place': place_name,
                 'lat': place['location']['latitude'],
                 'lng': place['location']['longitude'],
                 'photos': place.get('photos', []),
-<<<<<<< HEAD
-                'unsplash_image': unsplash_image,  # Add Unsplash image
-                'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
-                'venue': None,
-                'products': {}
-            }
-=======
                 'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
                 'venue': 'N/A',
                 'categories': place.get('types', []),
@@ -360,7 +326,6 @@ def merge_places_tiqets(places_data, tiqets_data):
                     'sale_status': product.get('sale_status', 'N/A'),
                     } for product in venue_info.get('products')}
         }
->>>>>>> 0ef34f20e4416d975c8c82f1925452fd0d2cd8e8
 
     return merged
 
