@@ -52,6 +52,7 @@ def get_places(lat, lng, radius, categories=None):
     '''
     api_url = "https://places.googleapis.com/v1/places:searchNearby"
 
+    print(f"Fetching places for lat={lat}, lng={lng}, radius={radius}, categories={categories}")
     # Define the JSON body of the request
     request_body = {
         "locationRestriction": {
@@ -80,7 +81,7 @@ def get_places(lat, lng, radius, categories=None):
             "aquarium"
         ],
         "maxResultCount": 20,
-        "rankPreference": "POPULARITY"  # Removed as it's not supported in Nearby Search (New)
+        "rankPreference": "POPULARITY" 
     }
 
     # Apply categories filter if provided
@@ -101,7 +102,6 @@ def get_places(lat, lng, radius, categories=None):
         # Make the POST request
         response = requests.post(api_url, json=request_body, headers=headers)
 
-        print(response.json())
         # Check if the response status is OK
         if response.status_code == 200:
             return response.json()
@@ -109,7 +109,7 @@ def get_places(lat, lng, radius, categories=None):
             return {'error': 'Failed to fetch data from Places API', 'status_code': response.status_code}
     except Exception as e:
         return {'error': str(e)}
-
+    
 def get_tiqets_products(lat, lng, radius, page=1, page_size=100):
     """
     Fetch products (attractions, events, etc.) from the Tiqets API based on location and radius.
@@ -154,13 +154,14 @@ def get_tiqets_products(lat, lng, radius, page=1, page_size=100):
     except Exception as e:
         return {'error': str(e)}
 
-def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num_seniors, num_adults, num_youth, num_children, budget, places, required_places, removed_places):
+def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num_seniors, num_adults, 
+                       num_youth, num_children, budget, places, required_places, removed_places, categories):
     genai.configure(api_key=settings.GEMINI_API_KEY)
 
     # Create the model
     generation_config = {
-    "temperature": 0.3,
-    "top_p": 0.8,
+    "temperature": 0.6,
+    "top_p": 0.95,
     "top_k": 40,
     "max_output_tokens": 8192,
     "response_schema": content.Schema(
@@ -215,10 +216,11 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
     "response_mime_type": "application/json",
     }
 
+    
     model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
     generation_config=generation_config,
-    system_instruction="Scenario: A user wants to visit a city for a specific number of days. \n\nYour Goal: Generate 3 distinct itineraries, each tailored to the user's preferences and requirements.\n\nYou will receive an object with the following fields:\nInput Fields:\n1. City: Latitude and longitude (lat, lng) of the city.\n2. Arrival Date: Arrival date and hour.\n3. Departure Date: Departure date and hour.\n4. Number of Days: The number of days the trip should last, taking into consideration the given dates.\n5. Number of Travelers: Seniors (65+), Adults (24–65), Youth (13–24), Children (<13).\n6. Budget: User's preference (Cheap, Balanced, Luxury or Flexible).\n7. Places: A JSON of all available attractions in the city , where each place includes:\n\ta. Name: name of the place (you should refer to a place using this field when returning the selected attractions).\n\tb. Associated Product: Details about a purchasable product related to the attraction, such as tours, museum visits, or activities.\n\tc. Summary: Information about the product.\n\td. What's included: What is included with the product.\n\te. Price of the product.\n7. Required attractions: attractions that must be included.\n8. Removed attractions: attractions that must be excluded.\n\nRequirements:\n1. The itineraries must cover all available days from arrival to departure. (example: if a user arrives 2024-10-22 12:00:00 and departures 2024-10-25 18:00:00 the first visit must start at 2024-10-22 12:00:00 and the last visit must end at 2024-10-25 18:00:00. All the other visits must be included between start date and end date).\n2. Ensure to use all the time the user has to visit the city, also the day of the departure if possible.\n3. All itineraries must Include attractions in required_places and exclude attractions in removed_places.\n4. Select additional attractions based on reviews, ratings, and user preferences.\n5. Focus on different themes for each itinerary (e.g., cultural, historical, adventure, entertainment). Select based on the age group of the traveller.\n6. Schedule at least 1 or 2 hour of spare time between consecutive visits, that is time for travel and breaks.\n7. If you select a place, the visit will be based on the product associated, so be aware of what the product includes and take into consideration the product summary and information.\n\nFor each itinerary you must retrieve these informations: \n1. itineraryName: Assign a unique and meaningful name to each itinerary that reflects its theme, focus, or style (e.g., 'Cultural Escapade', 'Adventure Highlights', 'Relaxed Retreat'). Avoid generic names such as 'Itinerary 1' or 'Itinerary 2'.\n2. list of attractions with: \n\ta. Name: the name of the attraction must be equal to Attraction Name, you can’t change it. (Example: If you receive a list with a place: 'Duomo di Milano’ and you want to use it, in the name you must put 'Duomo di Milano', without any changes).\n\tb. Starting Hour and EndingHour: Specify the starting and ending times for each attraction visit in the format HH:MM. Consider an average range of duration for each attractions (example: if it’s a museum minimum 3 hours, if it’s a dinnerShow minimum 3-4 hours). Consider also that some attractions must be done at specific range of time (example: a dinner should start between 19 and 23).\n\tc. Day: the day in which the visit is scheduled ",
+    system_instruction="Scenario: A user wants to visit a city for a specific number of days.\n\nGoal: Generate 3 unique itineraries, each with a distinct focus and tailored to the user's preferences and requirements.\n\nInput Fields:\n\n    City: Latitude and longitude (lat, lng) of the city.\n    Arrival Date & Time: The arrival timestamp (e.g., YYYY-MM-DD HH:MM).\n    Departure Date & Time: The departure timestamp (e.g., YYYY-MM-DD HH:MM).\n    Duration: Number of days the trip should span, aligning with the arrival and departure times.\n    Travelers: Breakdown by age groups:\n        Seniors (65+)\n        Adults (24–65)\n        Youth (13–24)\n        Children (<13)\n    Budget Preference: Budget type—Cheap, Balanced, Luxury, or Flexible.\n    Available Attractions: JSON object with details for each attraction:\n        Name (must be referred to exactly as provided).\n        Associated Product: Details of purchasable experiences (e.g., tours, museum entries). If no product exists, treat it as a free or self-guided attraction.\n        Product Summary (if applicable).\n        Price (if applicable).\n    Required Attractions: List of must-visit attractions.\n    Excluded Attractions: List of attractions to exclude.\n    Categories: User-preferred attraction categories (e.g., cultural, adventure, historical).\n\nRequirements for Itineraries:\n\n    Coverage: Use the entire available time (including arrival/departure days). Optimize schedules to make the most of the user’s visit while considering breaks and travel time.\n    Unique Themes:\n        Each itinerary must have a distinct focus (e.g., cultural, adventure, family-friendly) catering to different traveler interests and demographics.\n        Prioritize attractions relevant to the theme and age groups (e.g., adventure parks for youth, cultural sites for seniors).\n    Attraction Selection:\n        Required attractions must be included.\n        Excluded attractions must not appear.\n        Choose additional attractions based on user-selected categories, ratings, reviews, and availability of products (if any).\n        If an attraction lacks an associated product, include it as a free/self-guided activity where appropriate.\n    Scheduling:\n        Allow 1–2 hours of buffer time between visits for travel and breaks.\n        Account for time-specific attractions (e.g., dinner shows between 19:00–23:00).\n    Diversity: Ensure meaningful differences between itineraries, such as:\n        Visiting different attractions (or different combinations).\n        Different themes or focal points (e.g., history vs. entertainment).\n        Variations in intensity or pacing (e.g., relaxed vs. adventurous).\n\nOutput Format:\n\n    Itinerary Name: A unique, descriptive title reflecting the theme (e.g., Urban Explorer Adventure, Cultural Retreat).\n    Daily Schedule:\n        Day-by-day breakdown:\n            Attraction Name: Exact match to the provided data.\n            Start Time: HH:MM (aligned with attraction availability).\n            End Time: HH:MM.\n        Include travel and break times.\n    Notes: For attractions without products, add comments like \"Free Entry\" or \"Self-Guided Tour.\"",
     )
 
     chat_session = model.start_chat(
@@ -244,6 +246,7 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
         f'Places: {places}\n'
         f'Required places: {required_places}\n'
         f'Removed places: {removed_places}\n'
+        f'Categories: {categories}\n'
     )
 
     response = chat_session.send_message(input)

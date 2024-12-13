@@ -40,7 +40,6 @@ category_mapping = {
     "Local Cuisine": ["fine_dining_restaurant", "local_cuisine", "regional_restaurant", "bistro"]
 }
 
-
 def places(request):
     """
     Fetch places from Google Places API and return them as JSON.
@@ -64,8 +63,8 @@ def places(request):
 
     return JsonResponse(places_data, safe=False)
 
-def fetch_places(lat, lng, radius):
-    return get_places(lat, lng, radius).get('places', [])
+def fetch_places(lat, lng, radius, categories):
+    return get_places(lat, lng, radius, categories).get('places', [])
 
 def fetch_tiqets(lat, lng, radius):
     return get_tiqets_products(lat, lng, radius).get('products', [])
@@ -84,6 +83,9 @@ def get_itinerary(request):
         lng = float(request.GET.get('lng', 0))
         radius = int(request.GET.get('radius', 5000))  # Default radius = 5000 meters
         categories = request.GET.getlist('categories', [])  # Fetch as list if provided
+        
+        mapped_categories = [category_mapping.get(cat, [cat]) for cat in categories]
+        mapped_categories = [cat for sublist in mapped_categories for cat in sublist]
         start_date = datetime.strptime(request.GET.get('start_date'), "%Y-%m-%d")
         end_date = datetime.strptime(request.GET.get('end_date'), "%Y-%m-%d")
         start_time = datetime.strptime(request.GET.get('start_time'), "%H:%M")
@@ -95,8 +97,8 @@ def get_itinerary(request):
         budget = request.GET.get('budget', '').lower()  # Normalize budget string
         required_places = request.GET.getlist('required_places', [])  # Fetch as list if provided
         removed_places = request.GET.getlist('removed_places', [])  # Fetch as list if provided
-        
         # Validate logical constraints
+
         if start_date >= end_date:
             return JsonResponse({'error': 'start_date must be before end_date.'}, status=400)
         if radius <= 0:
@@ -110,7 +112,7 @@ def get_itinerary(request):
         places_data = []
         tiqets_data = []
 
-        places_thread = threading.Thread(target=lambda: places_data.extend(fetch_places(lat, lng, radius) or []))
+        places_thread = threading.Thread(target=lambda: places_data.extend(fetch_places(lat, lng, radius, mapped_categories) or []))
         tiqets_thread = threading.Thread(target=lambda: tiqets_data.extend(fetch_tiqets(lat, lng, radius) or []))
 
         places_thread.start()
@@ -130,7 +132,7 @@ def get_itinerary(request):
 
         itinerary = generate_itinerary(
             lat, lng, start_day, end_day, start_hour, end_hour,
-            num_seniors, num_adults, num_youth, num_children, budget, places_info, required_places, removed_places
+            num_seniors, num_adults, num_youth, num_children, budget, places_info, required_places, removed_places, categories
         )
      
         final_output = merge_gemini_places(merged_data, itinerary, budget, lat, lng)
@@ -143,15 +145,23 @@ def get_places_info(merged_data, budget):
     places = []
 
     for place_name, place_data in merged_data.items():
-        product = get_product(list(place_data['products'].values()), budget)
+        if place_data['products'] == {}:  
+            places.append({
+                'name': place_name,
+                'product_title': 'N/A',
+                'price': 'N/A',
+                'summary': 'N/A',
+            })
+        else:
+            product = get_product(list(place_data['products'].values()), budget)
 
-        places.append({
-            'name': place_name,
-            'product_title': product['title'],
-            'price': product['price'],
-            'summary': product['summary'],
-            'whats_included': product['whats_included'],
-        })
+            if product:
+                places.append({
+                    'name': place_name,
+                    'product_title': product['title'],
+                    'price': product['price'],
+                    'summary': product['summary'],
+                })
 
     return places
 
@@ -177,10 +187,15 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
 
             if name in merged_places_x_tiqets:
                 url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
-                url += f"?selected_date={date}&selected_timeslot_id={time}"
+                url += f"?selected_date={date}"
 
-                product = get_product(list(merged_places_x_tiqets[name]['products'].values()), budget)
-
+                # if the product exists, get the product
+                if merged_places_x_tiqets[name]['products'] != {}:
+                    product = get_product(list(merged_places_x_tiqets[name]['products'].values()), budget)
+                    product["product_checkout_url"] = url
+                else: 
+                    product = None
+                
                 attraction.update({
                     "lat": merged_places_x_tiqets[name]["lat"],
                     "lng": merged_places_x_tiqets[name]["lng"],
@@ -196,14 +211,27 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
 
     return gemini_response
 
-def merge_places_tiqets(places_data, tiqets_data):    
+def merge_places_tiqets(places_data, tiqets_data): 
+    """
+    Merges place data with Tiqets data based on matching scores.
+    This function takes two datasets: places_data and tiqets_data, and merges them into a single dictionary.
+    The merging is based on a matching score between places and venues. If the score is above a certain threshold,
+    the place and venue are considered a match and their data is combined. The function also handles cases where
+    places or venues do not have a match.
+    Parameters:
+    places_data (list): A list of dictionaries containing place information.
+    tiqets_data (list): A list of dictionaries containing Tiqets venue information.
+    Returns:
+    dict: A dictionary where the keys are place names or venue names and the values are dictionaries containing
+          merged information from both datasets.
+    """
+
     # Group products by venue
     grouped_products = group_products_by_venue(tiqets_data)
 
     merged = {}
 
     venue_to_remove = set()
-    places_to_remove = set()
 
     # Create a dictionary for quick lookup of places by name
     places_dict = {place['displayName']['text']: place for place in places_data}
@@ -212,7 +240,7 @@ def merge_places_tiqets(places_data, tiqets_data):
         for venue_name, venue_info in grouped_products.items():
             score = match_score(venue_info, place)
             if score > 0.7:
-                merged[place['displayName']['text']] = {
+                merged[place_name] = {
                     'place': place_name,
                     'lat': place['location']['latitude'],
                     'lng': place['location']['longitude'],
@@ -225,7 +253,7 @@ def merge_places_tiqets(places_data, tiqets_data):
                     'products': {product['title']: {
                             'title': product.get('title', 'N/A'),
                             'price': product.get('price', 'N/A'),
-                            'summary': product.get('summary', 'N/A'),
+                            'summary': product.get('tagline', 'N/A'),
                             'city': product.get('city_name', 'N/A'),
                             'country': product.get('country_name', 'N/A'),
                             'product_checkout_url': product.get('product_checkout_url', 'N/A'),
@@ -243,7 +271,24 @@ def merge_places_tiqets(places_data, tiqets_data):
                 # Delete marked venues after iteration
         for venue_name in venue_to_remove:
             grouped_products.pop(venue_name, None)
-                
+    
+    # Add remaining Places that did not match any venue
+    for place_name, place in places_dict.items():
+        if place_name not in merged:
+            print(place_name)
+
+            merged[place_name] = {
+                'place': place_name,
+                'lat': place['location']['latitude'],
+                'lng': place['location']['longitude'],
+                'photos': place.get('photos', []),
+                'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
+                'venue': 'N/A',
+                'categories': place.get('types', []),
+                'rating': place.get('rating', 'N/A'),
+                'num_reviews': place.get('userRatingCount', 'N/A'),
+                'products': {}
+            }
     # Add remaining Tiqets venues that did not match any place
     for venue_name, venue_info in grouped_products.items():
         average_rating = get_average_rating_from_tiqets(venue_info.get('products'))
@@ -282,6 +327,7 @@ def group_products_by_venue(products):
     Group products by venue and return a dictionary with the grouped products.
     Each venue will have a list of products associated with it.
     """
+
     grouped_products = {}
 
     for product in products:
@@ -291,7 +337,7 @@ def group_products_by_venue(products):
         address = venue.get('address', "Unknown Address")
         city_name = product.get('city_name', "Unknown City")
         lat, lng = product['geolocation'].get('lat'), product['geolocation'].get('lng')
-
+            
         # Group by venue name, initializing the venue entry if necessary
         venue_info = grouped_products.setdefault(venue_name, {
             'name': venue_name,
@@ -309,8 +355,15 @@ def group_products_by_venue(products):
 
 def match_score(venue, place):
     """
-    Calculate a match score between a product and a place based on their names.
-    The score is calculated as the number of common words between the two names.
+    Calculate a match score between a venue and a place based on their names, addresses, and geographical coordinates.
+
+    Args:
+        venue (dict): Information about the venue, including 'name', 'address', 'city', 'lat', and 'lng'.
+        place (dict): Information about the place, including 'displayName', 'shortFormattedAddress', 
+                      'formattedAddress', and 'location' (containing 'latitude' and 'longitude').
+
+    Returns:
+        float: A match score between 0 and 1, where higher values indicate a stronger match.
     """
     
     name_score = fuzz.token_set_ratio(place['displayName']['text'].lower(), venue['name'].lower()) / 100
@@ -501,6 +554,7 @@ def tiqets_products(request):
     return JsonResponse(products_data)
 
 
+# !!! This function is NOT used in the current implementation, for the merge use merge_places_tiqets function !!!
 def merge_tiqets_and_places(lat, lng, radius):
     """
     Fetch places from Google Places API and Tiqets API and return them as JSON.
