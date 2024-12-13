@@ -29,5 +29,5 @@ urlpatterns = [
     path('generate/', get_itinerary, name='get_itinerary'),
     path('recommendations/',get_recommendations, name="get_recommendations"),
     path('recommendations_top_10/',get_recommendations_top_10, name="get_recommendations_top_10"),
-    path('get_top10/', get_top10, name='get_top10')
+    path('get_top10/', get_top10, name='get_top10'),
 ]
