@@ -187,11 +187,12 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
 
             if name in merged_places_x_tiqets:
                 url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
-                url += f"?selected_date={date}&selected_timeslot_id={time}"
+                url += f"?selected_date={date}"
 
                 # if the product exists, get the product
                 if merged_places_x_tiqets[name]['products'] != {}:
                     product = get_product(list(merged_places_x_tiqets[name]['products'].values()), budget)
+                    product["product_checkout_url"] = url
                 else: 
                     product = None
                 
@@ -354,8 +355,15 @@ def group_products_by_venue(products):
 
 def match_score(venue, place):
     """
-    Calculate a match score between a product and a place based on their names.
-    The score is calculated as the number of common words between the two names.
+    Calculate a match score between a venue and a place based on their names, addresses, and geographical coordinates.
+
+    Args:
+        venue (dict): Information about the venue, including 'name', 'address', 'city', 'lat', and 'lng'.
+        place (dict): Information about the place, including 'displayName', 'shortFormattedAddress', 
+                      'formattedAddress', and 'location' (containing 'latitude' and 'longitude').
+
+    Returns:
+        float: A match score between 0 and 1, where higher values indicate a stronger match.
     """
     
     name_score = fuzz.token_set_ratio(place['displayName']['text'].lower(), venue['name'].lower()) / 100
