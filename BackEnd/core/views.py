@@ -11,7 +11,7 @@ from rapidfuzz import fuzz
 import json
 from geopy.distance import geodesic
 from core.utils import fetch_unsplash_image
-from core.utils import fetch_google_place_image
+from core.utils import fetch_google_place_image, fetch_opening_hours
 import threading
 
 
@@ -903,6 +903,8 @@ def get_top10(request):
         place_data_with_score.pop('products', None)
         place_data_with_score['recommended_score'] = recommendation_score
         place_data_with_score['categories'] = categories
+        place_data_with_score['currentOpeningHours'] = fetch_opening_hours(place_data.get("place"))
+
 
         place_data_with_score['photos'] = fetch_google_place_image(place_data.get('place'))
 

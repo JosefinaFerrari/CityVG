@@ -315,3 +315,60 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
 
     return response.text
 
+
+def fetch_opening_hours(place_name):
+    """
+    Fetch opening hours for a place using Google Places API.
+
+    Args:
+        place_name (str): The name of the place to fetch opening hours for.
+
+    Returns:
+        dict: A dictionary with the opening hours or an error message if not found.
+    """
+    # Google Places API key
+    GOOGLE_API_KEY = settings.GOOGLE_PLACES_API_KEY
+
+    # Step 1: Use Place Search API to find the place ID
+    search_url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
+    search_params = {
+        "input": place_name,
+        "inputtype": "textquery",
+        "fields": "place_id",
+        "key": GOOGLE_API_KEY
+    }
+
+    try:
+        search_response = requests.get(search_url, params=search_params)
+        search_response.raise_for_status()
+        search_data = search_response.json()
+
+        if search_data.get("status") == "OK" and search_data.get("candidates"):
+            place_id = search_data["candidates"][0]["place_id"]
+        else:
+            return {"error": "Place not found"}
+
+    except Exception as e:
+        return {"error": f"Error fetching place ID: {e}"}
+
+    # Step 2: Use Place Details API to fetch opening hours
+    details_url = "https://maps.googleapis.com/maps/api/place/details/json"
+    details_params = {
+        "place_id": place_id,
+        "fields": "opening_hours",
+        "key": GOOGLE_API_KEY
+    }
+
+    try:
+        details_response = requests.get(details_url, params=details_params)
+        details_response.raise_for_status()
+        details_data = details_response.json()
+
+        if details_data.get("status") == "OK" and details_data.get("result"):
+            opening_hours = details_data["result"].get("opening_hours", {})
+            return opening_hours  # Return opening hours directly
+        else:
+            return {"error": "Opening hours not available"}
+
+    except Exception as e:
+        return {"error": f"Error fetching opening hours: {e}"}
