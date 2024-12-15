@@ -2,9 +2,111 @@ import requests
 from django.conf import settings
 import os
 import json
+from django.conf import settings
+from google.ai.generativelanguage_v1beta.types import content
 import google.generativeai as genai
 
 # Documentation for google places nearby search https://developers.google.com/maps/documentation/places/web-service/nearby-search?hl=it
+
+from django.conf import settings
+import requests
+import os
+
+def fetch_unsplash_image(query):
+    """
+    Fetch the first image URL from Unsplash for a given query.
+
+    Args:
+        query (str): Search term for the image (e.g., "Eiffel Tower").
+    
+    Returns:
+        str: URL of the first image or a placeholder URL if no images are found.
+    """
+    UNSPLASH_API_KEY = settings.UNSPLASH_API_KEY  # Use settings to load the API key
+
+    print(f"Loaded API Key: {UNSPLASH_API_KEY}")  # Debugging: print the loaded API key
+
+    api_url = f"https://api.unsplash.com/search/photos?query={query}"
+
+    headers = {
+        'Authorization': f'Client-ID {UNSPLASH_API_KEY}',
+    }
+
+    try:
+        response = requests.get(api_url, headers=headers)
+        response.raise_for_status()  
+        data = response.json()
+
+        if data['results']:
+            return data['results'][0]['urls']['regular']
+    except Exception as e:
+        print(f"Error fetching image from Unsplash: {e}")
+
+    return "https://via.placeholder.com/300"
+
+
+def fetch_google_place_image(query):
+    # Google Places API key
+    GOOGLE_API_KEY = settings.GOOGLE_PLACES_API_KEY
+
+
+    google_api_url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
+    google_params = {
+        "input": query,
+        "inputtype": "textquery",
+        "fields": "name,photos",
+        "key": GOOGLE_API_KEY
+    }
+
+    try:
+        google_response = requests.get(google_api_url, params=google_params)
+        google_response.raise_for_status()
+        google_data = google_response.json()
+
+        if google_data.get("status") == "OK" and google_data.get("candidates"):
+            # Extract photo reference from the first candidate
+            photos = google_data["candidates"][0].get("photos", [])
+            if photos:
+                # Build the photo URL using the photo reference
+                photo_reference = photos[0]["photo_reference"]
+                photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={GOOGLE_API_KEY}"
+                return photo_url
+    except Exception as e:
+        print(f"Error fetching place details from Google Places API: {e}")
+
+    return "https://via.placeholder.com/300"
+
+
+def fetch_google_image(query):
+    google_api_url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
+    google_params = {
+        "input": query,
+        "inputtype": "textquery",
+        "fields": "name,photos",
+        "key": settings.GOOGLE_PLACES_API_KEY
+    }
+
+    try:
+        # Call the Google Places API
+        google_response = requests.get(google_api_url, params=google_params)
+        google_response.raise_for_status()
+        google_data = google_response.json()
+
+        if google_data.get("status") == "OK" and google_data.get("candidates"):
+            # Extract photo reference from the first candidate
+            photos = google_data["candidates"][0].get("photos", [])
+            if photos:
+                # Build the photo URL using the photo reference
+                photo_reference = photos[0]["photo_reference"]
+                photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={GOOGLE_API_KEY}"
+                return photo_url
+    except Exception as e:
+        print(f"Error fetching place details from Google Places API: {e}")
+
+    # Return a placeholder image if no photos are available or errors occur
+    return "https://via.placeholder.com/300"
+
+
  
 def get_places(lat, lng, radius, categories=None):
     '''
@@ -12,6 +114,7 @@ def get_places(lat, lng, radius, categories=None):
     '''
     api_url = "https://places.googleapis.com/v1/places:searchNearby"
 
+    print(f"Fetching places for lat={lat}, lng={lng}, radius={radius}, categories={categories}")
     # Define the JSON body of the request
     request_body = {
         "locationRestriction": {
@@ -40,7 +143,7 @@ def get_places(lat, lng, radius, categories=None):
             "aquarium"
         ],
         "maxResultCount": 20,
-        "rankPreference": "POPULARITY"  # Removed as it's not supported in Nearby Search (New)
+        "rankPreference": "POPULARITY" 
     }
 
     # Apply categories filter if provided
@@ -48,7 +151,7 @@ def get_places(lat, lng, radius, categories=None):
         request_body["includedTypes"] = categories
 
     # FieldMask to specify the fields to return (displayName is essential)
-    field_mask = "places.name,places.displayName,places.shortFormattedAddress,places.location,places.types,places.rating,places.regularOpeningHours"
+    field_mask = "places.name,places.displayName,places.shortFormattedAddress,places.location,places.types,places.rating,places.regularOpeningHours,places.userRatingCount,places.formattedAddress,places.photos"
 
     # Headers, including the API key and FieldMask
     headers = {
@@ -68,7 +171,7 @@ def get_places(lat, lng, radius, categories=None):
             return {'error': 'Failed to fetch data from Places API', 'status_code': response.status_code}
     except Exception as e:
         return {'error': str(e)}
-
+    
 def get_tiqets_products(lat, lng, radius, page=1, page_size=100):
     """
     Fetch products (attractions, events, etc.) from the Tiqets API based on location and radius.
@@ -113,21 +216,73 @@ def get_tiqets_products(lat, lng, radius, page=1, page_size=100):
     except Exception as e:
         return {'error': str(e)}
 
-def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num_seniors, num_adults, num_youth, num_children, budget, places):
+def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num_seniors, num_adults, 
+                       num_youth, num_children, budget, places, required_places, removed_places, categories):
     genai.configure(api_key=settings.GEMINI_API_KEY)
 
+    # Create the model
     generation_config = {
-    "temperature": 0.5,
+    "temperature": 0.6,
     "top_p": 0.95,
     "top_k": 40,
     "max_output_tokens": 8192,
+    "response_schema": content.Schema(
+        type = content.Type.OBJECT,
+        enum = [],
+        required = ["response"],
+        properties = {
+        "response": content.Schema(
+            type = content.Type.OBJECT,
+            enum = [],
+            required = ["itineraries"],
+            properties = {
+            "itineraries": content.Schema(
+                type = content.Type.ARRAY,
+                items = content.Schema(
+                type = content.Type.OBJECT,
+                enum = [],
+                required = ["itineraryName", "attractions"],
+                properties = {
+                    "itineraryName": content.Schema(
+                    type = content.Type.STRING,
+                    ),
+                    "attractions": content.Schema(
+                    type = content.Type.ARRAY,
+                    items = content.Schema(
+                        type = content.Type.OBJECT,
+                        enum = [],
+                        required = ["name", "startingHour", "endingHour", "day"],
+                        properties = {
+                        "name": content.Schema(
+                            type = content.Type.STRING,
+                        ),
+                        "startingHour": content.Schema(
+                            type = content.Type.STRING,
+                        ),
+                        "endingHour": content.Schema(
+                            type = content.Type.STRING,
+                        ),
+                        "day": content.Schema(
+                            type = content.Type.STRING,
+                        ),
+                        },
+                    ),
+                    ),
+                },
+                ),
+            ),
+            },
+        ),
+        },
+    ),
     "response_mime_type": "application/json",
     }
 
+    
     model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
     generation_config=generation_config,
-    system_instruction="Consider a scenario in which a user wants to visit a place for a given number of days X. You will receive a JSON containing a list of attractions to visit in a city and also the preferences selected by a user. These preferences may include factors such as price range, the number of participants, the trip duration, and a sublist of places the user wants to visit for sure. Based on this information, you must return 3 different itineraries. An itinerary lasts X days and starts when the user arrives (time of arrival) and ends when he/she departs (time of departure). \nEach itinerary should include the places you consider the best to visit, based on reviews and ratings of those places. Arrange the places in an order that allows the user to visit them in the most efficient way. In addition, for each attraction, make an estimation of average time spent to visit the attraction and assign the starting Hours (that is when the visit starts )and ending Hours (that is when the visit should finish). You must schedule each visit to ensure there is some spare time (of at least an hour) between any two consecutive visits. Give a name to each generated itinerary.\All the places will also have a list of available products (such as tours or visits to a place). If there are multiple products, select the one that fits better based on the user preferences. If there are products that include multiple attractions do not consider them (for example a package of tours). Each place has to have the chosen product between the given ones.\n\nThe returned JSON must follow this structure: {\"itineraries\": [{\"itineraryName\", \"attractions\": [{\"name\", \"productName\"(optional), \"startingHour\", \"endingHour\", \"day\"}]]}",
+    system_instruction="Scenario: A user wants to visit a city for a specific number of days. \n\nYour Goal: Generate 3 distinct itineraries, each tailored to the user's preferences and requirements.\n\nYou will receive an object with the following fields:\nInput Fields:\n1. City: Latitude and longitude (lat, lng) of the city.\n2. Arrival Date: Arrival date and hour.\n3. Departure Date: Departure date and hour.\n4. Number of Days: The number of days the trip should last, taking into consideration the given dates.\n5. Number of Travelers: Seniors (65+), Adults (24–65), Youth (13–24), Children (<13).\n6. Budget: User's preference (Cheap, Balanced, Luxury or Flexible).\n7. Places: A JSON of all available attractions in the city , where each place includes:\n\ta. Name: name of the place (you should refer to a place using this field when returning the selected attractions).\n\tb. Associated Product: Details about a purchasable product related to the attraction, such as tours, museum visits, or activities (Not all the attractions will have an associated product).\n\tc. Summary: Information about the product.\n\td. Price of the product.\n7. Required attractions: attractions that must be included.\n8. Removed attractions: attractions that must be excluded.\n9. Categories: the categories the user has selected as preferences\n\nRequirements:\n1. The itineraries must cover all available days from arrival to departure. (example: if a user arrives 2024-10-22 12:00:00 and departures 2024-10-25 18:00:00 the first visit must start at 2024-10-22 12:00:00 and the last visit must end at 2024-10-25 18:00:00. All the other visits must be included between start date and end date).\n2. Ensure to use all the time the user has to visit the city, also the day of the departure if possible.\n3. All itineraries must Include attractions in required_places and exclude attractions in removed_places.\n4. Select additional attractions based on reviews, ratings, and user preferences.\n5. Focus on different themes for each itinerary (e.g., cultural, historical, adventure, entertainment). Select based on the age group of the traveller.\n6. Schedule at least 1 or 2 hour of spare time between consecutive visits, that is time for travel and breaks.\n7. If you select a place, the visit will be based on the product associated, so be aware of what the product includes and take into consideration the product summary and information.\n\nFor each itinerary you must retrieve these informations: \n1. itineraryName: Assign a unique and meaningful name to each itinerary that reflects its theme, focus, or style (e.g., 'Cultural Escapade', 'Adventure Highlights', 'Relaxed Retreat'). Avoid generic names such as 'Itinerary 1' or 'Itinerary 2'.\n2. list of attractions with: \n\ta. Name: the name of the attraction must be equal to Attraction Name, you can’t change it. (Example: If you receive a list with a place: 'Duomo di Milano’ and you want to use it, in the name you must put 'Duomo di Milano', without any changes).\n\tb. Starting Hour and EndingHour: Specify the starting and ending times for each attraction visit in the format HH:MM. Consider an average range of duration for each attractions (example: if it’s a museum minimum 3 hours, if it’s a dinnerShow minimum 3-4 hours). Consider also that some attractions must be done at specific range of time (example: a dinner should start between 19 and 23).\n\tc. Day: the day in which the visit is scheduled "
     )
 
     chat_session = model.start_chat(
@@ -135,21 +290,28 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
     ]
     )
 
-    places_str = json.dumps(places)
-    
+    num_days = (end_date - start_date).days + 1
+
+    start_date = f"{start_date} at {start_hour}"
+    end_date = f"{end_date} at {end_hour}"
+
     input = (
         f'City: lat={lat} lng={lng}\n'
-        f'Start Date: {start_date}\n'
-        f'End Date: {end_date}\n'
-        f'Start Hour: {start_hour}\n'
-        f'End Hour: {end_hour}\n'
+        f'Arrival Date and Hour: {start_date}\n'
+        f'Departure Date and Hour: {end_date}\n'
+        f'Number of days: {num_days}'
         f'Number of Seniors: {num_seniors}\n'
         f'Number of Adults: {num_adults}\n'
         f'Number of Youth: {num_youth}\n'
         f'Number of Children: {num_children}\n'
         f'Budget: {budget}\n'
-        f'Places: {places_str}'
+        f'Places: {places}\n'
+        f'Required places: {required_places}\n'
+        f'Removed places: {removed_places}\n'
+        f'Categories: {categories}\n'
     )
+
     response = chat_session.send_message(input)
 
     return response.text
+
