@@ -195,7 +195,7 @@ def get_places_info(merged_data, budget):
                     'price': product['price'],
                     'summary': product['summary'],
                 })
-
+                
     return places
 
 # Get the product that fits the user's budget

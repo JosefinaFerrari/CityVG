@@ -330,11 +330,11 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
         4. Number of Travelers: Seniors (65+), Adults (24-65), Youth (13-24), Children (<13).
         5. Budget: User's preference (Cheap, Balanced, Luxury or Flexible).
         6. Places: A list of all available attractions in the city, where each place includes:
-            a. Attraction Name: name of the place.
+            a. name: name of the place (You must refer to the place using this name).
                 Some places will also include:
-            b. Associated Product: Details about a purchasable product related to the attraction, such as tours, museum visits, or activities.
-            c. What's included: List of items included in the product.
-            d. Price of the product.
+            b. product_title: the name of a purchasable product related to the attraction, such as tours, museum visits, or activities.
+            c. summary: List of items included in the product.
+            d. price: Price of the product.
         7. Required attractions: attractions that must be included.
         8. Removed attractions: attractions that must be excluded.
         9. Categories: the categories the user has selected, the chosen attraction must be of those categories
