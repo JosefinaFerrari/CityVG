@@ -238,6 +238,7 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
                     attraction.update({
                         "lat": lat,
                         "lng": lng,
+                        "photos": merged_places_x_tiqets[name].get('photos', []),  
                     })
 
             else:
@@ -941,13 +942,15 @@ def get_top10(request):
         recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
 
         place_data_with_score = place_data.copy()
-        place_data_with_score['product'] = get_product(list(place_data['products'].values()), budget)
-        place_data_with_score.pop('products', None)
+        if place_data.get('products') != {}:
+            place_data_with_score['product'] = get_product(list(place_data['products'].values()), budget)
+            place_data_with_score.pop('products', None)
+        else:
+            place_data_with_score['photos'] = fetch_google_place_image(place_data.get('place'))
+
         place_data_with_score['recommended_score'] = recommendation_score
         place_data_with_score['categories'] = categories
         place_data_with_score['currentOpeningHours'] = fetch_opening_hours(place_data.get("place"))
-
-        place_data_with_score['photos'] = fetch_google_place_image(place_data.get('place'))
 
         recommendations.append(place_data_with_score)
 
