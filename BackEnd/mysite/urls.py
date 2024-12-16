@@ -21,6 +21,7 @@ from core.views import places
 from core.views import get_itinerary
 from core.views import get_recommendations
 from core.views import get_top10
+from core.views import tags
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +30,5 @@ urlpatterns = [
     path('generate/', get_itinerary, name='get_itinerary'),
     path('recommendations/',get_recommendations, name="get_recommendations"),
     path('get_top10/', get_top10, name='get_top10'),
+    path('tags/', tags, name='tags')
 ]

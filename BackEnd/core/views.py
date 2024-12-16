@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from .utils import get_tiqets_products  # Import the function from utils.py
 from .utils import get_places  # Import the function from utils.py
 from .utils import generate_itinerary  # Import the function from utils.py
+from .utils import get_tags
 from rapidfuzz import fuzz
 import json
 from geopy.distance import geodesic
@@ -42,6 +43,29 @@ category_mapping = {
     "Local Cuisine": ["fine_dining_restaurant", "local_cuisine", "regional_restaurant", "bistro"]
 }
 
+tiqets_category_mapping = {
+  "Monument": ["440", "444", "436", "443"],
+  "Museum": ["442"],
+  "Art Gallery": ["442"],
+  "Amusement Park": ["434"],
+  "Zoo": ["449"],
+  "Aquarium": ["449"],
+  "Botanical Garden": ["439"],
+  "Wildlife Park": ["439"],
+  "Park": ["439"],
+  "Restaurant": ["601"],
+  "Local Cuisine": ["601"],
+  "Stadium": ["447"],
+  "Playground": ["599"],
+  "Theater": ["438"],
+  "Cinema": ["438"]
+}
+
+tiqets_remove_categories = ["500", "468"]
+
+def get_associated_categories(categories, mapping):
+    return [subcategory for category in categories if category in mapping for subcategory in mapping[category]]
+
 def places(request):
     """
     Fetch places from Google Places API and return them as JSON.
@@ -65,6 +89,9 @@ def places(request):
 
     return JsonResponse(places_data, safe=False)
 
+def tags(request):
+    return JsonResponse(get_tags(), safe=False)
+
 def fetch_places(lat, lng, radius, categories):
     return get_places(lat, lng, radius, categories).get('places', [])
 
@@ -84,10 +111,13 @@ def get_itinerary(request):
         lat = float(request.GET.get('lat', 0))
         lng = float(request.GET.get('lng', 0))
         radius = int(request.GET.get('radius', 5000))  # Default radius = 5000 meters
-        categories = request.GET.getlist('categories', [])  # Fetch as list if provided
-        
-        mapped_categories = [category_mapping.get(cat, [cat]) for cat in categories]
-        mapped_categories = [cat for sublist in mapped_categories for cat in sublist]
+        categories = request.GET.get('categories', '')  # Retrieve the value as a string
+        categories_list = [category.strip() for category in categories.split(',')] if categories else []
+
+
+        mapped_categories = get_associated_categories(categories_list, category_mapping)
+        tiqets_categories = get_associated_categories(categories_list, tiqets_category_mapping)
+
         start_date = datetime.strptime(request.GET.get('start_date'), "%Y-%m-%d")
         end_date = datetime.strptime(request.GET.get('end_date'), "%Y-%m-%d")
         start_time = datetime.strptime(request.GET.get('start_time'), "%H:%M")
@@ -136,7 +166,8 @@ def get_itinerary(request):
             lat, lng, start_day, end_day, start_hour, end_hour,
             num_seniors, num_adults, num_youth, num_children, budget, places_info, required_places, removed_places, categories
         )
-     
+
+        # Debugging information
         final_output = merge_gemini_places(merged_data, itinerary, budget, lat, lng)
 
         return JsonResponse(final_output, safe=False)
@@ -188,24 +219,27 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
             time = attraction["startingHour"]
 
             if name in merged_places_x_tiqets:
-                url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
-                url += f"?selected_date={date}"
+                products = merged_places_x_tiqets[name].get('products', {})
 
-                #unsplash_image = fetch_unsplash_image(name)
-
-                if merged_places_x_tiqets[name]['products'] != {}:
-                    product = get_product(list(merged_places_x_tiqets[name]['products'].values()), budget)
+                if products:
+                    product = get_product(list(products.values()), budget)
+                    url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
+                    url += f"?selected_date={date}"
                     product["product_checkout_url"] = url
-                else: 
-                    product = None
-                
-                attraction.update({
-                    "lat": merged_places_x_tiqets[name]["lat"],
-                    "lng": merged_places_x_tiqets[name]["lng"],
-                    "city": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['city'],
-                    "country": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['country'],
-                    "product": product,
-                })
+
+                    attraction.update({
+                        "lat": merged_places_x_tiqets[name]["lat"],
+                        "lng": merged_places_x_tiqets[name]["lng"],
+                        "city": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['city'],
+                        "country": merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['country'],
+                        "product": product,
+                    })
+                else:
+                    attraction.update({
+                        "lat": lat,
+                        "lng": lng,
+                    })
+
             else:
                 attraction.update({
                     "lat": lat,
@@ -244,37 +278,35 @@ def merge_places_tiqets(places_data, tiqets_data):
     for place_name, place in places_dict.items():
         for venue_name, venue_info in grouped_products.items():
             score = match_score(venue_info, place)
-            if score > 0.7:
-              unsplash_image = fetch_unsplash_image(place['displayName']['text'])
-              
-            merged[place_name] = {
-                'place': place_name,
-                'lat': place['location']['latitude'],
-                'lng': place['location']['longitude'],
-                'photos': place.get('photos', []),
-                'unsplash_image': unsplash_image,  # Add Unsplash image
-                'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
-                'venue': venue_info.get('name'),
-                'categories': place.get('types', []),
-                'rating': place.get('rating', 'N/A'),
-                'num_reviews': place.get('userRatingCount', 'N/A'),
-                'products': {product['title']: {
-                        'title': product.get('title', 'N/A'),
-                        'price': product.get('price', 'N/A'),
-                        'summary': product.get('tagline', 'N/A'),
-                        'city': product.get('city_name', 'N/A'),
-                        'country': product.get('country_name', 'N/A'),
-                        'product_checkout_url': product.get('product_checkout_url', 'N/A'),
-                        'rating': product['ratings'].get('average', 'N/A'),
-                        'description': product.get('tagline', ''),
-                        'images': product.get('images', []),
-                        'whats_included': product.get('whats_included', 'N/A'),
-                        'sale_status': product.get('sale_status', 'N/A'),
-                        } for product in grouped_products[venue_info.get('name')].get('products')}
-            }
 
-            venue_to_remove.add(venue_name)
-            break
+            if score > 0.7:
+                merged[place_name] = {
+                    'place': place_name,
+                    'lat': place['location']['latitude'],
+                    'lng': place['location']['longitude'],
+                    'photos': place.get('photos', []),
+                    'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
+                    'venue': venue_info.get('name'),
+                    'categories': place.get('types', []),
+                    'rating': place.get('rating', 'N/A'),
+                    'num_reviews': place.get('userRatingCount', 'N/A'),
+                    'products': {product['title']: {
+                            'title': product.get('title', 'N/A'),
+                            'price': product.get('price', 'N/A'),
+                            'summary': product.get('tagline', 'N/A'),
+                            'city': product.get('city_name', 'N/A'),
+                            'country': product.get('country_name', 'N/A'),
+                            'product_checkout_url': product.get('product_checkout_url', 'N/A'),
+                            'rating': product['ratings'].get('average', 'N/A'),
+                            'description': product.get('tagline', ''),
+                            'images': product.get('images', []),
+                            'whats_included': product.get('whats_included', 'N/A'),
+                            'sale_status': product.get('sale_status', 'N/A'),
+                            } for product in grouped_products[venue_info.get('name')].get('products')}
+                }
+
+                venue_to_remove.add(venue_name)
+                break
 
                 
                 # Delete marked venues after iteration
@@ -284,8 +316,6 @@ def merge_places_tiqets(places_data, tiqets_data):
     # Add remaining Places that did not match any venue
     for place_name, place in places_dict.items():
         if place_name not in merged:
-            print(place_name)
-
             merged[place_name] = {
                 'place': place_name,
                 'lat': place['location']['latitude'],
@@ -302,7 +332,7 @@ def merge_places_tiqets(places_data, tiqets_data):
     for venue_name, venue_info in grouped_products.items():
         average_rating = get_average_rating_from_tiqets(venue_info.get('products'))
         total_ratings = get_amount_of_rating_from_tiqets(venue_info.get('products'))
-        
+
         merged[venue_name] = {
             'place': venue_name,
             'lat': venue_info['lat'],
@@ -342,12 +372,22 @@ def group_products_by_venue(products):
 
     for product in products:
         # Extract venue info
+        isValid = True
+
         venue = product.get('venue', {})
         venue_name = venue.get('name', "Unknown Venue")
         address = venue.get('address', "Unknown Address")
         city_name = product.get('city_name', "Unknown City")
         lat, lng = product['geolocation'].get('lat'), product['geolocation'].get('lng')
-            
+        tag_ids = product.get('tag_ids', [])
+
+        for tag_id in tag_ids:
+            if tag_id in tiqets_remove_categories:
+                isValid = False
+        
+        if not isValid:
+            continue
+
         # Group by venue name, initializing the venue entry if necessary
         venue_info = grouped_products.setdefault(venue_name, {
             'name': venue_name,
@@ -359,6 +399,8 @@ def group_products_by_venue(products):
         })
         
         venue_info['products'].append(product)
+
+    print("Number of places from tiqets: ", len(grouped_products))
 
     return grouped_products
 
@@ -756,7 +798,7 @@ def recommend(lat, lng, radius, start_date, end_date, categories, budget):
         recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
 
         # *** Added Unsplash Integration ***
-        unsplash_image = fetch_unsplash_image(tiqetXplace.get('place'))
+        #unsplash_image = fetch_unsplash_image(tiqetXplace.get('place'))
 
         recommendations.append({
             'type': 'tiqetsXplaces',
@@ -765,7 +807,7 @@ def recommend(lat, lng, radius, start_date, end_date, categories, budget):
             'average_price': tiqetXplace.get('average_price'),
             'recommended_score': recommendation_score,
             'saved': True,
-            'image': unsplash_image  # Add Unsplash image to the response
+            #'image': unsplash_image  # Add Unsplash image to the response
         })
 
     for place in merged_data.get("places_only"):
@@ -905,10 +947,7 @@ def get_top10(request):
         place_data_with_score['categories'] = categories
         place_data_with_score['currentOpeningHours'] = fetch_opening_hours(place_data.get("place"))
 
-
         place_data_with_score['photos'] = fetch_google_place_image(place_data.get('place'))
-
-
 
         recommendations.append(place_data_with_score)
 

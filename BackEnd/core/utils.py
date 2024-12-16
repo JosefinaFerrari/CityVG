@@ -114,7 +114,6 @@ def get_places(lat, lng, radius, categories=None):
     '''
     api_url = "https://places.googleapis.com/v1/places:searchNearby"
 
-    print(f"Fetching places for lat={lat}, lng={lng}, radius={radius}, categories={categories}")
     # Define the JSON body of the request
     request_body = {
         "locationRestriction": {
@@ -150,6 +149,8 @@ def get_places(lat, lng, radius, categories=None):
     if categories:
         request_body["includedTypes"] = categories
 
+    print(f"Request Body: {request_body}")
+
     # FieldMask to specify the fields to return (displayName is essential)
     field_mask = "places.name,places.displayName,places.shortFormattedAddress,places.location,places.types,places.rating,places.regularOpeningHours,places.userRatingCount,places.formattedAddress,places.photos"
 
@@ -166,12 +167,46 @@ def get_places(lat, lng, radius, categories=None):
 
         # Check if the response status is OK
         if response.status_code == 200:
+            places = response.json().get("places", [])
+
+            if(len(places) < 5):
+                print("Less than 5 places found, expanding search radius")
+                return get_places(lat, lng, radius)
+            
             return response.json()
         else:
             return {'error': 'Failed to fetch data from Places API', 'status_code': response.status_code}
     except Exception as e:
         return {'error': str(e)}
-    
+
+def get_tags():
+    api_url = "https://api.tiqets.com/v2/tags"
+
+    # Headers for the API request
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Token {settings.TIQETS_API_KEY}",  # Using the API key from settings
+    }
+
+    params = {
+        'lang': "en",
+        'page_size': 100,
+        'page': 1,
+        'type_name': 'main_category'
+    }
+
+    try:
+        # Make the GET request to the Tiqets API
+        response = requests.get(api_url, headers=headers, params=params)
+        
+        # Check if the response status is OK
+        if response.status_code == 200:
+            return response.json()  # Return the JSON response with the data
+        else:
+            return {'error': 'Failed to fetch data from Tiqets API', 'status_code': response.status_code}
+    except Exception as e:
+        return {'error': str(e)}
+
 def get_tiqets_products(lat, lng, radius, page=1, page_size=100):
     """
     Fetch products (attractions, events, etc.) from the Tiqets API based on location and radius.
