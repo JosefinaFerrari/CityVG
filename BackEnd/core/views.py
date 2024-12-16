@@ -238,7 +238,7 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
                     attraction.update({
                         "lat": lat,
                         "lng": lng,
-                        "photos": merged_places_x_tiqets[name].get('photos', []),  
+                        "photos": fetch_google_place_image(name),  
                     })
 
             else:
