@@ -730,9 +730,9 @@ def calculate_place_common_categories(place_categories, user_preferred_categorie
 
 
 def calculate_weighted_rating(rating, num_reviews, global_average_rating, min_reviews=10):
-
-    if num_reviews == 0:
-        return 0
+    if num_reviews == 0 or rating is None:
+        print(f"There are no reviews. However, it has a global rating of: {global_average_rating}")
+        return global_average_rating
 
     weighted_rating = (rating * num_reviews + global_average_rating * min_reviews) / (num_reviews + min_reviews)
     return weighted_rating
