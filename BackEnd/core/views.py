@@ -980,6 +980,7 @@ def get_top10(request):
         place_data_with_score = {
             'place': place_name,
             'photos': [],
+            'products': place_data.get('products', {}),
             'product_photos': {},
         }
 
