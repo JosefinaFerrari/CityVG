@@ -149,8 +149,6 @@ def get_places(lat, lng, radius, categories=None):
     if categories:
         request_body["includedTypes"] = categories
 
-    print(f"Request Body: {request_body}")
-
     # FieldMask to specify the fields to return (displayName is essential)
     field_mask = "places.name,places.displayName,places.shortFormattedAddress,places.location,places.types,places.rating,places.regularOpeningHours,places.userRatingCount,places.formattedAddress,places.photos"
 
@@ -344,7 +342,7 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
         2. Ensure to use all the time the user has to visit the city, also the day of the departure if possible.
         3. All itineraries must Include attractions in required_places and exclude attractions in removed_places. The attractions in required_places do do not have to be necessarily at the beginning of the itinerary, but can be also put in the middle or at the end of the itineray.
         4. Select additional attractions based on reviews, ratings, and user preferences.
-        5. Focus on different themes for each itinerary (e.g., cultural, historical, adventure, entertainment). Select based on the age group of the traveller.
+        5. Focus on different themes for each itinerary (e.g., cultural, historical, adventure, entertainment). Select based on the age group of the traveller. Don't include the same attraction in multiple itineraries (except for the required ones which should be in all the itineraries).
         6. Always schedule at least 1 or 2 hour of spare time between consecutive visits, that is time for travel and breaks.
         7. If you select a place, the visit will be based on the product associated, so be aware of what the product includes and take into consideration the product summary and information.
         8. The attractions must be selected based on the categories the user chosen (e.g., if the user has selected the category 'Stadium', each itinerary must contain at least one attraction belonging to the 'Stadium' Category). There must be at least one attraction per category in all itineraries. The categories of the attractions should be inferred from their name and summary.
@@ -352,7 +350,7 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
         For each itinerary you must retrieve these informations: 
         1. itineraryName: Assign a unique and meaningful name to each itinerary that reflects its theme, focus, or style (e.g., 'Cultural Escapade', 'Adventure Highlights', 'Relaxed Retreat'). Avoid generic names such as 'Itinerary 1' or 'Itinerary 2'.
         2. list of attractions with: 
-            a. Name: the name of the attraction must be equal to Attraction Name, you can’t change it. (Example: If you receive a list with a place: 'Duomo di Milano’ and you want to use it, in the name you must put 'Duomo di Milano', without any changes).
+            a. Name: the name of the attraction must be equal to the 'name' field of the place, you can’t change it. (Example: If you receive a list with a place: 'Duomo di Milano’ and you want to use it, in the name you must put 'Duomo di Milano', without any changes).
             b. Starting Hour and EndingHour: Specify the starting and ending times for each attraction visit in the format HH:MM. Consider an average range of duration for each attractions (example: if it's a museum minimum 3 hours, if it's a dinnerShow minimum 3-4 hours). Consider also that some attractions must be done at specific range of time (example: a dinner should start between 19 and 23). Remember that at least 1 or 2 hours of spare time should be scheduled between two consecutive visits. Do not schedule visits after the departure hour of the user.
             c. Day: the day in which the visit is scheduled
     """
