@@ -21,7 +21,7 @@ category_mapping = {
     "Art Gallery": ["art_gallery"],
     "Museum": ["museum"],
     "Monument": ["monument", "cultural_landmark", "historical_place"],
-    "Theater": ["performing_arts_theater", "auditorium", "opera_house", "amphitheatre"],
+    "Theater": ["performing_arts_theater", "auditorium"],
     "Cinema": ["movie_theater"],
     "Water Park": ["water_park"],
     "Amusement Park": ["amusement_park", "roller_coaster"],
@@ -33,14 +33,14 @@ category_mapping = {
     "Botanical Garden": ["botanical_garden"],
     "Stadium": ["stadium", "arena", "sports_complex", "athletic_field"],
     "Playground": ["playground"],
-    "Hiking Area": ["hiking_area", "adventure_sports_center", "off_roading_area"],
+    "Hiking Area": ["hiking_area"],
     "Karaoke": ["karaoke"],
     "Comedy Club": ["comedy_club"],
     "Night Club": ["night_club", "dance_hall"],
     "Casino": ["casino"],
     "Restaurant": ["restaurant", "cafe", "fast_food_restaurant"],
     "Steak House": ["steak_house", "bar_and_grill"],
-    "Local Cuisine": ["fine_dining_restaurant", "local_cuisine", "regional_restaurant", "bistro"]
+    "Local Cuisine": ["fine_dining_restaurant"]
 }
 
 tiqets_category_mapping = {
@@ -303,6 +303,7 @@ def merge_places_tiqets(places_data, tiqets_data):
                             'images': product.get('images', []),
                             'whats_included': product.get('whats_included', 'N/A'),
                             'sale_status': product.get('sale_status', 'N/A'),
+                            'tag_ids': product.get('tag_ids', []),
                             } for product in grouped_products[venue_info.get('name')].get('products')}
                 }
 
@@ -333,7 +334,7 @@ def merge_places_tiqets(places_data, tiqets_data):
     for venue_name, venue_info in grouped_products.items():
         average_rating = get_average_rating_from_tiqets(venue_info.get('products'))
         total_ratings = get_amount_of_rating_from_tiqets(venue_info.get('products'))
-
+        
         merged[venue_name] = {
             'place': venue_name,
             'lat': venue_info['lat'],
@@ -356,6 +357,7 @@ def merge_places_tiqets(places_data, tiqets_data):
                     'images': product.get('images', []),
                     'whats_included': product.get('whats_included', 'N/A'),
                     'sale_status': product.get('sale_status', 'N/A'),
+                    'tag_ids': product.get('tag_ids', []),
                     } for product in venue_info.get('products')}
         }
 
@@ -771,6 +773,28 @@ def calculate_place_common_categories(place_categories, user_preferred_categorie
         return len(common) / len(user_preferred_categories)
     return 0
 
+'''
+def calculate_tiqets_common_categories(products, user_preferred_categories):
+    categories = set()
+
+    for product, product_info in products.items():
+        for tag_id in product_info.get('tag_ids', []):
+            if tag_id not in categories:
+                categories.add(tag_id)
+
+    print("Categories: ", categories)
+
+    if (len(user_preferred_categories)>0):
+        user_preferred_categories_set = set(user_preferred_categories)
+
+        common = user_preferred_categories_set.intersection(categories)
+
+        print("Common: ", common)
+        
+        return len(common) / len(user_preferred_categories)
+    
+    return 0
+'''
 
 def calculate_weighted_rating(rating, num_reviews, global_average_rating, min_reviews=10):
 
@@ -908,7 +932,11 @@ def get_top10(request):
         lat = float(request.GET.get('lat', 0))
         lng = float(request.GET.get('lng', 0))
         radius = int(request.GET.get('radius', 5000))  # Default radius = 5000 meters
-        categories = request.GET.getlist('categories', [])  # Fetch as list if provided
+        categories = request.GET.get('categories', '')  # Retrieve the value as a string
+        categories_list = [category.strip() for category in categories.split(',')] if categories else []
+
+        mapped_categories = get_associated_categories(categories_list, category_mapping)
+        tiqets_categories = get_associated_categories(categories_list, tiqets_category_mapping)
         start_date = datetime.strptime(request.GET.get('start_date'), "%Y-%m-%d")
         end_date = datetime.strptime(request.GET.get('end_date'), "%Y-%m-%d")
         budget = request.GET.get('budget', '').lower()  # Normalize budget string
@@ -921,36 +949,41 @@ def get_top10(request):
     except (ValueError, TypeError) as e:
         return JsonResponse({'error': f'Invalid input: {str(e)}'}, status=400)
     
-    places_data = get_places(lat, lng, radius, categories).get("places", [])
+    places_data = get_places(lat, lng, radius, mapped_categories).get("places", [])
+    print("Places retrieved: ",len(places_data))
     tiqets_data = get_tiqets_products(lat, lng, radius).get("products", [])
 
-    merged_data = merge_places_tiqets(places_data, tiqets_data)
+    filtered_tiqets_data = filter_tiqets_data(tiqets_data, tiqets_categories)
+
+    if len(filtered_tiqets_data) == 0:
+        merged_data = merge_places_tiqets(places_data, tiqets_data)
+    else:
+        merged_data = merge_places_tiqets(places_data, filtered_tiqets_data)
 
     recommendations = []
 
     for place_name, place_data in merged_data.items():
         rating = place_data.get('rating', 0) # rating value between 0 and 5
         num_reviews = place_data.get('num_reviews', 0)
-        global_average_rating = sum(item['rating'] for item in merged_data.values() if item['rating']) / len(merged_data)
+        
+        global_average_rating = sum(float(item['rating']) for item in merged_data.values() if 'rating' in item and isinstance(item['rating'], (int, float, str)) and item['rating']) / len(merged_data)
+        
         weighted_rating = calculate_weighted_rating(rating, num_reviews, global_average_rating)
         
         normalized_rating = weighted_rating / 5 # rating value between 0 and 1
 
-        category_score = calculate_place_common_categories(place_data.get('categories', []), categories) # category accuracy value between 0 and 1
-        
+        category_score = calculate_place_common_categories(place_data.get('categories', []), mapped_categories) # category accuracy value between 0 and 1
+
         recommendation_score = 0
         recommendation_score = (normalized_rating * 0.35) + (category_score * 0.65)
 
-        place_data_with_score = place_data.copy()
-        if place_data.get('products') != {}:
-            place_data_with_score['product'] = get_product(list(place_data['products'].values()), budget)
-            place_data_with_score.pop('products', None)
-        else:
-            place_data_with_score['photos'] = fetch_google_place_image(place_data.get('place'))
+        place_data_with_score = {
+            'place': place_name,
+            'photos': [],
+            'product_photos': {},
+        }
 
         place_data_with_score['recommended_score'] = recommendation_score
-        place_data_with_score['categories'] = categories
-        place_data_with_score['currentOpeningHours'] = fetch_opening_hours(place_data.get("place"))
 
         recommendations.append(place_data_with_score)
 
@@ -958,4 +991,33 @@ def get_top10(request):
         recommendations, key=lambda rec: rec["recommended_score"], reverse=True
     )[:10]
 
+    for rec in top_recommendations:
+        if rec.get('products') != {}:
+            product = get_product(list(place_data['products'].values()), budget)
+
+            rec['product_photos'] = product.get('images', [])
+            
+            rec.pop('products', None)
+        else:
+            rec['photos'] = fetch_google_place_image(place_data.get('place'))
+
     return JsonResponse(top_recommendations, safe=False)
+
+def filter_tiqets_data(tiqets_data, categories):
+    """
+    Filter Tiqets data based on the provided categories.
+    Args:
+        tiqets_data (list): A list of dictionaries containing Tiqets venue information.
+        categories (list): A list of categories to filter by.
+    Returns:
+        list: A filtered list of Tiqets venues that match the categories.
+    """
+    filtered_data = []
+
+    for product in tiqets_data:
+        if any(category in product.get('tag_ids', []) for category in categories):
+            filtered_data.append(product)
+    
+    return filtered_data
+
+
