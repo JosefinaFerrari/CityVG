@@ -61,7 +61,7 @@ tiqets_category_mapping = {
   "Cinema": ["438"]
 }
 
-tiqets_remove_categories = ["500", "468"]
+tiqets_remove_categories = ["500", "468", "437", "599", "601"]
 
 def get_associated_categories(categories, mapping):
     return [subcategory for category in categories if category in mapping for subcategory in mapping[category]]
@@ -222,7 +222,11 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
                 products = merged_places_x_tiqets[name].get('products', {})
 
                 if products:
-                    product = get_product(list(products.values()), budget)
+                    if len(products) > 1:
+                        product = get_product(list(products.values()), budget)
+                    else:
+                        product = list(products.values())[0]
+
                     url = merged_places_x_tiqets[name]['products'][list(merged_places_x_tiqets[name]['products'].keys())[0]]['product_checkout_url']
                     url += f"?selected_date={date}"
                     product["product_checkout_url"] = url
@@ -957,7 +961,8 @@ def get_top10(request):
         return JsonResponse({'error': f'Invalid input: {str(e)}'}, status=400)
     
     places_data = get_places(lat, lng, radius, mapped_categories).get("places", [])
-    print("Places retrieved: ",len(places_data))
+    tiqets_categories = list(set(tiqets_categories))
+    
     tiqets_data = get_tiqets_products(lat, lng, radius).get("products", [])
 
     filtered_tiqets_data = filter_tiqets_data(tiqets_data, tiqets_categories)
@@ -1000,14 +1005,20 @@ def get_top10(request):
     )[:10]
 
     for rec in top_recommendations:
+        products = rec.get('products', {})
+
         if rec.get('products') != {}:
-            product = get_product(list(place_data['products'].values()), budget)
+            if len(products) > 1:
+                product = get_product(list(place_data['products'].values()), budget)
+            else:
+                product = list(products.values())[0]
 
             rec['product_photos'] = product.get('images', [])
-            
             rec.pop('products', None)
         else:
             rec['photos'] = fetch_google_place_image(rec['place'])
+            rec.pop('products', None)
+
 
     return JsonResponse(top_recommendations, safe=False)
 
