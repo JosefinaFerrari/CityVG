@@ -314,7 +314,7 @@ def merge_places_tiqets(places_data, tiqets_data):
                 # Delete marked venues after iteration
         for venue_name in venue_to_remove:
             grouped_products.pop(venue_name, None)
-    
+    #places.accessibilityOptions,places.allowsDogs,places.editorialSummary,places.reviews
     # Add remaining Places that did not match any venue
     for place_name, place in places_dict.items():
         if place_name not in merged:
@@ -328,8 +328,12 @@ def merge_places_tiqets(places_data, tiqets_data):
                 'categories': place.get('types', []),
                 'rating': place.get('rating', 'N/A'),
                 'num_reviews': place.get('userRatingCount', 'N/A'),
+                'accessibilityOptions': place.get('accessibilityOptions', 'N/A'),
+                'editorialSummary': place.get('editorialSummary', 'N/A'),
+                'reviews': place.get('reviews', [])[:2],
                 'products': {}
             }
+
     # Add remaining Tiqets venues that did not match any place
     for venue_name, venue_info in grouped_products.items():
         average_rating = get_average_rating_from_tiqets(venue_info.get('products'))
@@ -1000,7 +1004,7 @@ def get_top10(request):
             
             rec.pop('products', None)
         else:
-            rec['photos'] = fetch_google_place_image(place_data.get('place'))
+            rec['photos'] = fetch_google_place_image(rec['place'])
 
     return JsonResponse(top_recommendations, safe=False)
 
