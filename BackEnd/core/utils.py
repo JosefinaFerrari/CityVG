@@ -204,6 +204,7 @@ def get_tags():
     except Exception as e:
         return {'error': str(e)}
 
+'''
 def get_tiqets_products(lat, lng, radius, page=1, page_size=100):
     """
     Fetch products (attractions, events, etc.) from the Tiqets API based on location and radius.
@@ -247,6 +248,80 @@ def get_tiqets_products(lat, lng, radius, page=1, page_size=100):
             return {'error': 'Failed to fetch data from Tiqets API', 'status_code': response.status_code}
     except Exception as e:
         return {'error': str(e)}
+'''
+
+def get_tiqets_products(lat, lng, radius, num_days, tag_ids=[], page_size=100):
+    """
+    Fetch all products (attractions, events, etc.) from the Tiqets API based on location and radius.
+
+    Args:
+        lat (float): Latitude of the location.
+        lng (float): Longitude of the location.
+        radius (int): Maximum search radius in meters.
+        page_size (int, optional): Number of results per page. Defaults to 100.
+
+    Returns:
+        list: List of all product data from Tiqets API.
+    """
+    api_url = "https://api.tiqets.com/v2/products"
+    
+    # Headers for the API request
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Token {settings.TIQETS_API_KEY}",  # Using the API key from settings
+    }
+    
+    # Initialize variables
+    all_products = []
+    page = 1  # Start with the first page
+    
+    pages = 1
+    if num_days > 5:
+        pages = 2
+    elif num_days > 14:
+        pages = 3
+    
+    for i in range(pages):
+        # Parameters for the API request
+        params = {
+            "lat": lat,
+            "lng": lng,
+            "max_distance": radius,
+            "sort": "popularity desc",  # Sorting by popularity in descending order
+            "page": page,
+            "page_size": page_size,
+        }
+        
+        try:
+            # Make the GET request to the Tiqets API
+            response = requests.get(api_url, headers=headers, params=params)
+            
+            # Check if the response status is OK
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Add the products from the current page to the list
+                products = data.get("products", [])
+                all_products.extend(products)
+                
+                # Check if we have fetched all pages
+                if len(products) < page_size:  # Last page will have fewer items
+                    break
+                else:
+                    page += 1  # Move to the next page
+            else:
+                print(f"Error: Failed to fetch data (Status Code: {response.status_code})")
+                break
+        except Exception as e:
+            print(f"Exception occurred: {str(e)}")
+            break
+    # Convert all_products to a dictionary
+    products_data = {
+        "products": all_products,
+        "total": len(all_products),
+    }
+    
+    return products_data
 
 def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num_seniors, num_adults, 
                        num_youth, num_children, budget, places, required_places, removed_places, categories):
