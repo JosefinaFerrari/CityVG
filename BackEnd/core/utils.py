@@ -49,7 +49,6 @@ def fetch_google_place_image(query):
     # Google Places API key
     GOOGLE_API_KEY = settings.GOOGLE_PLACES_API_KEY
 
-
     google_api_url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
     google_params = {
         "input": query,
@@ -150,7 +149,7 @@ def get_places(lat, lng, radius, categories=None):
         request_body["includedTypes"] = categories
 
     # FieldMask to specify the fields to return (displayName is essential)
-    field_mask = "places.name,places.displayName,places.shortFormattedAddress,places.location,places.types,places.rating,places.regularOpeningHours,places.userRatingCount,places.formattedAddress,places.photos"
+    field_mask = "places.name,places.displayName,places.shortFormattedAddress,places.location,places.types,places.rating,places.regularOpeningHours,places.userRatingCount,places.formattedAddress,places.photos,places.accessibilityOptions,places.allowsDogs,places.editorialSummary,places.reviews"
 
     # Headers, including the API key and FieldMask
     headers = {

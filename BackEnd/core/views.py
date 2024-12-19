@@ -193,7 +193,7 @@ def get_places_info(merged_data, budget):
                     'name': place_name,
                     'product_title': product['title'],
                     'price': product['price'],
-                    'summary': product['summary'],
+                    'summary': product['description'],
                 })
                 
     return places
@@ -291,10 +291,12 @@ def merge_places_tiqets(places_data, tiqets_data):
                     'categories': place.get('types', []),
                     'rating': place.get('rating', 'N/A'),
                     'num_reviews': place.get('userRatingCount', 'N/A'),
+                    'accessibilityOptions': place.get('accessibilityOptions', 'N/A'),
+                    'editorialSummary': place.get('editorialSummary', 'N/A'),
                     'products': {product['title']: {
                             'title': product.get('title', 'N/A'),
                             'price': product.get('price', 'N/A'),
-                            'summary': product.get('tagline', 'N/A'),
+                            'summary': product.get('summary', 'N/A'),
                             'city': product.get('city_name', 'N/A'),
                             'country': product.get('country_name', 'N/A'),
                             'product_checkout_url': product.get('product_checkout_url', 'N/A'),
@@ -304,6 +306,7 @@ def merge_places_tiqets(places_data, tiqets_data):
                             'whats_included': product.get('whats_included', 'N/A'),
                             'sale_status': product.get('sale_status', 'N/A'),
                             'tag_ids': product.get('tag_ids', []),
+                            'wheelchair_access': product.get('wheelchair_access', 'N/A'),
                             } for product in grouped_products[venue_info.get('name')].get('products')}
                 }
 
@@ -314,7 +317,7 @@ def merge_places_tiqets(places_data, tiqets_data):
                 # Delete marked venues after iteration
         for venue_name in venue_to_remove:
             grouped_products.pop(venue_name, None)
-    
+    #places.accessibilityOptions,places.allowsDogs,places.editorialSummary,places.reviews
     # Add remaining Places that did not match any venue
     for place_name, place in places_dict.items():
         if place_name not in merged:
@@ -328,8 +331,11 @@ def merge_places_tiqets(places_data, tiqets_data):
                 'categories': place.get('types', []),
                 'rating': place.get('rating', 'N/A'),
                 'num_reviews': place.get('userRatingCount', 'N/A'),
+                'accessibilityOptions': place.get('accessibilityOptions', 'N/A'),
+                'editorialSummary': place.get('editorialSummary', 'N/A'),
                 'products': {}
             }
+
     # Add remaining Tiqets venues that did not match any place
     for venue_name, venue_info in grouped_products.items():
         average_rating = get_average_rating_from_tiqets(venue_info.get('products'))
@@ -358,6 +364,7 @@ def merge_places_tiqets(places_data, tiqets_data):
                     'whats_included': product.get('whats_included', 'N/A'),
                     'sale_status': product.get('sale_status', 'N/A'),
                     'tag_ids': product.get('tag_ids', []),
+                    'wheelchair_access': product.get('wheelchair_access', 'N/A'),
                     } for product in venue_info.get('products')}
         }
 
@@ -1000,7 +1007,7 @@ def get_top10(request):
             
             rec.pop('products', None)
         else:
-            rec['photos'] = fetch_google_place_image(place_data.get('place'))
+            rec['photos'] = fetch_google_place_image(rec['place'])
 
     return JsonResponse(top_recommendations, safe=False)
 
