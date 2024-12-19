@@ -1014,7 +1014,7 @@ def get_top10(request):
 
         if rec.get('products') != {}:
             if len(products) > 1:
-                product = get_product(list(place_data['products'].values()), budget)
+                product = get_product(list(rec['products'].values()), budget)
             else:
                 product = list(products.values())[0]
 
