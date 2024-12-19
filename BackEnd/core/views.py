@@ -193,7 +193,7 @@ def get_places_info(merged_data, budget):
                     'name': place_name,
                     'product_title': product['title'],
                     'price': product['price'],
-                    'summary': product['summary'],
+                    'summary': product['description'],
                 })
                 
     return places
@@ -291,10 +291,12 @@ def merge_places_tiqets(places_data, tiqets_data):
                     'categories': place.get('types', []),
                     'rating': place.get('rating', 'N/A'),
                     'num_reviews': place.get('userRatingCount', 'N/A'),
+                    'accessibilityOptions': place.get('accessibilityOptions', 'N/A'),
+                    'editorialSummary': place.get('editorialSummary', 'N/A'),
                     'products': {product['title']: {
                             'title': product.get('title', 'N/A'),
                             'price': product.get('price', 'N/A'),
-                            'summary': product.get('tagline', 'N/A'),
+                            'summary': product.get('summary', 'N/A'),
                             'city': product.get('city_name', 'N/A'),
                             'country': product.get('country_name', 'N/A'),
                             'product_checkout_url': product.get('product_checkout_url', 'N/A'),
@@ -304,6 +306,7 @@ def merge_places_tiqets(places_data, tiqets_data):
                             'whats_included': product.get('whats_included', 'N/A'),
                             'sale_status': product.get('sale_status', 'N/A'),
                             'tag_ids': product.get('tag_ids', []),
+                            'wheelchair_access': product.get('wheelchair_access', 'N/A'),
                             } for product in grouped_products[venue_info.get('name')].get('products')}
                 }
 
@@ -330,7 +333,6 @@ def merge_places_tiqets(places_data, tiqets_data):
                 'num_reviews': place.get('userRatingCount', 'N/A'),
                 'accessibilityOptions': place.get('accessibilityOptions', 'N/A'),
                 'editorialSummary': place.get('editorialSummary', 'N/A'),
-                'reviews': place.get('reviews', [])[:2],
                 'products': {}
             }
 
@@ -362,6 +364,7 @@ def merge_places_tiqets(places_data, tiqets_data):
                     'whats_included': product.get('whats_included', 'N/A'),
                     'sale_status': product.get('sale_status', 'N/A'),
                     'tag_ids': product.get('tag_ids', []),
+                    'wheelchair_access': product.get('wheelchair_access', 'N/A'),
                     } for product in venue_info.get('products')}
         }
 
