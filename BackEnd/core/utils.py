@@ -49,8 +49,6 @@ def fetch_google_place_image(query):
     # Google Places API key
     GOOGLE_API_KEY = settings.GOOGLE_PLACES_API_KEY
 
-    print("Query:", query)
-
     google_api_url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
     google_params = {
         "input": query,
@@ -163,8 +161,6 @@ def get_places(lat, lng, radius, categories=None):
     try:
         # Make the POST request
         response = requests.post(api_url, json=request_body, headers=headers)
-
-        print(response.json())
 
         # Check if the response status is OK
         if response.status_code == 200:
