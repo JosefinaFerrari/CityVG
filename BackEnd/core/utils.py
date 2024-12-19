@@ -204,7 +204,7 @@ def get_tags():
     except Exception as e:
         return {'error': str(e)}
 
-
+'''
 def get_tiqets_products(lat, lng, radius, page=1, page_size=100):
     """
     Fetch products (attractions, events, etc.) from the Tiqets API based on location and radius.
@@ -248,9 +248,8 @@ def get_tiqets_products(lat, lng, radius, page=1, page_size=100):
             return {'error': 'Failed to fetch data from Tiqets API', 'status_code': response.status_code}
     except Exception as e:
         return {'error': str(e)}
-
-
 '''
+
 def get_tiqets_products(lat, lng, radius, num_days, tag_ids=[], page_size=100):
     """
     Fetch all products (attractions, events, etc.) from the Tiqets API based on location and radius.
@@ -276,7 +275,13 @@ def get_tiqets_products(lat, lng, radius, num_days, tag_ids=[], page_size=100):
     all_products = []
     page = 1  # Start with the first page
     
-    for i in range(2):
+    pages = 1
+    if num_days > 5:
+        pages = 2
+    elif num_days > 14:
+        pages = 3
+    
+    for i in range(pages):
         # Parameters for the API request
         params = {
             "lat": lat,
@@ -317,7 +322,6 @@ def get_tiqets_products(lat, lng, radius, num_days, tag_ids=[], page_size=100):
     }
     
     return products_data
-'''
 
 def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num_seniors, num_adults, 
                        num_youth, num_children, budget, places, required_places, removed_places, categories):
