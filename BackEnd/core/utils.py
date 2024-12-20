@@ -416,10 +416,11 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
         2. Ensure to use all the time the user has to visit the city, also the day of the departure if possible.
         3. All itineraries must Include attractions in required_places and exclude attractions in removed_places. The attractions in required_places do do not have to be necessarily at the beginning of the itinerary, but can be also put in the middle or at the end of the itineray.
         4. Select additional attractions based on reviews, ratings, and user preferences.
-        5. Focus on different themes for each itinerary (e.g., cultural, historical, adventure, entertainment). Select based on the age group of the traveller. Don't include the same attraction in multiple itineraries (except for the required ones which should be in all the itineraries).
+        5. Focus on different themes for each itinerary (e.g., cultural, historical, adventure, entertainment). Select based on the age group of the traveller. 
         6. Always schedule at least 1 or 2 hour of spare time between consecutive visits, that is time for travel and breaks.
         7. If you select a place, the visit will be based on the product associated, so be aware of what the product includes and take into consideration the product summary and information.
         8. The attractions must be selected based on the categories the user chosen (e.g., if the user has selected the category 'Stadium', each itinerary must contain at least one attraction belonging to the 'Stadium' Category). There must be at least one attraction per category in all itineraries. The categories of the attractions should be inferred from their name and summary.
+        9. Itineraries must be different from each other and ensure variability of attractions and themes. Don't include the same attraction in multiple itineraries (except for the required ones which should be in all the itineraries). For example, if one itinerary already includes a visit to the 'Eiffel Tower', the other itineraries must not include a visit to the 'Eiffel Tower'. If an attraction is already present in one itinerary, it should not be included in the other itineraries.
 
         For each itinerary you must retrieve these informations: 
         1. itineraryName: Assign a unique and meaningful name to each itinerary that reflects its theme, focus, or style (e.g., 'Cultural Escapade', 'Adventure Highlights', 'Relaxed Retreat'). Avoid generic names such as 'Itinerary 1' or 'Itinerary 2'.
