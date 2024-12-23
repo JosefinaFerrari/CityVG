@@ -149,7 +149,7 @@ def get_places(lat, lng, radius, categories=None):
         request_body["includedTypes"] = categories
 
     # FieldMask to specify the fields to return (displayName is essential)
-    field_mask = "places.name,places.displayName,places.shortFormattedAddress,places.location,places.types,places.rating,places.regularOpeningHours,places.userRatingCount,places.formattedAddress,places.photos,places.accessibilityOptions,places.allowsDogs,places.editorialSummary,places.reviews"
+    field_mask = "places.name,places.addressComponents,places.displayName,places.shortFormattedAddress,places.location,places.types,places.rating,places.regularOpeningHours,places.userRatingCount,places.formattedAddress,places.photos,places.accessibilityOptions,places.allowsDogs,places.editorialSummary,places.reviews"
 
     # Headers, including the API key and FieldMask
     headers = {

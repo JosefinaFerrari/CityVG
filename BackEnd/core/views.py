@@ -243,10 +243,15 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
                         "product": product,
                     })
                 else:
+                    city = merged_places_x_tiqets[name].get('city', 'N/A')
+                    country = merged_places_x_tiqets[name].get('country', 'N/A')
+    
                     attraction.update({
                         "lat": lat,
                         "lng": lng,
-                        "photos": fetch_google_place_image(name),  
+                        "photos": fetch_google_place_image(name),
+                        "city": city,
+                        "country": country,
                     })
 
             else:
@@ -327,12 +332,22 @@ def merge_places_tiqets(places_data, tiqets_data):
             grouped_products.pop(venue_name, None)
     #places.accessibilityOptions,places.allowsDogs,places.editorialSummary,places.reviews
     # Add remaining Places that did not match any venue
-    for place_name, place in places_dict.items():
+    for place_name, place in places_dict.items():    
         if place_name not in merged:
+            addressComponents = place.get('addressComponents', [])
+            
+            for component in addressComponents:
+                if 'country' in component['types']:
+                    country = component['longText']
+                if 'locality' in component['types']:
+                    city = component['longText']
+
             merged[place_name] = {
                 'place': place_name,
                 'lat': place['location']['latitude'],
                 'lng': place['location']['longitude'],
+                'city': city,
+                'country': country,
                 'photos': place.get('photos', []),
                 'currentOpeningHours': place.get('currentOpeningHours', 'N/A'),
                 'venue': 'N/A',
