@@ -247,11 +247,13 @@ def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat
                     country = merged_places_x_tiqets[name].get('country', 'N/A')
     
                     attraction.update({
-                        "lat": lat,
-                        "lng": lng,
+                        "lat": merged_places_x_tiqets[name]["lat"],
+                        "lng": merged_places_x_tiqets[name]["lng"],
                         "photos": fetch_google_place_image(name),
                         "city": city,
                         "country": country,
+                        "accessibilityOptions": merged_places_x_tiqets[name].get('accessibilityOptions', 'N/A'),
+                        "editorialSummary": merged_places_x_tiqets[name].get('editorialSummary', 'N/A'),
                     })
 
             else:
@@ -335,7 +337,7 @@ def merge_places_tiqets(places_data, tiqets_data):
     for place_name, place in places_dict.items():    
         if place_name not in merged:
             addressComponents = place.get('addressComponents', [])
-            
+
             for component in addressComponents:
                 if 'country' in component['types']:
                     country = component['longText']
