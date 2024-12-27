@@ -1000,7 +1000,10 @@ def get_top10(request):
         rating = place_data.get('rating', 0) # rating value between 0 and 5
         num_reviews = place_data.get('num_reviews', 0)
         
-        global_average_rating = sum(float(item['rating']) for item in merged_data.values() if 'rating' in item and isinstance(item['rating'], (int, float, str)) and item['rating']) / len(merged_data)
+        if num_reviews == 'N/A':
+            num_reviews = 0
+
+        global_average_rating = sum(float(item['rating']) for item in merged_data.values() if 'rating' in item and isinstance(item['rating'], (int, float)) and item['rating']) / len(merged_data)
         
         weighted_rating = calculate_weighted_rating(rating, num_reviews, global_average_rating)
         
