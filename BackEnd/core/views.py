@@ -966,17 +966,21 @@ def get_top10(request):
         radius = int(request.GET.get('radius', 5000))  # Default radius = 5000 meters
         categories = request.GET.get('categories', '')  # Retrieve the value as a string
         categories_list = [category.strip() for category in categories.split(',')] if categories else []
-
+        start_time = datetime.strptime(request.GET.get('start_time'), "%H:%M")
+        end_time = datetime.strptime(request.GET.get('end_time'), "%H:%M")
         mapped_categories = get_associated_categories(categories_list, category_mapping)
         tiqets_categories = get_associated_categories(categories_list, tiqets_category_mapping)
         start_date = datetime.strptime(request.GET.get('start_date'), "%Y-%m-%d")
         end_date = datetime.strptime(request.GET.get('end_date'), "%Y-%m-%d")
+
         budget = request.GET.get('budget', '').lower()  # Normalize budget string
 
         num_days = (end_date - start_date).days + 1
         # Validate logical constraints
-        if start_date >= end_date:
+        if start_date > end_date:
             return JsonResponse({'error': 'start_date must be before end_date.'}, status=400)
+        if start_date.date() == end_date.date() and start_time.time() >= end_time.time():
+            return JsonResponse({'error': 'start_time must be before end_time on the same day.'}, status=400)
         if radius <= 0:
             return JsonResponse({'error': 'radius must be a positive integer.'}, status=400)
     except (ValueError, TypeError) as e:
