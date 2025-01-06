@@ -338,10 +338,12 @@ def merge_places_tiqets(places_data, tiqets_data):
         if place_name not in merged:
             addressComponents = place.get('addressComponents', [])
 
+            print("Address Components: ", addressComponents)
+
             for component in addressComponents:
                 if 'country' in component['types']:
                     country = component['longText']
-                if 'locality' in component['types']:
+                if 'locality' in component['types'] or 'postal_town' in component['types']:
                     city = component['longText']
 
             merged[place_name] = {
