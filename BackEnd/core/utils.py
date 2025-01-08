@@ -73,7 +73,7 @@ def fetch_google_place_image(query):
     except Exception as e:
         print(f"Error fetching place details from Google Places API: {e}")
 
-    return "https://via.placeholder.com/300"
+    return ""
 
 
 def fetch_google_image(query):
