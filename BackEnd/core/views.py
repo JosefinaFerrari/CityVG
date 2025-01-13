@@ -8,6 +8,7 @@ from .utils import get_tiqets_products  # Import the function from utils.py
 from .utils import get_places  # Import the function from utils.py
 from .utils import generate_itinerary  # Import the function from utils.py
 from .utils import get_tags
+from .utils import fetch_city_image
 from rapidfuzz import fuzz
 import json
 from geopy.distance import geodesic
@@ -62,6 +63,19 @@ tiqets_category_mapping = {
 }
 
 tiqets_remove_categories = ["500", "468", "437", "599", "601"]
+
+def city_image(request):
+    """
+    Fetch an image of a city based on the name provided in the request.
+    Example: /city-image/?city_name=Paris
+    """
+    city_name = request.GET.get("city_name", None)
+    
+    if not city_name:
+        return JsonResponse({"error": "city_name parameter is required."}, status=400)
+    # Fetch city image
+    result = fetch_city_image(city_name)
+    return JsonResponse(result)
 
 def get_associated_categories(categories, mapping):
     return [subcategory for category in categories if category in mapping for subcategory in mapping[category]]
