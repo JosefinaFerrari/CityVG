@@ -19,8 +19,9 @@ from django.urls import path
 from core.views import tiqets
 from core.views import places
 from core.views import get_itinerary
-from core.views import get_recommendations, get_recommendations_top_10
+from core.views import get_recommendations
 from core.views import get_top10
+from core.views import tags
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,6 +29,6 @@ urlpatterns = [
     path('places/', places, name='places'),
     path('generate/', get_itinerary, name='get_itinerary'),
     path('recommendations/',get_recommendations, name="get_recommendations"),
-    path('recommendations_top_10/',get_recommendations_top_10, name="get_recommendations_top_10"),
     path('get_top10/', get_top10, name='get_top10'),
+    path('tags/', tags, name='tags')
 ]
