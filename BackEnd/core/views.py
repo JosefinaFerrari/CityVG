@@ -12,6 +12,7 @@ import json
 from geopy.distance import geodesic
 from core.utils import fetch_unsplash_image
 import threading
+from .utils import fetch_city_image
 
 
 # Define the mapping dictionary
@@ -40,6 +41,21 @@ category_mapping = {
     "Steak House": ["steak_house", "bar_and_grill"],
     "Local Cuisine": ["fine_dining_restaurant", "local_cuisine", "regional_restaurant", "bistro"]
 }
+
+def city_image(request):
+    """
+    Fetch an image of a city based on the name provided in the request.
+    Example: /city-image/?city_name=Paris
+    """
+    city_name = request.GET.get("city_name", None)
+    
+    if not city_name:
+        return JsonResponse({"error": "city_name parameter is required."}, status=400)
+
+    # Fetch city image
+    result = fetch_city_image(city_name)
+    return JsonResponse(result)
+
 
 def places(request):
     """
@@ -789,15 +805,11 @@ def recommend(lat, lng, radius, start_date, end_date, categories, budget):
             'image': unsplash_image  # Add Unsplash image to the response
         })
 
-    tiqets_only = merged_data.get("tiqets_only", [])
-    if tiqets_only:
-        global_average_rating = sum(item['tiqets_average_rating']
-                                    for item in tiqets_only
-                                    if item['tiqets_average_rating']) / len(tiqets_only)
-    else:
-        global_average_rating = 0  # Safeguard against division by zero
+    global_average_rating = sum(item['tiqets_average_rating']
+                                for item in merged_data.get("tiqets_only")
+                                if item['tiqets_average_rating']) / len(merged_data.get("tiqets_only"))
 
-    for tiqet in tiqets_only:
+    for tiqet in merged_data.get("tiqets_only"):
         rating = tiqet.get('tiqets_average_rating', 0)  # rating value between 0 and 10
         total_ratings = tiqet.get('total_ratings')
         weighted_rating = calculate_weighted_rating(rating, total_ratings, global_average_rating)
@@ -832,14 +844,13 @@ def recommend(lat, lng, radius, start_date, end_date, categories, budget):
     return top_recommendations
 
 
-from core.utils import fetch_unsplash_image 
 
 def get_recommendations(request):
     """
     Fetch places from Google Places API and return them as JSON.
     Example URL: http://127.0.0.1:8000/recommendations/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-29T10:00:00&end_date=2024-11-30T18:00:00&categories=Museums%20and%20Galleries,Historical%20Sites&budget=Cheap
     """
-
+    # Extract query parameters from the request
     lat = request.GET.get('lat')
     lng = request.GET.get('lng')
     radius = request.GET.get('radius')
@@ -847,7 +858,6 @@ def get_recommendations(request):
     end_date = request.GET.get('end_date')
     categories = request.GET.get('categories', [])
     budget = request.GET.get('budget')
-    city_name = request.GET.get('city')  
 
     try:
         lat = float(lat)
@@ -860,17 +870,7 @@ def get_recommendations(request):
 
     recomendations = recommend(lat, lng, radius, start_date, end_date, categories, budget)
 
-
-    image_url = fetch_unsplash_image(city_name) if city_name else None
-
-    response_data = {
-        "city": city_name,
-        "image": image_url,
-        "recommendations": recomendations, 
-    }
-
-    return JsonResponse(response_data, safe=False)
-
+    return JsonResponse(recomendations, safe=False)
 
 def merge_places_tiqets_top_10(places_data, tiqets_data):
     # Group products by venue
@@ -1148,3 +1148,6 @@ def get_top10(request):
     )[:10]
 
     return JsonResponse(top_recommendations, safe=False)
+
+
+

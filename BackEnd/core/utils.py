@@ -12,6 +12,45 @@ from django.conf import settings
 import requests
 import os
 
+def fetch_city_image(city_name):
+    """
+    Fetch an image for a city using the Google Places API.
+
+    Args:
+        city_name (str): Name of the city.
+    
+    Returns:
+        dict: A dictionary containing the city name and the image URL.
+    """
+    api_key = settings.GOOGLE_PLACES_API_KEY
+    search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+    photo_url = "https://maps.googleapis.com/maps/api/place/photo"
+    
+ 
+    params = {
+        "query": city_name,
+        "key": api_key,
+    }
+    try:
+        search_response = requests.get(search_url, params=params)
+        search_results = search_response.json()
+
+        if (
+            "results" in search_results
+            and len(search_results["results"]) > 0
+            and "photos" in search_results["results"][0]
+        ):
+            photo_reference = search_results["results"][0]["photos"][0]["photo_reference"]
+
+    
+            image_url = f"{photo_url}?maxwidth=800&photoreference={photo_reference}&key={api_key}"
+            return {"city_name": city_name, "image": image_url}
+    except Exception as e:
+        print(f"Error fetching city image: {e}")
+
+    return {"city_name": city_name, "image": "https://via.placeholder.com/300"}
+
+
 def fetch_unsplash_image(query):
     """
     Fetch the first image URL from Unsplash for a given query.
@@ -252,4 +291,35 @@ def generate_itinerary(lat, lng, start_date, end_date, start_hour, end_hour, num
     response = chat_session.send_message(input)
 
     return response.text
+
+def fetch_google_places_image(city_name):
+    """
+    Fetch an image for a city using the Google Places API.
+    """
+    api_key = settings.GOOGLE_PLACES_API_KEY
+    search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+    photo_url = "https://maps.googleapis.com/maps/api/place/photo"
+
+  
+    params = {
+        "query": city_name,
+        "key": api_key,
+    }
+    try:
+        search_response = requests.get(search_url, params=params)
+        search_results = search_response.json()
+
+        if (
+            "results" in search_results
+            and len(search_results["results"]) > 0
+            and "photos" in search_results["results"][0]
+        ):
+            photo_reference = search_results["results"][0]["photos"][0]["photo_reference"]
+
+            return f"{photo_url}?maxwidth=800&photoreference={photo_reference}&key={api_key}"
+    except Exception as e:
+        print(f"Error fetching Google Places data: {e}")
+
+    return "https://via.placeholder.com/300"
+
 
