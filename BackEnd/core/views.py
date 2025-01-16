@@ -218,6 +218,10 @@ def get_places_info(merged_data, budget):
 
 # Get the product that fits the user's budget
 def get_product(products, budget):
+    """
+    Selects a product from a list of products based on the given budget.
+    """
+
     if budget == 'cheap':
         return min(products, key=lambda x: x['price'])
     elif budget == 'balanced':
@@ -226,6 +230,10 @@ def get_product(products, budget):
         return max(products, key=lambda x: x['rating'])
 
 def merge_gemini_places(merged_places_x_tiqets, gemini_response_str, budget, lat, lng):
+    """
+    Merge the places from Gemini with the places retrieved from Tiqets and Places API.
+    """
+
     gemini_response = json.loads(gemini_response_str)
 
     gemini_response = gemini_response["response"]
@@ -975,6 +983,9 @@ def get_recommendations(request):
 
 # http://127.0.0.1:8000/get_top10/?lat=45.4642&lng=9.1900&radius=5&start_date=2024-11-29&end_date=2024-11-30&categories=Museums%20and%20Galleries,Historical%20Sites&budget=Cheap
 def get_top10(request):
+    """
+    Get the top 10 recommendations based on the user's preferences.
+    """
     try:
         # Extract and validate query parameters
         lat = float(request.GET.get('lat', 0))
