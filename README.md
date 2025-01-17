@@ -154,13 +154,28 @@ Make sure to have the credentials in the .env file:
 ---
 ## Troubleshooting
 
-- **Virtual Environment Activation Issues:** Ensure you are in the correct directory before activating the environment.
-- **Credential File:** Ensure you have the .env file with the API keys
+- **Virtual Environment Activation Issues:**  
+  Ensure you are in the correct directory before activating the environment. Check that you have run the command to activate the virtual environment (`Scripts\activate.bat` for Windows, or `source env/bin/activate` for macOS/Linux).
+- **Credential File:**  
+  Ensure you have the `.env` file with the required API keys (e.g., `TIQETS_API_KEY`, `GOOGLE_PLACES_API_KEY`, and `GEMINI_API_KEY`). If the file is missing or the keys are incorrect, API calls will fail.
 - **Dependency Errors:** If `pip install -r requirements.txt` fails, ensure `pip` is updated using:
 
    ```bash
    pip install --upgrade pip
    ```
+- **API Call Errors (e.g., 400 or 500 HTTP Status Codes):**  
+  - Double-check that all required parameters are included in your API requests. Missing or invalid parameters will result in errors.
+  - If you encounter a **401 Unauthorized** error, verify that your API keys are correct and have the necessary permissions.
+  - For **timeout errors**, ensure your internet connection is stable or check if the external APIs are experiencing downtime.
+
+- **Testing API Calls Directly:**  
+  You can test the APIs alone without running the entire application by using the following example endpoints:
+  - [Get Places](https://cityvg-5fcc7f07e779.herokuapp.com/places/?lat=45.4642&lng=9.1900&radius=5):  
+    `https://cityvg-5fcc7f07e779.herokuapp.com/places/?lat=45.4642&lng=9.1900&radius=5`
+  - [Get Tiqets](https://cityvg-5fcc7f07e779.herokuapp.com/tiqets/?lat=45.4642&lng=9.1900&radius=5):  
+    `https://cityvg-5fcc7f07e779.herokuapp.com/tiqets/?lat=45.4642&lng=9.1900&radius=5`
+
+    Use tools like **Postman**, **cURL**, or a browser to make requests to these URLs. These will help you verify if the backend APIs are functioning correctly.
 
 ---
 
