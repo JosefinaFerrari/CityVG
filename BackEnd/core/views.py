@@ -633,7 +633,7 @@ def tiqets(request):
         return JsonResponse({'error': 'Invalid latitude, longitude, or radius values.'}, status=400)
 
     # Fetch data from Tiqets API using the utility function
-    products_data = get_tiqets_products(lat, lng, radius)
+    products_data = get_tiqets_products(lat, lng, radius, 2)
 
     return JsonResponse(products_data)
 
