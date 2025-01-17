@@ -1,0 +1,18 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "itineraries_api",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "searchId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "itineraryName",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ]
+}
