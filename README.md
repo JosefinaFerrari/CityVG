@@ -14,8 +14,6 @@ Ensure you have the following installed:
 
 ---
 
----
-
 ## Setup and Run Instructions
 
 ### For Windows:
@@ -61,7 +59,7 @@ Ensure you have the following installed:
    ```bash
    python manage.py runserver
    ```
-
+   
    **Important:** The root URL [http://127.0.0.1:8000/](http://127.0.0.1:8000/) will not serve content. Only the endpoints are functional. Refer to the list of available endpoints below.
 
    The main endpoints are:
@@ -170,8 +168,8 @@ Make sure to have the credentials in the .env file:
 
 - The `migrate` command is necessary if your project involves a database, as it applies any changes defined in Django's models.
 - Always use the virtual environment to avoid conflicts with global Python packages.
+- Running the server allows you to test the API endpoints. You can make API calls to the endpoints listed below and view their responses in your browser or using tools like Postman or cURL
   
-
 ---
 
 ## Test Trip generation
