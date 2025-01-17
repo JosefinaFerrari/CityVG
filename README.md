@@ -1,4 +1,4 @@
-# CityVG: Guided Tour Planning Application
+# CityVG
 
 ## Overview
 
