@@ -46,8 +46,6 @@ Ensure you have the following installed:
    python manage.py migrate
    ```
 
-   _Note: This step is only required if your project uses a database and there are migrations to apply._
-
 5. **Start the Server**  
    Launch the Django development server:
 
@@ -94,8 +92,6 @@ Ensure you have the following installed:
    ```bash
    python3 manage.py migrate
    ```
-
-   _Note: This step is only required if your project uses a database and there are migrations to apply._
 
 5. **Start the Server**  
    Launch the Django development server:
