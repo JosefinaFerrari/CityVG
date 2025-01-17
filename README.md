@@ -1,5 +1,9 @@
 # CityVG
 
+This project aims to design and deliver an innovative application that enhances the experience of planning and exploring guided tours. By leveraging modern technology, the app will empower users to plan routes according to their available time and personal preferences, ensuring a customized and efficient journey.
+
+# Backend Installation and Deployment Guide
+
 This guide provides instructions to set up and run the Django server for the project. Follow the steps carefully depending on your operating system.
 
 ---
