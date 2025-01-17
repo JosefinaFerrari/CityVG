@@ -14,63 +14,79 @@ Ensure you have the following installed:
 
 ---
 
+---
+
 ## Setup and Run Instructions
 
 ### For Windows:
 
-1. **Navigate to the Backend Directory**  
-   Open a terminal and navigate to the `BackEnd` directory where the project files are located:
+1. **Clone the Repository**  
+   Open a terminal and clone the repository to your local machine:
 
    ```bash
-   cd path\to\BackEnd
+   git clone https://github.com/JosefinaFerrari/CityVG.git
    ```
 
-2. **Activate the Virtual Environment**  
+2. **Navigate to the Backend Directory**  
+   Navigate to the `BackEnd` directory where the project files are located:
+
+   ```bash
+   cd CityVG/BackEnd
+   ```
+
+3. **Activate the Virtual Environment**  
    Run the following command to activate the virtual environment:
 
    ```bash
    Scripts\activate.bat
    ```
 
-3. **Install Dependencies**  
+4. **Install Dependencies**  
    Install the required Python packages listed in `requirements.txt`:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Run Migrations (Optional)**  
+5. **Run Migrations (Optional)**  
    If there are any database migrations pending, run:
 
    ```bash
    python manage.py migrate
    ```
 
-5. **Start the Server**  
+6. **Start the Server**  
    Launch the Django development server:
 
    ```bash
    python manage.py runserver
    ```
 
-   Important: The root URL http://127.0.0.1:8000/ will not serve content. Only the endpoints are functional. Refer to the list of available endpoints below.
-   
+   **Important:** The root URL [http://127.0.0.1:8000/](http://127.0.0.1:8000/) will not serve content. Only the endpoints are functional. Refer to the list of available endpoints below.
+
    The main endpoints are:
-   - /generate/, parameters: lat, lng, radius, start_date, end_date, start_time, end_time, categories, budget, required_places, removed_places
-   - /get_top10/, parameters: lat, lng, radius, start_date, end_date, start_time, end_time, categories, budget
+   - `/generate/`, parameters: `lat`, `lng`, `radius`, `start_date`, `end_date`, `start_time`, `end_time`, `categories`, `budget`, `required_places`, `removed_places`
+   - `/get_top10/`, parameters: `lat`, `lng`, `radius`, `start_date`, `end_date`, `start_time`, `end_time`, `categories`, `budget`
 
 ---
 
 ### For macOS/Linux:
 
-1. **Navigate to the Backend Directory**  
-   Open a terminal and navigate to the `BackEnd` directory:
+1. **Clone the Repository**  
+   Open a terminal and clone the repository to your local machine:
 
    ```bash
-   cd pathTo/BackEnd
+   git clone https://github.com/JosefinaFerrari/CityVG.git
    ```
 
-2. **Create and Activate the Virtual Environment**  
+2. **Navigate to the Backend Directory**  
+   Navigate to the `BackEnd` directory:
+
+   ```bash
+   cd CityVG/BackEnd
+   ```
+
+3. **Create and Activate the Virtual Environment**  
    Create a virtual environment named `env`:
 
    ```bash
@@ -83,32 +99,33 @@ Ensure you have the following installed:
    source env/bin/activate
    ```
 
-3. **Install Dependencies**  
+4. **Install Dependencies**  
    Install the required Python packages:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Run Migrations (Optional)**  
+5. **Run Migrations (Optional)**  
    If there are any database migrations pending, run:
 
    ```bash
    python3 manage.py migrate
    ```
 
-5. **Start the Server**  
+6. **Start the Server**  
    Launch the Django development server:
 
    ```bash
    python3 manage.py runserver
    ```
 
-   Important: The root URL http://127.0.0.1:8000/ will not serve content. Only the endpoints are functional. Refer to the list of available endpoints below.
-   
+   **Important:** The root URL [http://127.0.0.1:8000/](http://127.0.0.1:8000/) will not serve content. Only the endpoints are functional. Refer to the list of available endpoints below.
+
    The main endpoints are:
-   - /generate/, parameters: lat, lng, radius, start_date, end_date, start_time, end_time, categories, budget, required_places, removed_places
-   - /get_top10/, parameters: lat, lng, radius, start_date, end_date, start_time, end_time, categories, budget
+   - `/generate/`, parameters: `lat`, `lng`, `radius`, `start_date`, `end_date`, `start_time`, `end_time`, `categories`, `budget`, `required_places`, `removed_places`
+   - `/get_top10/`, parameters: `lat`, `lng`, `radius`, `start_date`, `end_date`, `start_time`, `end_time`, `categories`, `budget`
+     
 ---
 
 ## Deployment on Heroku
