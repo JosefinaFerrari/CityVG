@@ -11,7 +11,7 @@ import 'place.dart';
 
 class FlutterFlowPlacePicker extends StatefulWidget {
   const FlutterFlowPlacePicker({
-    super.key,
+    Key? key,
     required this.iOSGoogleMapsApiKey,
     required this.androidGoogleMapsApiKey,
     required this.webGoogleMapsApiKey,
@@ -20,7 +20,7 @@ class FlutterFlowPlacePicker extends StatefulWidget {
     required this.buttonOptions,
     required this.onSelect,
     this.proxyBaseUrl,
-  });
+  }) : super(key: key);
 
   final String iOSGoogleMapsApiKey;
   final String androidGoogleMapsApiKey;
@@ -90,13 +90,13 @@ class _FFPlacePickerState extends State<FlutterFlowPlacePicker> {
     if (placeId == null) {
       return;
     }
-    GoogleMapsPlaces places = GoogleMapsPlaces(
+    GoogleMapsPlaces _places = GoogleMapsPlaces(
       apiKey: googleMapsApiKey,
       baseUrl: widget.proxyBaseUrl,
       apiHeaders: await const GoogleApiHeaders().getHeaders(),
     );
     PlacesDetailsResponse detail =
-        await places.getDetailsByPlaceId(placeId, language: languageCode);
+        await _places.getDetailsByPlaceId(placeId, language: languageCode);
     if (mounted) {
       setState(() {
         _selectedPlace = detail.result.name;

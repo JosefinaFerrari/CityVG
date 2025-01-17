@@ -11,7 +11,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 class AttractionStruct extends FFFirebaseStruct {
   AttractionStruct({
     String? name,
-    String? productName,
     LatLng? location,
     String? city,
     String? country,
@@ -25,9 +24,11 @@ class AttractionStruct extends FFFirebaseStruct {
     String? startingHour,
     String? endingHour,
     double? productPrice,
+    bool? isVisited,
+    String? wheelChairAccess,
+    String? whatsIncluded,
     FirestoreUtilData firestoreUtilData = const FirestoreUtilData(),
   })  : _name = name,
-        _productName = productName,
         _location = location,
         _city = city,
         _country = country,
@@ -41,6 +42,9 @@ class AttractionStruct extends FFFirebaseStruct {
         _startingHour = startingHour,
         _endingHour = endingHour,
         _productPrice = productPrice,
+        _isVisited = isVisited,
+        _wheelChairAccess = wheelChairAccess,
+        _whatsIncluded = whatsIncluded,
         super(firestoreUtilData);
 
   // "name" field.
@@ -49,13 +53,6 @@ class AttractionStruct extends FFFirebaseStruct {
   set name(String? val) => _name = val;
 
   bool hasName() => _name != null;
-
-  // "productName" field.
-  String? _productName;
-  String get productName => _productName ?? '';
-  set productName(String? val) => _productName = val;
-
-  bool hasProductName() => _productName != null;
 
   // "location" field.
   LatLng? _location;
@@ -158,10 +155,30 @@ class AttractionStruct extends FFFirebaseStruct {
 
   bool hasProductPrice() => _productPrice != null;
 
+  // "isVisited" field.
+  bool? _isVisited;
+  bool get isVisited => _isVisited ?? false;
+  set isVisited(bool? val) => _isVisited = val;
+
+  bool hasIsVisited() => _isVisited != null;
+
+  // "wheelChairAccess" field.
+  String? _wheelChairAccess;
+  String get wheelChairAccess => _wheelChairAccess ?? '';
+  set wheelChairAccess(String? val) => _wheelChairAccess = val;
+
+  bool hasWheelChairAccess() => _wheelChairAccess != null;
+
+  // "whatsIncluded" field.
+  String? _whatsIncluded;
+  String get whatsIncluded => _whatsIncluded ?? '';
+  set whatsIncluded(String? val) => _whatsIncluded = val;
+
+  bool hasWhatsIncluded() => _whatsIncluded != null;
+
   static AttractionStruct fromMap(Map<String, dynamic> data) =>
       AttractionStruct(
         name: data['name'] as String?,
-        productName: data['productName'] as String?,
         location: data['location'] as LatLng?,
         city: data['city'] as String?,
         country: data['country'] as String?,
@@ -175,6 +192,9 @@ class AttractionStruct extends FFFirebaseStruct {
         startingHour: data['startingHour'] as String?,
         endingHour: data['endingHour'] as String?,
         productPrice: castToType<double>(data['productPrice']),
+        isVisited: data['isVisited'] as bool?,
+        wheelChairAccess: data['wheelChairAccess'] as String?,
+        whatsIncluded: data['whatsIncluded'] as String?,
       );
 
   static AttractionStruct? maybeFromMap(dynamic data) => data is Map
@@ -183,7 +203,6 @@ class AttractionStruct extends FFFirebaseStruct {
 
   Map<String, dynamic> toMap() => {
         'name': _name,
-        'productName': _productName,
         'location': _location,
         'city': _city,
         'country': _country,
@@ -197,16 +216,15 @@ class AttractionStruct extends FFFirebaseStruct {
         'startingHour': _startingHour,
         'endingHour': _endingHour,
         'productPrice': _productPrice,
+        'isVisited': _isVisited,
+        'wheelChairAccess': _wheelChairAccess,
+        'whatsIncluded': _whatsIncluded,
       }.withoutNulls;
 
   @override
   Map<String, dynamic> toSerializableMap() => {
         'name': serializeParam(
           _name,
-          ParamType.String,
-        ),
-        'productName': serializeParam(
-          _productName,
           ParamType.String,
         ),
         'location': serializeParam(
@@ -262,17 +280,24 @@ class AttractionStruct extends FFFirebaseStruct {
           _productPrice,
           ParamType.double,
         ),
+        'isVisited': serializeParam(
+          _isVisited,
+          ParamType.bool,
+        ),
+        'wheelChairAccess': serializeParam(
+          _wheelChairAccess,
+          ParamType.String,
+        ),
+        'whatsIncluded': serializeParam(
+          _whatsIncluded,
+          ParamType.String,
+        ),
       }.withoutNulls;
 
   static AttractionStruct fromSerializableMap(Map<String, dynamic> data) =>
       AttractionStruct(
         name: deserializeParam(
           data['name'],
-          ParamType.String,
-          false,
-        ),
-        productName: deserializeParam(
-          data['productName'],
           ParamType.String,
           false,
         ),
@@ -341,6 +366,21 @@ class AttractionStruct extends FFFirebaseStruct {
           ParamType.double,
           false,
         ),
+        isVisited: deserializeParam(
+          data['isVisited'],
+          ParamType.bool,
+          false,
+        ),
+        wheelChairAccess: deserializeParam(
+          data['wheelChairAccess'],
+          ParamType.String,
+          false,
+        ),
+        whatsIncluded: deserializeParam(
+          data['whatsIncluded'],
+          ParamType.String,
+          false,
+        ),
       );
 
   @override
@@ -351,7 +391,6 @@ class AttractionStruct extends FFFirebaseStruct {
     const listEquality = ListEquality();
     return other is AttractionStruct &&
         name == other.name &&
-        productName == other.productName &&
         location == other.location &&
         city == other.city &&
         country == other.country &&
@@ -364,13 +403,15 @@ class AttractionStruct extends FFFirebaseStruct {
         day == other.day &&
         startingHour == other.startingHour &&
         endingHour == other.endingHour &&
-        productPrice == other.productPrice;
+        productPrice == other.productPrice &&
+        isVisited == other.isVisited &&
+        wheelChairAccess == other.wheelChairAccess &&
+        whatsIncluded == other.whatsIncluded;
   }
 
   @override
   int get hashCode => const ListEquality().hash([
         name,
-        productName,
         location,
         city,
         country,
@@ -383,13 +424,15 @@ class AttractionStruct extends FFFirebaseStruct {
         day,
         startingHour,
         endingHour,
-        productPrice
+        productPrice,
+        isVisited,
+        wheelChairAccess,
+        whatsIncluded
       ]);
 }
 
 AttractionStruct createAttractionStruct({
   String? name,
-  String? productName,
   LatLng? location,
   String? city,
   String? country,
@@ -402,6 +445,9 @@ AttractionStruct createAttractionStruct({
   String? startingHour,
   String? endingHour,
   double? productPrice,
+  bool? isVisited,
+  String? wheelChairAccess,
+  String? whatsIncluded,
   Map<String, dynamic> fieldValues = const {},
   bool clearUnsetFields = true,
   bool create = false,
@@ -409,7 +455,6 @@ AttractionStruct createAttractionStruct({
 }) =>
     AttractionStruct(
       name: name,
-      productName: productName,
       location: location,
       city: city,
       country: country,
@@ -422,6 +467,9 @@ AttractionStruct createAttractionStruct({
       startingHour: startingHour,
       endingHour: endingHour,
       productPrice: productPrice,
+      isVisited: isVisited,
+      wheelChairAccess: wheelChairAccess,
+      whatsIncluded: whatsIncluded,
       firestoreUtilData: FirestoreUtilData(
         clearUnsetFields: clearUnsetFields,
         create: create,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '/backend/backend.dart';
+import '/backend/schema/structs/index.dart';
+import '/backend/api_requests/api_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 
@@ -19,18 +21,18 @@ class FFAppState extends ChangeNotifier {
   Future initializePersistedState() async {
     prefs = await SharedPreferences.getInstance();
     _safeInit(() {
-      if (prefs.containsKey('ff_dataSelected')) {
-        try {
-          final serializedData = prefs.getString('ff_dataSelected') ?? '{}';
-          _dataSelected =
-              InputDataStruct.fromSerializableMap(jsonDecode(serializedData));
-        } catch (e) {
-          print("Can't decode persisted data type. Error: $e.");
-        }
-      }
+      _searchId = prefs.getString('ff_searchId') ?? _searchId;
     });
     _safeInit(() {
-      _searchId = prefs.getString('ff_searchId') ?? _searchId;
+      _savedItineraries = prefs
+              .getStringList('ff_savedItineraries')
+              ?.map((path) => path.ref)
+              .toList() ??
+          _savedItineraries;
+    });
+    _safeInit(() {
+      _currentItinerary =
+          prefs.getString('ff_currentItinerary')?.ref ?? _currentItinerary;
     });
   }
 
@@ -46,12 +48,10 @@ class FFAppState extends ChangeNotifier {
   InputDataStruct get dataSelected => _dataSelected;
   set dataSelected(InputDataStruct value) {
     _dataSelected = value;
-    prefs.setString('ff_dataSelected', value.serialize());
   }
 
   void updateDataSelectedStruct(Function(InputDataStruct) updateFn) {
     updateFn(_dataSelected);
-    prefs.setString('ff_dataSelected', _dataSelected.serialize());
   }
 
   DateTime? _startDate;
@@ -73,10 +73,141 @@ class FFAppState extends ChangeNotifier {
     prefs.setString('ff_searchId', value);
   }
 
-  LatLng? _location;
-  LatLng? get location => _location;
-  set location(LatLng? value) {
-    _location = value;
+  List<DocumentReference> _savedItineraries = [];
+  List<DocumentReference> get savedItineraries => _savedItineraries;
+  set savedItineraries(List<DocumentReference> value) {
+    _savedItineraries = value;
+    prefs.setStringList(
+        'ff_savedItineraries', value.map((x) => x.path).toList());
+  }
+
+  void addToSavedItineraries(DocumentReference value) {
+    savedItineraries.add(value);
+    prefs.setStringList(
+        'ff_savedItineraries', _savedItineraries.map((x) => x.path).toList());
+  }
+
+  void removeFromSavedItineraries(DocumentReference value) {
+    savedItineraries.remove(value);
+    prefs.setStringList(
+        'ff_savedItineraries', _savedItineraries.map((x) => x.path).toList());
+  }
+
+  void removeAtIndexFromSavedItineraries(int index) {
+    savedItineraries.removeAt(index);
+    prefs.setStringList(
+        'ff_savedItineraries', _savedItineraries.map((x) => x.path).toList());
+  }
+
+  void updateSavedItinerariesAtIndex(
+    int index,
+    DocumentReference Function(DocumentReference) updateFn,
+  ) {
+    savedItineraries[index] = updateFn(_savedItineraries[index]);
+    prefs.setStringList(
+        'ff_savedItineraries', _savedItineraries.map((x) => x.path).toList());
+  }
+
+  void insertAtIndexInSavedItineraries(int index, DocumentReference value) {
+    savedItineraries.insert(index, value);
+    prefs.setStringList(
+        'ff_savedItineraries', _savedItineraries.map((x) => x.path).toList());
+  }
+
+  DocumentReference? _currentItinerary;
+  DocumentReference? get currentItinerary => _currentItinerary;
+  set currentItinerary(DocumentReference? value) {
+    _currentItinerary = value;
+    value != null
+        ? prefs.setString('ff_currentItinerary', value.path)
+        : prefs.remove('ff_currentItinerary');
+  }
+
+  List<AttractionStruct> _listOfAttractions = [];
+  List<AttractionStruct> get listOfAttractions => _listOfAttractions;
+  set listOfAttractions(List<AttractionStruct> value) {
+    _listOfAttractions = value;
+  }
+
+  void addToListOfAttractions(AttractionStruct value) {
+    listOfAttractions.add(value);
+  }
+
+  void removeFromListOfAttractions(AttractionStruct value) {
+    listOfAttractions.remove(value);
+  }
+
+  void removeAtIndexFromListOfAttractions(int index) {
+    listOfAttractions.removeAt(index);
+  }
+
+  void updateListOfAttractionsAtIndex(
+    int index,
+    AttractionStruct Function(AttractionStruct) updateFn,
+  ) {
+    listOfAttractions[index] = updateFn(_listOfAttractions[index]);
+  }
+
+  void insertAtIndexInListOfAttractions(int index, AttractionStruct value) {
+    listOfAttractions.insert(index, value);
+  }
+
+  List<String> _removedAttractions = [];
+  List<String> get removedAttractions => _removedAttractions;
+  set removedAttractions(List<String> value) {
+    _removedAttractions = value;
+  }
+
+  void addToRemovedAttractions(String value) {
+    removedAttractions.add(value);
+  }
+
+  void removeFromRemovedAttractions(String value) {
+    removedAttractions.remove(value);
+  }
+
+  void removeAtIndexFromRemovedAttractions(int index) {
+    removedAttractions.removeAt(index);
+  }
+
+  void updateRemovedAttractionsAtIndex(
+    int index,
+    String Function(String) updateFn,
+  ) {
+    removedAttractions[index] = updateFn(_removedAttractions[index]);
+  }
+
+  void insertAtIndexInRemovedAttractions(int index, String value) {
+    removedAttractions.insert(index, value);
+  }
+
+  List<String> _requiredAttractions = [];
+  List<String> get requiredAttractions => _requiredAttractions;
+  set requiredAttractions(List<String> value) {
+    _requiredAttractions = value;
+  }
+
+  void addToRequiredAttractions(String value) {
+    requiredAttractions.add(value);
+  }
+
+  void removeFromRequiredAttractions(String value) {
+    requiredAttractions.remove(value);
+  }
+
+  void removeAtIndexFromRequiredAttractions(int index) {
+    requiredAttractions.removeAt(index);
+  }
+
+  void updateRequiredAttractionsAtIndex(
+    int index,
+    String Function(String) updateFn,
+  ) {
+    requiredAttractions[index] = updateFn(_requiredAttractions[index]);
+  }
+
+  void insertAtIndexInRequiredAttractions(int index, String value) {
+    requiredAttractions.insert(index, value);
   }
 }
 

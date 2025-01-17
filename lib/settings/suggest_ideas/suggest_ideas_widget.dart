@@ -1,9 +1,14 @@
+import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_choice_chips.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
+import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'suggest_ideas_model.dart';
 export 'suggest_ideas_model.dart';
 
@@ -43,19 +48,22 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
           automaticallyImplyLeading: false,
-          actions: const [],
+          actions: [],
           flexibleSpace: FlexibleSpaceBar(
             title: Stack(
               children: [
                 Align(
-                  alignment: const AlignmentDirectional(0.0, 1.0),
+                  alignment: AlignmentDirectional(0.0, 1.0),
                   child: Text(
                     'Your Ideas',
                     style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -68,10 +76,10 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
                   ),
                 ),
                 Align(
-                  alignment: const AlignmentDirectional(-1.0, 1.0),
+                  alignment: AlignmentDirectional(-1.0, 1.0),
                   child: Padding(
                     padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 0.0, 2.0),
+                        EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 0.0, 2.0),
                     child: InkWell(
                       splashColor: Colors.transparent,
                       focusColor: Colors.transparent,
@@ -88,7 +96,7 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(8.0),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
                             child: Image.asset(
@@ -107,7 +115,7 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
             ),
             centerTitle: true,
             expandedTitleScale: 1.0,
-            titlePadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 10.0),
+            titlePadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 10.0),
           ),
           elevation: 2.0,
         ),
@@ -124,9 +132,9 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Align(
-                          alignment: const AlignmentDirectional(0.0, 0.0),
+                          alignment: AlignmentDirectional(0.0, 0.0),
                           child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 20.0, 20.0, 20.0, 0.0),
                             child: Text(
                               'Our travelers are our greatest testimony and your ideas and suggestions bring a huge impact to improving our business. ',
@@ -149,11 +157,11 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
+                          padding: EdgeInsetsDirectional.fromSTEB(
                               0.0, 20.0, 0.0, 0.0),
                           child: Icon(
                             Icons.lightbulb_outlined,
-                            color: FlutterFlowTheme.of(context).primaryText,
+                            color: Color(0xFFFFE800),
                             size: 60.0,
                           ),
                         ),
@@ -161,193 +169,188 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
                     ),
                     Padding(
                       padding:
-                          const EdgeInsetsDirectional.fromSTEB(16.0, 20.0, 16.0, 0.0),
+                          EdgeInsetsDirectional.fromSTEB(12.0, 20.0, 12.0, 0.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Align(
-                            alignment: const AlignmentDirectional(0.0, 0.0),
-                            child: SizedBox(
-                              width: 350.0,
-                              child: TextFormField(
-                                controller: _model.taskTextController,
-                                focusNode: _model.taskFocusNode,
-                                autofocus: true,
-                                textCapitalization: TextCapitalization.words,
-                                obscureText: false,
-                                decoration: InputDecoration(
-                                  labelText: 'Suggestion...',
-                                  labelStyle: FlutterFlowTheme.of(context)
-                                      .headlineMedium
-                                      .override(
-                                        fontFamily: 'Poppins',
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        fontSize: 24.0,
-                                        letterSpacing: 0.0,
-                                      ),
-                                  hintStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        letterSpacing: 0.0,
-                                      ),
-                                  errorStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        color:
-                                            FlutterFlowTheme.of(context).error,
-                                        fontSize: 12.0,
-                                        letterSpacing: 0.0,
-                                      ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: FlutterFlowTheme.of(context)
-                                          .alternate,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: FlutterFlowTheme.of(context).error,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  focusedErrorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: FlutterFlowTheme.of(context).error,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  filled: true,
-                                  contentPadding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 20.0, 16.0, 20.0),
-                                ),
-                                style: FlutterFlowTheme.of(context)
+                            alignment: AlignmentDirectional(0.0, 0.0),
+                            child: TextFormField(
+                              controller: _model.taskTextController,
+                              focusNode: _model.taskFocusNode,
+                              autofocus: true,
+                              textCapitalization: TextCapitalization.words,
+                              obscureText: false,
+                              decoration: InputDecoration(
+                                labelText: 'Suggestion...',
+                                labelStyle: FlutterFlowTheme.of(context)
                                     .headlineMedium
                                     .override(
                                       fontFamily: 'Poppins',
-                                      letterSpacing: 0.0,
-                                    ),
-                                minLines: 1,
-                                cursorColor:
-                                    FlutterFlowTheme.of(context).primary,
-                                validator: _model.taskTextControllerValidator
-                                    .asValidator(context),
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: const AlignmentDirectional(0.0, 0.0),
-                            child: SizedBox(
-                              width: 350.0,
-                              child: TextFormField(
-                                controller: _model.descriptionTextController,
-                                focusNode: _model.descriptionFocusNode,
-                                autofocus: true,
-                                textCapitalization: TextCapitalization.words,
-                                obscureText: false,
-                                decoration: InputDecoration(
-                                  labelText: 'Description...',
-                                  labelStyle: FlutterFlowTheme.of(context)
-                                      .labelLarge
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        letterSpacing: 0.0,
-                                      ),
-                                  alignLabelWithHint: true,
-                                  hintStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        letterSpacing: 0.0,
-                                      ),
-                                  errorStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        color:
-                                            FlutterFlowTheme.of(context).error,
-                                        fontSize: 12.0,
-                                        letterSpacing: 0.0,
-                                      ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
                                       color: FlutterFlowTheme.of(context)
-                                          .alternate,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: FlutterFlowTheme.of(context).error,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  focusedErrorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: FlutterFlowTheme.of(context).error,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  filled: true,
-                                  contentPadding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 16.0, 16.0, 16.0),
-                                ),
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyLarge
-                                    .override(
-                                      fontFamily: 'Inter',
+                                          .primaryText,
+                                      fontSize: 24.0,
                                       letterSpacing: 0.0,
                                     ),
-                                maxLines: 9,
-                                minLines: 5,
-                                cursorColor:
-                                    FlutterFlowTheme.of(context).primary,
-                                validator: _model
-                                    .descriptionTextControllerValidator
-                                    .asValidator(context),
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: const AlignmentDirectional(-1.0, 0.0),
-                            child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  8.0, 0.0, 0.0, 0.0),
-                              child: Text(
-                                'Add tags',
-                                style: FlutterFlowTheme.of(context)
+                                hintStyle: FlutterFlowTheme.of(context)
                                     .labelMedium
                                     .override(
                                       fontFamily: 'Inter',
                                       letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                errorStyle: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      color: FlutterFlowTheme.of(context).error,
+                                      fontSize: 12.0,
+                                      letterSpacing: 0.0,
+                                    ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color:
+                                        FlutterFlowTheme.of(context).alternate,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).error,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).error,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                filled: true,
+                                contentPadding: EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 20.0, 16.0, 20.0),
+                              ),
+                              style: FlutterFlowTheme.of(context)
+                                  .headlineMedium
+                                  .override(
+                                    fontFamily: 'Poppins',
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
+                                    fontSize: 22.0,
+                                    letterSpacing: 0.0,
+                                  ),
+                              minLines: 1,
+                              cursorColor: FlutterFlowTheme.of(context).primary,
+                              validator: _model.taskTextControllerValidator
+                                  .asValidator(context),
+                            ),
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional(0.0, 0.0),
+                            child: TextFormField(
+                              controller: _model.descriptionTextController,
+                              focusNode: _model.descriptionFocusNode,
+                              autofocus: true,
+                              textCapitalization: TextCapitalization.words,
+                              obscureText: false,
+                              decoration: InputDecoration(
+                                labelText: 'Description...',
+                                labelStyle: FlutterFlowTheme.of(context)
+                                    .labelLarge
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryText,
+                                      letterSpacing: 0.0,
+                                    ),
+                                alignLabelWithHint: true,
+                                hintStyle: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      letterSpacing: 0.0,
+                                    ),
+                                errorStyle: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      color: FlutterFlowTheme.of(context).error,
+                                      fontSize: 12.0,
+                                      letterSpacing: 0.0,
+                                    ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color:
+                                        FlutterFlowTheme.of(context).alternate,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                errorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).error,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).error,
+                                    width: 2.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                filled: true,
+                                contentPadding: EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 16.0, 16.0, 16.0),
+                              ),
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyLarge
+                                  .override(
+                                    fontFamily: 'Inter',
+                                    letterSpacing: 0.0,
+                                  ),
+                              maxLines: 9,
+                              minLines: 5,
+                              cursorColor: FlutterFlowTheme.of(context).primary,
+                              validator: _model
+                                  .descriptionTextControllerValidator
+                                  .asValidator(context),
+                            ),
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  8.0, 0.0, 0.0, 0.0),
+                              child: Text(
+                                'Add a Tag:',
+                                style: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .override(
+                                      fontFamily: 'Poppins',
+                                      color: Colors.black,
+                                      fontSize: 15.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w500,
                                     ),
                               ),
                             ),
@@ -356,12 +359,12 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Align(
-                                alignment: const AlignmentDirectional(-1.0, 0.0),
+                                alignment: AlignmentDirectional(-1.0, 0.0),
                                 child: Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
                                       5.0, 0.0, 0.0, 0.0),
                                   child: FlutterFlowChoiceChips(
-                                    options: const [
+                                    options: [
                                       ChipData('Product Design'),
                                       ChipData('Feature requirement'),
                                       ChipData('UI/UX improvement'),
@@ -372,7 +375,7 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
                                         _model.choiceChipsValue =
                                             val?.firstOrNull),
                                     selectedChipStyle: ChipStyle(
-                                      backgroundColor: const Color(0x975D805F),
+                                      backgroundColor: Color(0x975D805F),
                                       textStyle: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
@@ -385,7 +388,7 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
                                           .primaryText,
                                       iconSize: 20.0,
                                       elevation: 0.0,
-                                      borderColor: const Color(0xFFA1C4A3),
+                                      borderColor: Color(0xFFA1C4A3),
                                       borderWidth: 2.0,
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
@@ -428,30 +431,135 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
                             ],
                           ),
                         ]
-                            .divide(const SizedBox(height: 12.0))
-                            .addToEnd(const SizedBox(height: 32.0)),
+                            .divide(SizedBox(height: 12.0))
+                            .addToEnd(SizedBox(height: 32.0)),
                       ),
                     ),
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
                 child: FFButtonWidget(
-                  onPressed: () {
-                    print('Button pressed ...');
+                  onPressed: () async {
+                    if ((_model.taskTextController.text != null &&
+                            _model.taskTextController.text != '') &&
+                        (_model.descriptionTextController.text != null &&
+                            _model.descriptionTextController.text != '')) {
+                      var suggestionReportRecordReference =
+                          SuggestionReportRecord.collection.doc();
+                      await suggestionReportRecordReference
+                          .set(createSuggestionReportRecordData(
+                        title: _model.taskTextController.text,
+                        suggestion: _model.descriptionTextController.text,
+                        tag: _model.choiceChipsValue,
+                      ));
+                      _model.output =
+                          SuggestionReportRecord.getDocumentFromData(
+                              createSuggestionReportRecordData(
+                                title: _model.taskTextController.text,
+                                suggestion:
+                                    _model.descriptionTextController.text,
+                                tag: _model.choiceChipsValue,
+                              ),
+                              suggestionReportRecordReference);
+                      safeSetState(() {
+                        _model.taskTextController?.clear();
+                        _model.descriptionTextController?.clear();
+                      });
+                      safeSetState(() {
+                        _model.choiceChipsValueController?.reset();
+                      });
+                      await showDialog(
+                        context: context,
+                        builder: (alertDialogContext) {
+                          return AlertDialog(
+                            content: Text('Report sent!'),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pop(alertDialogContext),
+                                child: Text('Ok'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    } else {
+                      if (!((_model.taskTextController.text != null &&
+                              _model.taskTextController.text != '') ||
+                          (_model.descriptionTextController.text != null &&
+                              _model.descriptionTextController.text != ''))) {
+                        await showDialog(
+                          context: context,
+                          builder: (alertDialogContext) {
+                            return AlertDialog(
+                              title: Text('Error'),
+                              content:
+                                  Text('Title and Description are missing!'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(alertDialogContext),
+                                  child: Text('Ok'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      } else {
+                        if (_model.taskTextController.text != null &&
+                            _model.taskTextController.text != '') {
+                          await showDialog(
+                            context: context,
+                            builder: (alertDialogContext) {
+                              return AlertDialog(
+                                title: Text('Error'),
+                                content: Text('Description is missing!'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(alertDialogContext),
+                                    child: Text('Ok'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else {
+                          await showDialog(
+                            context: context,
+                            builder: (alertDialogContext) {
+                              return AlertDialog(
+                                title: Text('Error'),
+                                content: Text('Title is missing!'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(alertDialogContext),
+                                    child: Text('Ok'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      }
+                    }
+
+                    safeSetState(() {});
                   },
                   text: 'Submit Idea',
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.receipt_long,
                     size: 18.0,
                   ),
                   options: FFButtonOptions(
                     width: 320.0,
                     height: 54.0,
-                    padding: const EdgeInsets.all(0.0),
+                    padding: EdgeInsets.all(0.0),
                     iconPadding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                     color: FlutterFlowTheme.of(context).primary,
                     textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                           fontFamily: 'Poppins',
@@ -459,7 +567,7 @@ class _SuggestIdeasWidgetState extends State<SuggestIdeasWidget> {
                           fontSize: 18.0,
                           letterSpacing: 0.0,
                         ),
-                    borderSide: const BorderSide(
+                    borderSide: BorderSide(
                       color: Colors.transparent,
                       width: 1.0,
                     ),

@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
+import '../cloud_functions/cloud_functions.dart';
+import '../schema/structs/index.dart';
 
 import 'package:flutter/foundation.dart';
 
@@ -19,7 +22,7 @@ class TiquetsCall {
       callType: ApiCallType.GET,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Token $token',
+        'Authorization': 'Token ${token}',
       },
       params: {
         'query': "Duomo di Milano",
@@ -42,11 +45,11 @@ class TiquetsSingleCall {
     return ApiManager.instance.makeApiCall(
       callName: 'tiquets single',
       apiUrl:
-          'https://api.tiqets.com/v2/products/$productId/checkout_information',
+          'https://api.tiqets.com/v2/products/${productId}/checkout_information',
       callType: ApiCallType.GET,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Token $token',
+        'Authorization': 'Token ${token}',
       },
       params: {},
       returnBody: true,
@@ -69,7 +72,7 @@ class CitiesCall {
       callType: ApiCallType.GET,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Token $token',
+        'Authorization': 'Token ${token}',
       },
       params: {
         'country_id': 50109,
@@ -95,7 +98,7 @@ class CountriesCall {
       callType: ApiCallType.GET,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Token $token',
+        'Authorization': 'Token ${token}',
       },
       params: {
         'page_size': 100,
@@ -120,7 +123,7 @@ class CountriesCopyCall {
       callType: ApiCallType.GET,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Token $token',
+        'Authorization': 'Token ${token}',
       },
       params: {
         'page_size': 100,
@@ -187,7 +190,7 @@ class LocalhostCall {
     int? numAdults = 2,
     int? numYouth = 0,
     int? numChildren = 1,
-    String? budget = 'low',
+    String? budget = 'Cheap',
   }) async {
     return ApiManager.instance.makeApiCall(
       callName: 'localhost',
@@ -222,6 +225,130 @@ class LocalhostCall {
         r'''$.itineraries''',
         true,
       ) as List?;
+}
+
+class HerokuPreferencesCall {
+  static Future<ApiCallResponse> call({
+    double? lat = 48.864716,
+    double? lng = 2.349014,
+    int? radius = 10,
+    String? startDate = '2024-11-23',
+    String? endDate = '2024-11-30',
+    String? startTime = '9:00',
+    String? endTime = '15:00',
+    int? numSeniors = 0,
+    int? numAdults = 2,
+    int? numYouth = 0,
+    int? numChildren = 1,
+    String? budget = 'Cheap',
+    String? categories = '',
+  }) async {
+    final response = await makeCloudCall(
+      _kPrivateApiFunctionName,
+      {
+        'callName': 'HerokuPreferencesCall',
+        'variables': {
+          'lat': lat,
+          'lng': lng,
+          'radius': radius,
+          'startDate': startDate,
+          'endDate': endDate,
+          'startTime': startTime,
+          'endTime': endTime,
+          'numSeniors': numSeniors,
+          'numAdults': numAdults,
+          'numYouth': numYouth,
+          'numChildren': numChildren,
+          'budget': budget,
+          'categories': categories,
+        },
+      },
+    );
+    return ApiCallResponse.fromCloudCallResponse(response);
+  }
+
+  static List? preferences(dynamic response) => getJsonField(
+        response,
+        r'''$.preferences''',
+        true,
+      ) as List?;
+}
+
+class HerokuItinerariesCall {
+  static Future<ApiCallResponse> call({
+    double? lat = 48.864716,
+    double? lng = 2.349014,
+    int? radius = 10,
+    String? startDate = '2024-11-23',
+    String? endDate = '2024-11-30',
+    String? startTime = '9:00',
+    String? endTime = '18:00',
+    int? numSeniors = 0,
+    int? numAdults = 2,
+    int? numYouth = 0,
+    int? numChildren = 1,
+    String? budget = 'Cheap',
+    String? requiredPlaces = '',
+    String? removedPlaces = '',
+    String? categories = '',
+  }) async {
+    final response = await makeCloudCall(
+      _kPrivateApiFunctionName,
+      {
+        'callName': 'HerokuItinerariesCall',
+        'variables': {
+          'lat': lat,
+          'lng': lng,
+          'radius': radius,
+          'startDate': startDate,
+          'endDate': endDate,
+          'startTime': startTime,
+          'endTime': endTime,
+          'numSeniors': numSeniors,
+          'numAdults': numAdults,
+          'numYouth': numYouth,
+          'numChildren': numChildren,
+          'budget': budget,
+          'requiredPlaces': requiredPlaces,
+          'removedPlaces': removedPlaces,
+          'categories': categories,
+        },
+      },
+    );
+    return ApiCallResponse.fromCloudCallResponse(response);
+  }
+
+  static List? itineraries(dynamic response) => getJsonField(
+        response,
+        r'''$.itineraries''',
+        true,
+      ) as List?;
+}
+
+class HerokuImageCall {
+  static Future<ApiCallResponse> call({
+    String? cityName = 'London',
+  }) async {
+    final response = await makeCloudCall(
+      _kPrivateApiFunctionName,
+      {
+        'callName': 'HerokuImageCall',
+        'variables': {
+          'cityName': cityName,
+        },
+      },
+    );
+    return ApiCallResponse.fromCloudCallResponse(response);
+  }
+
+  static String? image(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.image''',
+      ));
+  static String? cityName(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.city_name''',
+      ));
 }
 
 class ApiPagingParams {

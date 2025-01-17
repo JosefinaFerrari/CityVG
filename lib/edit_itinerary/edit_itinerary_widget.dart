@@ -1,6 +1,11 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'edit_itinerary_model.dart';
 export 'edit_itinerary_model.dart';
 
@@ -34,14 +39,17 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
           child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(15.0, 0.0, 15.0, 0.0),
+            padding: EdgeInsetsDirectional.fromSTEB(15.0, 0.0, 15.0, 0.0),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -60,11 +68,11 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                         width: 72.0,
                         height: 40.0,
                         decoration: BoxDecoration(
-                          color: const Color(0xC0DDE5D9),
+                          color: Color(0xC0DDE5D9),
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(8.0),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
                             child: Image.asset(
@@ -80,7 +88,7 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                   ),
                   Padding(
                     padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 25.0, 0.0, 0.0),
+                        EdgeInsetsDirectional.fromSTEB(0.0, 25.0, 0.0, 0.0),
                     child: Text(
                       'Edit Itinerary',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -103,65 +111,82 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                   Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Icon(
-                            Icons.drag_indicator,
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            size: 24.0,
-                          ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                10.0, 0.0, 5.0, 0.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(18.0),
-                              child: Image.network(
-                                'https://firebasestorage.googleapis.com/v0/b/cityvg-1f3e7.firebasestorage.app/o/DemoImages%2Fimage%2018.png?alt=media&token=06b088ef-3c81-4144-90a9-aeeb9d364173',
-                                width: 96.0,
-                                height: 96.0,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
+                      Container(
+                        height: 96.0,
+                        decoration: BoxDecoration(),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Column(
                               mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'The Duomo (Milan Cathedral)',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 12.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                FaIcon(
+                                  FontAwesomeIcons.levelUpAlt,
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
+                                  size: 24.0,
                                 ),
-                                Text(
-                                  'Historic Landmark',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Poppins',
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        fontSize: 12.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                FaIcon(
+                                  FontAwesomeIcons.levelDownAlt,
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
+                                  size: 24.0,
                                 ),
                               ],
                             ),
-                          ),
-                          Icon(
-                            Icons.delete_rounded,
-                            color: FlutterFlowTheme.of(context).error,
-                            size: 24.0,
-                          ),
-                        ],
+                            Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  10.0, 0.0, 5.0, 0.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(18.0),
+                                child: Image.network(
+                                  'https://firebasestorage.googleapis.com/v0/b/cityvg-1f3e7.firebasestorage.app/o/DemoImages%2Fimage%2018.png?alt=media&token=06b088ef-3c81-4144-90a9-aeeb9d364173',
+                                  width: 96.0,
+                                  height: 96.0,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'The Duomo (Milan Cathedral)',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 12.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                  ),
+                                  Text(
+                                    'Historic Landmark',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Poppins',
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                          fontSize: 12.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              Icons.delete_rounded,
+                              color: FlutterFlowTheme.of(context).error,
+                              size: 24.0,
+                            ),
+                          ],
+                        ),
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.max,
@@ -172,7 +197,7 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                             size: 24.0,
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 10.0, 0.0, 5.0, 0.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(18.0),
@@ -232,7 +257,7 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                             size: 24.0,
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 10.0, 0.0, 5.0, 0.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(18.0),
@@ -284,8 +309,8 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                         ],
                       ),
                     ]
-                        .divide(const SizedBox(height: 40.0))
-                        .around(const SizedBox(height: 40.0)),
+                        .divide(SizedBox(height: 40.0))
+                        .around(SizedBox(height: 40.0)),
                   ),
                   Text(
                     'Day 2: November 5th',
@@ -308,7 +333,7 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                             size: 24.0,
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 10.0, 0.0, 5.0, 0.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(18.0),
@@ -368,7 +393,7 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                             size: 24.0,
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 10.0, 0.0, 5.0, 0.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(18.0),
@@ -420,8 +445,8 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                         ],
                       ),
                     ]
-                        .divide(const SizedBox(height: 40.0))
-                        .around(const SizedBox(height: 40.0)),
+                        .divide(SizedBox(height: 40.0))
+                        .around(SizedBox(height: 40.0)),
                   ),
                   Text(
                     'Day 3: November 4th',
@@ -444,7 +469,7 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                             size: 24.0,
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 10.0, 0.0, 5.0, 0.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(18.0),
@@ -496,8 +521,8 @@ class _EditItineraryWidgetState extends State<EditItineraryWidget> {
                         ],
                       ),
                     ]
-                        .divide(const SizedBox(height: 40.0))
-                        .around(const SizedBox(height: 40.0)),
+                        .divide(SizedBox(height: 40.0))
+                        .around(SizedBox(height: 40.0)),
                   ),
                 ],
               ),

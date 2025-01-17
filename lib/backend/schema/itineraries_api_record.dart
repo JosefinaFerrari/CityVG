@@ -3,15 +3,16 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 
 import '/backend/schema/util/firestore_util.dart';
+import '/backend/schema/util/schema_util.dart';
 
 import 'index.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 
 class ItinerariesApiRecord extends FirestoreRecord {
   ItinerariesApiRecord._(
-    super.reference,
-    super.data,
-  ) {
+    DocumentReference reference,
+    Map<String, dynamic> data,
+  ) : super(reference, data) {
     _initializeFields();
   }
 
@@ -40,6 +41,11 @@ class ItinerariesApiRecord extends FirestoreRecord {
   List<DateTime> get days => _days ?? const [];
   bool hasDays() => _days != null;
 
+  // "tripCode" field.
+  String? _tripCode;
+  String get tripCode => _tripCode ?? '';
+  bool hasTripCode() => _tripCode != null;
+
   void _initializeFields() {
     _itineraryName = snapshotData['itineraryName'] as String?;
     _attractions = getStructList(
@@ -49,6 +55,7 @@ class ItinerariesApiRecord extends FirestoreRecord {
     _searchId = snapshotData['searchId'] as String?;
     _coverImage = snapshotData['coverImage'] as String?;
     _days = getDataList(snapshotData['days']);
+    _tripCode = snapshotData['tripCode'] as String?;
   }
 
   static CollectionReference get collection =>
@@ -89,12 +96,14 @@ Map<String, dynamic> createItinerariesApiRecordData({
   String? itineraryName,
   String? searchId,
   String? coverImage,
+  String? tripCode,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
       'itineraryName': itineraryName,
       'searchId': searchId,
       'coverImage': coverImage,
+      'tripCode': tripCode,
     }.withoutNulls,
   );
 
@@ -112,12 +121,19 @@ class ItinerariesApiRecordDocumentEquality
         listEquality.equals(e1?.attractions, e2?.attractions) &&
         e1?.searchId == e2?.searchId &&
         e1?.coverImage == e2?.coverImage &&
-        listEquality.equals(e1?.days, e2?.days);
+        listEquality.equals(e1?.days, e2?.days) &&
+        e1?.tripCode == e2?.tripCode;
   }
 
   @override
-  int hash(ItinerariesApiRecord? e) => const ListEquality().hash(
-      [e?.itineraryName, e?.attractions, e?.searchId, e?.coverImage, e?.days]);
+  int hash(ItinerariesApiRecord? e) => const ListEquality().hash([
+        e?.itineraryName,
+        e?.attractions,
+        e?.searchId,
+        e?.coverImage,
+        e?.days,
+        e?.tripCode
+      ]);
 
   @override
   bool isValidKey(Object? o) => o is ItinerariesApiRecord;

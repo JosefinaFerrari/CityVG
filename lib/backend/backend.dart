@@ -1,9 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../flutter_flow/flutter_flow_util.dart';
 import 'schema/util/firestore_util.dart';
 
 import 'schema/test_record.dart';
 import 'schema/itineraries_api_record.dart';
+import 'schema/notifications_record.dart';
+import 'schema/bug_report_record.dart';
+import 'schema/suggestion_report_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
@@ -14,6 +18,9 @@ export 'schema/util/schema_util.dart';
 
 export 'schema/test_record.dart';
 export 'schema/itineraries_api_record.dart';
+export 'schema/notifications_record.dart';
+export 'schema/bug_report_record.dart';
+export 'schema/suggestion_report_record.dart';
 
 /// Functions to query TestRecords (as a Stream and as a Future).
 Future<int> queryTestRecordCount({
@@ -84,6 +91,117 @@ Future<List<ItinerariesApiRecord>> queryItinerariesApiRecordOnce({
     queryCollectionOnce(
       ItinerariesApiRecord.collection,
       ItinerariesApiRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query NotificationsRecords (as a Stream and as a Future).
+Future<int> queryNotificationsRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      NotificationsRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<NotificationsRecord>> queryNotificationsRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      NotificationsRecord.collection,
+      NotificationsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<NotificationsRecord>> queryNotificationsRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      NotificationsRecord.collection,
+      NotificationsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query BugReportRecords (as a Stream and as a Future).
+Future<int> queryBugReportRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      BugReportRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<BugReportRecord>> queryBugReportRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      BugReportRecord.collection,
+      BugReportRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<BugReportRecord>> queryBugReportRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      BugReportRecord.collection,
+      BugReportRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query SuggestionReportRecords (as a Stream and as a Future).
+Future<int> querySuggestionReportRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      SuggestionReportRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<SuggestionReportRecord>> querySuggestionReportRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      SuggestionReportRecord.collection,
+      SuggestionReportRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<SuggestionReportRecord>> querySuggestionReportRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      SuggestionReportRecord.collection,
+      SuggestionReportRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,
@@ -208,7 +326,7 @@ Future<FFFirestorePage<T>> queryCollectionPage<T>(
   } else {
     docSnapshot = await query.get();
   }
-  getDocs(QuerySnapshot s) => s.docs
+  final getDocs = (QuerySnapshot s) => s.docs
       .map(
         (d) => safeGet(
           () => recordBuilder(d),

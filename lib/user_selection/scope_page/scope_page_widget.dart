@@ -1,11 +1,18 @@
+import '/backend/schema/structs/index.dart';
+import '/components/navigate_back_widget.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:math';
+import 'dart:ui';
 import '/flutter_flow/custom_functions.dart' as functions;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'scope_page_model.dart';
 export 'scope_page_model.dart';
@@ -52,8 +59,8 @@ class _ScopePageWidgetState extends State<ScopePageWidget>
             curve: Curves.easeInOut,
             delay: 0.0.ms,
             duration: 700.0.ms,
-            begin: const Offset(1.0, 1.0),
-            end: const Offset(1.04, 1.04),
+            begin: Offset(1.0, 1.0),
+            end: Offset(1.04, 1.04),
           ),
         ],
       ),
@@ -80,7 +87,10 @@ class _ScopePageWidgetState extends State<ScopePageWidget>
     context.watch<FFAppState>();
 
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
         key: scaffoldKey,
         resizeToAvoidBottomInset: false,
@@ -90,198 +100,139 @@ class _ScopePageWidgetState extends State<ScopePageWidget>
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Flexible(
-                          child: Align(
-                            alignment: const AlignmentDirectional(-1.0, 0.0),
-                            child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  30.0, 0.0, 0.0, 0.0),
-                              child: InkWell(
-                                splashColor: Colors.transparent,
-                                focusColor: Colors.transparent,
-                                hoverColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                onTap: () async {
-                                  context.safePop();
-                                },
-                                child: Container(
-                                  width: 72.0,
-                                  height: 40.0,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xC0DDE5D9),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      child: Image.asset(
-                                        'assets/images/Group_131_(1).png',
-                                        width: 0.0,
-                                        height: 200.0,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 30.0, 0.0),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Padding(
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          RichText(
-                            textScaler: MediaQuery.of(context).textScaler,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: FFAppState()
-                                      .dataSelected
-                                      .placeSelected
-                                      .city,
-                                  style: FlutterFlowTheme.of(context)
-                                      .displaySmall
-                                      .override(
-                                    fontFamily: 'Poppins',
-                                    color: const Color(0xFF022904),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w600,
-                                    shadows: [
-                                      const Shadow(
-                                        color: Color(0xFF989898),
-                                        offset: Offset(0.5, 2.0),
-                                        blurRadius: 5.0,
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                const TextSpan(
-                                  text: ', ',
-                                  style: TextStyle(),
-                                ),
-                                TextSpan(
-                                  text: FFAppState()
-                                      .dataSelected
-                                      .placeSelected
-                                      .country,
-                                  style: const TextStyle(),
-                                )
-                              ],
-                              style: FlutterFlowTheme.of(context)
-                                  .displaySmall
-                                  .override(
-                                fontFamily: 'Poppins',
-                                color: const Color(0xFF022904),
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w600,
-                                shadows: [
-                                  const Shadow(
-                                    color: Color(0xFF989898),
-                                    offset: Offset(0.5, 2.0),
-                                    blurRadius: 5.0,
-                                  )
-                                ],
-                              ),
+                          Align(
+                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            child: wrapWithModel(
+                              model: _model.navigateBackModel,
+                              updateCallback: () => safeSetState(() {}),
+                              child: NavigateBackWidget(),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  Align(
-                    alignment: const AlignmentDirectional(0.0, 0.0),
-                    child: Padding(
+                    Padding(
                       padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-                      child: SizedBox(
-                        width: 350.0,
-                        height: 470.0,
-                        child: Stack(
+                          EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 30.0, 0.0),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Align(
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12.0),
-                                child: Container(
-                                  width: 350.0,
-                                  height: 470.0,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12.0),
+                            RichText(
+                              textScaler: MediaQuery.of(context).textScaler,
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: FFAppState()
+                                        .dataSelected
+                                        .placeSelected
+                                        .city,
+                                    style: FlutterFlowTheme.of(context)
+                                        .displaySmall
+                                        .override(
+                                      fontFamily: 'Poppins',
+                                      color: FlutterFlowTheme.of(context)
+                                          .alternate,
+                                      fontSize: () {
+                                        if (MediaQuery.sizeOf(context).width <
+                                            kBreakpointSmall) {
+                                          return 36.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointMedium) {
+                                          return 50.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointLarge) {
+                                          return 60.0;
+                                        } else {
+                                          return 65.0;
+                                        }
+                                      }(),
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w600,
+                                      shadows: [
+                                        Shadow(
+                                          color: Color(0xFF989898),
+                                          offset: Offset(0.5, 2.0),
+                                          blurRadius: 5.0,
+                                        )
+                                      ],
+                                    ),
                                   ),
-                                  child: Align(
-                                    alignment: const AlignmentDirectional(0.0, 0.0),
-                                    child: Builder(builder: (context) {
-                                      final googleMapMarker = FFAppState()
-                                          .dataSelected
-                                          .placeSelected
-                                          .gps;
-                                      return FlutterFlowGoogleMap(
-                                        controller: _model.googleMapsController,
-                                        onCameraIdle: (latLng) =>
-                                            _model.googleMapsCenter = latLng,
-                                        initialLocation:
-                                            _model.googleMapsCenter ??=
-                                                FFAppState()
-                                                    .dataSelected
-                                                    .placeSelected
-                                                    .gps!,
-                                        markers: [
-                                          if (googleMapMarker != null)
-                                            FlutterFlowMarker(
-                                              googleMapMarker.serialize(),
-                                              googleMapMarker,
-                                            ),
-                                        ],
-                                        markerColor: GoogleMarkerColor.red,
-                                        mapType: MapType.normal,
-                                        style: GoogleMapStyle.standard,
-                                        initialZoom: 12.0,
-                                        allowInteraction: false,
-                                        allowZoom: false,
-                                        showZoomControls: false,
-                                        showLocation: false,
-                                        showCompass: false,
-                                        showMapToolbar: false,
-                                        showTraffic: false,
-                                        centerMapOnMarkerTap: true,
-                                      );
-                                    }),
+                                  TextSpan(
+                                    text: ', ',
+                                    style: TextStyle(
+                                      fontSize: () {
+                                        if (MediaQuery.sizeOf(context).width <
+                                            kBreakpointSmall) {
+                                          return 36.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointMedium) {
+                                          return 50.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointLarge) {
+                                          return 60.0;
+                                        } else {
+                                          return 65.0;
+                                        }
+                                      }(),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: Container(
-                                width: _model.sliderValue,
-                                height: _model.sliderValue,
-                                decoration: BoxDecoration(
-                                  color: const Color(0x4DE40000),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: const Color(0xFFB10909),
-                                    width: 3.0,
-                                  ),
+                                  TextSpan(
+                                    text: FFAppState()
+                                        .dataSelected
+                                        .placeSelected
+                                        .country,
+                                    style: TextStyle(
+                                      fontSize: () {
+                                        if (MediaQuery.sizeOf(context).width <
+                                            kBreakpointSmall) {
+                                          return 36.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointMedium) {
+                                          return 50.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointLarge) {
+                                          return 60.0;
+                                        } else {
+                                          return 65.0;
+                                        }
+                                      }(),
+                                    ),
+                                  )
+                                ],
+                                style: FlutterFlowTheme.of(context)
+                                    .displaySmall
+                                    .override(
+                                  fontFamily: 'Poppins',
+                                  color: FlutterFlowTheme.of(context).alternate,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                  shadows: [
+                                    Shadow(
+                                      color: Color(0xFF989898),
+                                      offset: Offset(0.5, 2.0),
+                                      blurRadius: 5.0,
+                                    )
+                                  ],
                                 ),
                               ),
                             ),
@@ -289,70 +240,208 @@ class _ScopePageWidgetState extends State<ScopePageWidget>
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Stack(
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Expanded(
-                              child: Slider(
-                                activeColor:
-                                    FlutterFlowTheme.of(context).primary,
-                                inactiveColor: const Color(0xFFC8E0C9),
-                                min: 100.0,
-                                max: 350.0,
-                                value: _model.sliderValue ??= 200.0,
-                                onChanged: (newValue) {
-                                  newValue =
-                                      double.parse(newValue.toStringAsFixed(2));
-                                  safeSetState(
-                                      () => _model.sliderValue = newValue);
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 35.0, 0.0, 0.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
+                    Expanded(
+                      child: Align(
+                        alignment: AlignmentDirectional(0.0, 0.0),
+                        child: Padding(
+                          padding: EdgeInsets.all(valueOrDefault<double>(
+                            () {
+                              if (MediaQuery.sizeOf(context).width <
+                                  kBreakpointSmall) {
+                                return 22.0;
+                              } else if (MediaQuery.sizeOf(context).width <
+                                  kBreakpointMedium) {
+                                return 30.0;
+                              } else {
+                                return 50.0;
+                              }
+                            }(),
+                            0.0,
+                          )),
+                          child: Stack(
                             children: [
                               Align(
-                                alignment: const AlignmentDirectional(0.0, -1.0),
+                                alignment: AlignmentDirectional(0.0, 0.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  child: Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: Align(
+                                      alignment: AlignmentDirectional(0.0, 0.0),
+                                      child: Builder(builder: (context) {
+                                        final _googleMapMarker = FFAppState()
+                                            .dataSelected
+                                            .placeSelected
+                                            .gps;
+                                        return FlutterFlowGoogleMap(
+                                          controller:
+                                              _model.googleMapsController,
+                                          onCameraIdle: (latLng) =>
+                                              _model.googleMapsCenter = latLng,
+                                          initialLocation:
+                                              _model.googleMapsCenter ??=
+                                                  FFAppState()
+                                                      .dataSelected
+                                                      .placeSelected
+                                                      .gps!,
+                                          markers: [
+                                            if (_googleMapMarker != null)
+                                              FlutterFlowMarker(
+                                                _googleMapMarker.serialize(),
+                                                _googleMapMarker,
+                                              ),
+                                          ],
+                                          markerColor: GoogleMarkerColor.red,
+                                          mapType: MapType.normal,
+                                          style: GoogleMapStyle.standard,
+                                          initialZoom: 12.0,
+                                          allowInteraction: false,
+                                          allowZoom: false,
+                                          showZoomControls: false,
+                                          showLocation: false,
+                                          showCompass: false,
+                                          showMapToolbar: false,
+                                          showTraffic: false,
+                                          centerMapOnMarkerTap: true,
+                                        );
+                                      }),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Align(
+                                alignment: AlignmentDirectional(0.0, 0.0),
                                 child: Container(
-                                  decoration: const BoxDecoration(),
-                                  child: Text(
-                                    functions
-                                        .getDistanceText(_model.sliderValue!),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 20.0,
-                                          letterSpacing: 0.0,
-                                        ),
+                                  width: _model.sliderValue,
+                                  height: _model.sliderValue,
+                                  decoration: BoxDecoration(
+                                    color: Color(0x4DE40000),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Color(0xFFB10909),
+                                      width: 3.0,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
               ),
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              valueOrDefault<double>(
+                                () {
+                                  if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointSmall) {
+                                    return 20.0;
+                                  } else if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointMedium) {
+                                    return 40.0;
+                                  } else if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointLarge) {
+                                    return 50.0;
+                                  } else {
+                                    return 60.0;
+                                  }
+                                }(),
+                                0.0,
+                              ),
+                              valueOrDefault<double>(
+                                () {
+                                  if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointSmall) {
+                                    return 0.0;
+                                  } else if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointMedium) {
+                                    return 30.0;
+                                  } else if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointLarge) {
+                                    return 0.0;
+                                  } else {
+                                    return 10.0;
+                                  }
+                                }(),
+                                0.0,
+                              ),
+                              valueOrDefault<double>(
+                                () {
+                                  if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointSmall) {
+                                    return 20.0;
+                                  } else if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointMedium) {
+                                    return 40.0;
+                                  } else if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointLarge) {
+                                    return 50.0;
+                                  } else {
+                                    return 60.0;
+                                  }
+                                }(),
+                                0.0,
+                              ),
+                              0.0),
+                          child: Slider(
+                            activeColor: FlutterFlowTheme.of(context).primary,
+                            inactiveColor: Color(0xFFC8E0C9),
+                            min: 100.0,
+                            max: 350.0,
+                            value: _model.sliderValue ??= 200.0,
+                            onChanged: (newValue) {
+                              newValue =
+                                  double.parse(newValue.toStringAsFixed(2));
+                              safeSetState(() => _model.sliderValue = newValue);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Align(
+                        alignment: AlignmentDirectional(0.0, -1.0),
+                        child: Container(
+                          decoration: BoxDecoration(),
+                          child: Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 5.0, 0.0, 0.0),
+                            child: Text(
+                              functions.getDistanceText(_model.sliderValue!),
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 20.0,
+                                    letterSpacing: 0.0,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -388,20 +477,60 @@ class _ScopePageWidgetState extends State<ScopePageWidget>
                         },
                         text: 'NEXT',
                         options: FFButtonOptions(
-                          width: 260.0,
-                          height: 55.0,
-                          padding: const EdgeInsets.all(0.0),
-                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
+                          width: () {
+                            if (MediaQuery.sizeOf(context).width <
+                                kBreakpointSmall) {
+                              return 260.0;
+                            } else if (MediaQuery.sizeOf(context).width <
+                                kBreakpointMedium) {
+                              return 300.0;
+                            } else if (MediaQuery.sizeOf(context).width <
+                                kBreakpointLarge) {
+                              return 320.0;
+                            } else {
+                              return 340.0;
+                            }
+                          }(),
+                          height: () {
+                            if (MediaQuery.sizeOf(context).width <
+                                kBreakpointSmall) {
+                              return 55.0;
+                            } else if (MediaQuery.sizeOf(context).width <
+                                kBreakpointMedium) {
+                              return 60.0;
+                            } else if (MediaQuery.sizeOf(context).width <
+                                kBreakpointLarge) {
+                              return 63.0;
+                            } else {
+                              return 65.0;
+                            }
+                          }(),
+                          padding: EdgeInsets.all(0.0),
+                          iconPadding: EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 0.0, 0.0),
                           color: FlutterFlowTheme.of(context).primary,
-                          textStyle:
-                              FlutterFlowTheme.of(context).titleSmall.override(
-                                    fontFamily: 'Poppins',
-                                    color: Colors.white,
-                                    fontSize: 20.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          textStyle: FlutterFlowTheme.of(context)
+                              .titleSmall
+                              .override(
+                                fontFamily: 'Poppins',
+                                color: Colors.white,
+                                fontSize: () {
+                                  if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointSmall) {
+                                    return 20.0;
+                                  } else if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointMedium) {
+                                    return 25.0;
+                                  } else if (MediaQuery.sizeOf(context).width <
+                                      kBreakpointLarge) {
+                                    return 28.0;
+                                  } else {
+                                    return 30.0;
+                                  }
+                                }(),
+                                letterSpacing: 0.0,
+                                fontWeight: FontWeight.w600,
+                              ),
                           elevation: 0.0,
                           borderRadius: BorderRadius.circular(30.0),
                         ),

@@ -1,13 +1,125 @@
 const axios = require("axios").default;
 const qs = require("qs");
 
+async function _herokuPreferencesCall(context, ffVariables) {
+  var lat = ffVariables["lat"];
+  var lng = ffVariables["lng"];
+  var radius = ffVariables["radius"];
+  var startDate = ffVariables["startDate"];
+  var endDate = ffVariables["endDate"];
+  var startTime = ffVariables["startTime"];
+  var endTime = ffVariables["endTime"];
+  var numSeniors = ffVariables["numSeniors"];
+  var numAdults = ffVariables["numAdults"];
+  var numYouth = ffVariables["numYouth"];
+  var numChildren = ffVariables["numChildren"];
+  var budget = ffVariables["budget"];
+  var categories = ffVariables["categories"];
+
+  var url = `https://cityvg-5fcc7f07e779.herokuapp.com/get_top10/`;
+  var headers = {};
+  var params = {
+    lat: lat,
+    lng: lng,
+    radius: radius,
+    start_date: startDate,
+    end_date: endDate,
+    start_time: startTime,
+    end_time: endTime,
+    num_seniors: numSeniors,
+    num_adults: numAdults,
+    num_youth: numYouth,
+    num_children: numChildren,
+    budget: budget,
+    categories: categories,
+  };
+  var ffApiRequestBody = undefined;
+
+  return makeApiRequest({
+    method: "get",
+    url,
+    headers,
+    params,
+    returnBody: true,
+    isStreamingApi: false,
+  });
+}
+async function _herokuItinerariesCall(context, ffVariables) {
+  var lat = ffVariables["lat"];
+  var lng = ffVariables["lng"];
+  var radius = ffVariables["radius"];
+  var startDate = ffVariables["startDate"];
+  var endDate = ffVariables["endDate"];
+  var startTime = ffVariables["startTime"];
+  var endTime = ffVariables["endTime"];
+  var numSeniors = ffVariables["numSeniors"];
+  var numAdults = ffVariables["numAdults"];
+  var numYouth = ffVariables["numYouth"];
+  var numChildren = ffVariables["numChildren"];
+  var budget = ffVariables["budget"];
+  var requiredPlaces = ffVariables["requiredPlaces"];
+  var removedPlaces = ffVariables["removedPlaces"];
+  var categories = ffVariables["categories"];
+
+  var url = `https://cityvg-5fcc7f07e779.herokuapp.com/generate/`;
+  var headers = {};
+  var params = {
+    lat: lat,
+    lng: lng,
+    radius: radius,
+    start_date: startDate,
+    end_date: endDate,
+    start_time: startTime,
+    end_time: endTime,
+    num_seniors: numSeniors,
+    num_adults: numAdults,
+    num_youth: numYouth,
+    num_children: numChildren,
+    budget: budget,
+    required_places: requiredPlaces,
+    removed_places: removedPlaces,
+    categories: categories,
+  };
+  var ffApiRequestBody = undefined;
+
+  return makeApiRequest({
+    method: "get",
+    url,
+    headers,
+    params,
+    returnBody: true,
+    isStreamingApi: false,
+  });
+}
+async function _herokuImageCall(context, ffVariables) {
+  var cityName = ffVariables["cityName"];
+
+  var url = `https://cityvg-5fcc7f07e779.herokuapp.com/city-image/`;
+  var headers = {};
+  var params = { city_name: cityName };
+  var ffApiRequestBody = undefined;
+
+  return makeApiRequest({
+    method: "get",
+    url,
+    headers,
+    params,
+    returnBody: true,
+    isStreamingApi: false,
+  });
+}
+
 /// Helper functions to route to the appropriate API Call.
 
 async function makeApiCall(context, data) {
   var callName = data["callName"] || "";
   var variables = data["variables"] || {};
 
-  const callMap = {};
+  const callMap = {
+    HerokuPreferencesCall: _herokuPreferencesCall,
+    HerokuItinerariesCall: _herokuItinerariesCall,
+    HerokuImageCall: _herokuImageCall,
+  };
 
   if (!(callName in callMap)) {
     return {

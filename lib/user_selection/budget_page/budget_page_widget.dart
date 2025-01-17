@@ -1,10 +1,16 @@
+import '/backend/schema/structs/index.dart';
+import '/components/navigate_back_widget.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:math';
+import 'dart:ui';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'budget_page_model.dart';
 export 'budget_page_model.dart';
@@ -31,7 +37,8 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (FFAppState().dataSelected.budgetSelected != '') {
+      if (FFAppState().dataSelected.budgetSelected != null &&
+          FFAppState().dataSelected.budgetSelected != '') {
         if (FFAppState().dataSelected.budgetSelected == 'cheap') {
           _model.updateIsClickedListAtIndex(
             0,
@@ -112,89 +119,142 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
     context.watch<FFAppState>();
 
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: WillPopScope(
         onWillPop: () async => false,
         child: Scaffold(
           key: scaffoldKey,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           body: SafeArea(
             top: true,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
+            child: Stack(
               children: [
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Flexible(
-                        child: Align(
-                          alignment: const AlignmentDirectional(-1.0, 0.0),
-                          child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                30.0, 0.0, 0.0, 0.0),
-                            child: InkWell(
-                              splashColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: () async {
-                                context.safePop();
-                              },
-                              child: Container(
-                                width: 72.0,
-                                height: 40.0,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xC0DDE5D9),
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.asset(
-                                      'assets/images/Group_131_(1).png',
-                                      width: 0.0,
-                                      height: 200.0,
-                                      fit: BoxFit.cover,
+                Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Padding(
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(0.0, 15.0, 0.0, 0.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          wrapWithModel(
+                            model: _model.navigateBackModel,
+                            updateCallback: () => safeSetState(() {}),
+                            child: NavigateBackWidget(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 30.0, 0.0),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            RichText(
+                              textScaler: MediaQuery.of(context).textScaler,
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: FFAppState()
+                                        .dataSelected
+                                        .placeSelected
+                                        .city,
+                                    style: FlutterFlowTheme.of(context)
+                                        .displaySmall
+                                        .override(
+                                      fontFamily: 'Poppins',
+                                      color: FlutterFlowTheme.of(context)
+                                          .alternate,
+                                      fontSize: () {
+                                        if (MediaQuery.sizeOf(context).width <
+                                            kBreakpointSmall) {
+                                          return 36.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointMedium) {
+                                          return 50.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointLarge) {
+                                          return 60.0;
+                                        } else {
+                                          return 65.0;
+                                        }
+                                      }(),
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w600,
+                                      shadows: [
+                                        Shadow(
+                                          color: Color(0xFF989898),
+                                          offset: Offset(0.5, 2.0),
+                                          blurRadius: 5.0,
+                                        )
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 30.0, 0.0),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        RichText(
-                          textScaler: MediaQuery.of(context).textScaler,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: FFAppState()
-                                    .dataSelected
-                                    .placeSelected
-                                    .city,
+                                  TextSpan(
+                                    text: ', ',
+                                    style: TextStyle(
+                                      fontSize: () {
+                                        if (MediaQuery.sizeOf(context).width <
+                                            kBreakpointSmall) {
+                                          return 36.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointMedium) {
+                                          return 50.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointLarge) {
+                                          return 60.0;
+                                        } else {
+                                          return 65.0;
+                                        }
+                                      }(),
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: FFAppState()
+                                        .dataSelected
+                                        .placeSelected
+                                        .country,
+                                    style: TextStyle(
+                                      fontSize: () {
+                                        if (MediaQuery.sizeOf(context).width <
+                                            kBreakpointSmall) {
+                                          return 36.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointMedium) {
+                                          return 50.0;
+                                        } else if (MediaQuery.sizeOf(context)
+                                                .width <
+                                            kBreakpointLarge) {
+                                          return 60.0;
+                                        } else {
+                                          return 65.0;
+                                        }
+                                      }(),
+                                    ),
+                                  )
+                                ],
                                 style: FlutterFlowTheme.of(context)
                                     .displaySmall
                                     .override(
                                   fontFamily: 'Poppins',
-                                  color: const Color(0xFF022904),
+                                  color: FlutterFlowTheme.of(context).alternate,
                                   letterSpacing: 0.0,
                                   fontWeight: FontWeight.w600,
                                   shadows: [
-                                    const Shadow(
+                                    Shadow(
                                       color: Color(0xFF989898),
                                       offset: Offset(0.5, 2.0),
                                       blurRadius: 5.0,
@@ -202,114 +262,99 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                   ],
                                 ),
                               ),
-                              const TextSpan(
-                                text: ', ',
-                                style: TextStyle(),
-                              ),
-                              TextSpan(
-                                text: FFAppState()
-                                    .dataSelected
-                                    .placeSelected
-                                    .country,
-                                style: const TextStyle(),
-                              )
-                            ],
-                            style: FlutterFlowTheme.of(context)
-                                .displaySmall
-                                .override(
-                              fontFamily: 'Poppins',
-                              color: const Color(0xFF022904),
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
-                              shadows: [
-                                const Shadow(
-                                  color: Color(0xFF989898),
-                                  offset: Offset(0.5, 2.0),
-                                  blurRadius: 5.0,
-                                )
-                              ],
                             ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              30.0, 35.0, 0.0, 0.0),
+                          child: Text(
+                            'Budget',
+                            style: FlutterFlowTheme.of(context)
+                                .titleLarge
+                                .override(
+                                  fontFamily: 'Poppins',
+                                  color: FlutterFlowTheme.of(context).alternate,
+                                  fontSize: () {
+                                    if (MediaQuery.sizeOf(context).width <
+                                        kBreakpointSmall) {
+                                      return 20.0;
+                                    } else if (MediaQuery.sizeOf(context)
+                                            .width <
+                                        kBreakpointMedium) {
+                                      return 25.0;
+                                    } else if (MediaQuery.sizeOf(context)
+                                            .width <
+                                        kBreakpointLarge) {
+                                      return 28.0;
+                                    } else {
+                                      return 30.0;
+                                    }
+                                  }(),
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(30.0, 35.0, 0.0, 0.0),
-                      child: Text(
-                        'Budget',
-                        style: FlutterFlowTheme.of(context).titleLarge.override(
-                          fontFamily: 'Poppins',
-                          color: const Color(0xFF022904),
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w500,
-                          shadows: [
-                            const Shadow(
-                              color: Color(0xFF989898),
-                              offset: Offset(0.5, 1.0),
-                              blurRadius: 4.0,
-                            )
-                          ],
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              30.0, 9.0, 0.0, 0.0),
+                          child: Text(
+                            'Select the budget that suits you best.',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(
+                                  fontFamily: 'Inter',
+                                  color: FlutterFlowTheme.of(context).alternate,
+                                  fontSize: () {
+                                    if (MediaQuery.sizeOf(context).width <
+                                        kBreakpointSmall) {
+                                      return 14.0;
+                                    } else if (MediaQuery.sizeOf(context)
+                                            .width <
+                                        kBreakpointMedium) {
+                                      return 16.0;
+                                    } else {
+                                      return 17.0;
+                                    }
+                                  }(),
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(30.0, 9.0, 0.0, 0.0),
-                      child: Text(
-                        'Select the budget that suits you best.',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          fontFamily: 'Inter',
-                          color: const Color(0xFF022904),
-                          fontSize: 14.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w300,
-                          shadows: [
-                            const Shadow(
-                              color: Color(0xFFC4C0C0),
-                              offset: Offset(0.5, 1.0),
-                              blurRadius: 2.0,
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: Align(
-                    alignment: const AlignmentDirectional(-1.0, 0.0),
-                    child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.fromSTEB(0.0, 50.0, 0.0, 0.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            20.0, 5.0, 20.0, 0.0),
+                        child: SingleChildScrollView(
+                          child: Column(
                             mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Align(
-                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                alignment: AlignmentDirectional(0.0, 0.0),
                                 child: InkWell(
                                   splashColor: Colors.transparent,
                                   focusColor: Colors.transparent,
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
-                                    if (_model.isClickedList[0]) {
+                                    if (_model.isClickedList
+                                        .elementAtOrNull(0)!) {
                                       FFAppState().updateDataSelectedStruct(
                                         (e) => e..budgetSelected = null,
                                       );
@@ -365,21 +410,45 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                     }
                                   },
                                   child: Container(
-                                    width: 312.0,
-                                    height: 74.0,
+                                    width: () {
+                                      if (MediaQuery.sizeOf(context).width <
+                                          kBreakpointSmall) {
+                                        return 350.0;
+                                      } else if (MediaQuery.sizeOf(context)
+                                              .width <
+                                          kBreakpointMedium) {
+                                        return 450.0;
+                                      } else {
+                                        return 520.0;
+                                      }
+                                    }(),
+                                    height: () {
+                                      if (MediaQuery.sizeOf(context).width <
+                                          kBreakpointSmall) {
+                                        return 74.0;
+                                      } else if (MediaQuery.sizeOf(context)
+                                              .width <
+                                          kBreakpointMedium) {
+                                        return 85.0;
+                                      } else {
+                                        return 90.0;
+                                      }
+                                    }(),
                                     decoration: BoxDecoration(
                                       color: valueOrDefault<Color>(
-                                        !_model.isClickedList[0]
-                                            ? const Color(0x76D9D9D9)
-                                            : const Color(0xFFD4E8D1),
-                                        const Color(0x75D9D9D9),
+                                        !_model.isClickedList
+                                                .elementAtOrNull(0)!
+                                            ? Color(0x76D9D9D9)
+                                            : Color(0xFFD4E8D1),
+                                        Color(0x75D9D9D9),
                                       ),
                                       borderRadius: BorderRadius.circular(16.0),
                                       shape: BoxShape.rectangle,
                                       border: Border.all(
-                                        color: !_model.isClickedList[0]
-                                            ? const Color(0xFFD4E8D1)
-                                            : const Color(0xFF72978F),
+                                        color: !_model.isClickedList
+                                                .elementAtOrNull(0)!
+                                            ? Color(0xFFD4E8D1)
+                                            : Color(0xFF72978F),
                                       ),
                                     ),
                                     child: Column(
@@ -391,7 +460,7 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                       children: [
                                         Padding(
                                           padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              EdgeInsetsDirectional.fromSTEB(
                                                   25.0, 0.0, 0.0, 0.0),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.max,
@@ -405,7 +474,22 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Poppins',
-                                                          fontSize: 18.0,
+                                                          fontSize: () {
+                                                            if (MediaQuery.sizeOf(
+                                                                        context)
+                                                                    .width <
+                                                                kBreakpointSmall) {
+                                                              return 18.0;
+                                                            } else if (MediaQuery
+                                                                        .sizeOf(
+                                                                            context)
+                                                                    .width <
+                                                                kBreakpointMedium) {
+                                                              return 21.0;
+                                                            } else {
+                                                              return 23.0;
+                                                            }
+                                                          }(),
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w500,
@@ -416,7 +500,7 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                         ),
                                         Padding(
                                           padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              EdgeInsetsDirectional.fromSTEB(
                                                   25.0, 0.0, 0.0, 0.0),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.max,
@@ -428,6 +512,22 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Poppins',
+                                                          fontSize: () {
+                                                            if (MediaQuery.sizeOf(
+                                                                        context)
+                                                                    .width <
+                                                                kBreakpointSmall) {
+                                                              return 14.0;
+                                                            } else if (MediaQuery
+                                                                        .sizeOf(
+                                                                            context)
+                                                                    .width <
+                                                                kBreakpointMedium) {
+                                                              return 16.0;
+                                                            } else {
+                                                              return 17.0;
+                                                            }
+                                                          }(),
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w300,
@@ -441,21 +541,16 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
                               Align(
-                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                alignment: AlignmentDirectional(0.0, 0.0),
                                 child: InkWell(
                                   splashColor: Colors.transparent,
                                   focusColor: Colors.transparent,
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
-                                    if (_model.isClickedList[1]) {
+                                    if (_model.isClickedList
+                                        .elementAtOrNull(1)!) {
                                       FFAppState().updateDataSelectedStruct(
                                         (e) => e..budgetSelected = null,
                                       );
@@ -511,21 +606,45 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                     }
                                   },
                                   child: Container(
-                                    width: 312.0,
-                                    height: 74.0,
+                                    width: () {
+                                      if (MediaQuery.sizeOf(context).width <
+                                          kBreakpointSmall) {
+                                        return 350.0;
+                                      } else if (MediaQuery.sizeOf(context)
+                                              .width <
+                                          kBreakpointMedium) {
+                                        return 450.0;
+                                      } else {
+                                        return 520.0;
+                                      }
+                                    }(),
+                                    height: () {
+                                      if (MediaQuery.sizeOf(context).width <
+                                          kBreakpointSmall) {
+                                        return 74.0;
+                                      } else if (MediaQuery.sizeOf(context)
+                                              .width <
+                                          kBreakpointMedium) {
+                                        return 85.0;
+                                      } else {
+                                        return 90.0;
+                                      }
+                                    }(),
                                     decoration: BoxDecoration(
                                       color: valueOrDefault<Color>(
-                                        !_model.isClickedList[1]
-                                            ? const Color(0x76D9D9D9)
-                                            : const Color(0xFFD4E8D1),
-                                        const Color(0x75D9D9D9),
+                                        !_model.isClickedList
+                                                .elementAtOrNull(1)!
+                                            ? Color(0x76D9D9D9)
+                                            : Color(0xFFD4E8D1),
+                                        Color(0x75D9D9D9),
                                       ),
                                       borderRadius: BorderRadius.circular(16.0),
                                       shape: BoxShape.rectangle,
                                       border: Border.all(
-                                        color: !_model.isClickedList[1]
-                                            ? const Color(0xFFD4E8D1)
-                                            : const Color(0xFF72978F),
+                                        color: !_model.isClickedList
+                                                .elementAtOrNull(1)!
+                                            ? Color(0xFFD4E8D1)
+                                            : Color(0xFF72978F),
                                       ),
                                     ),
                                     child: Column(
@@ -537,7 +656,7 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                       children: [
                                         Padding(
                                           padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              EdgeInsetsDirectional.fromSTEB(
                                                   25.0, 0.0, 0.0, 0.0),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.max,
@@ -551,7 +670,22 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Poppins',
-                                                          fontSize: 18.0,
+                                                          fontSize: () {
+                                                            if (MediaQuery.sizeOf(
+                                                                        context)
+                                                                    .width <
+                                                                kBreakpointSmall) {
+                                                              return 18.0;
+                                                            } else if (MediaQuery
+                                                                        .sizeOf(
+                                                                            context)
+                                                                    .width <
+                                                                kBreakpointMedium) {
+                                                              return 21.0;
+                                                            } else {
+                                                              return 23.0;
+                                                            }
+                                                          }(),
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w500,
@@ -562,7 +696,7 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                         ),
                                         Padding(
                                           padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              EdgeInsetsDirectional.fromSTEB(
                                                   25.0, 0.0, 0.0, 0.0),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.max,
@@ -574,6 +708,22 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Poppins',
+                                                          fontSize: () {
+                                                            if (MediaQuery.sizeOf(
+                                                                        context)
+                                                                    .width <
+                                                                kBreakpointSmall) {
+                                                              return 14.0;
+                                                            } else if (MediaQuery
+                                                                        .sizeOf(
+                                                                            context)
+                                                                    .width <
+                                                                kBreakpointMedium) {
+                                                              return 16.0;
+                                                            } else {
+                                                              return 17.0;
+                                                            }
+                                                          }(),
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w300,
@@ -587,21 +737,16 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
                               Align(
-                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                alignment: AlignmentDirectional(0.0, 0.0),
                                 child: InkWell(
                                   splashColor: Colors.transparent,
                                   focusColor: Colors.transparent,
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
-                                    if (_model.isClickedList[2]) {
+                                    if (_model.isClickedList
+                                        .elementAtOrNull(2)!) {
                                       FFAppState().updateDataSelectedStruct(
                                         (e) => e..budgetSelected = null,
                                       );
@@ -657,21 +802,45 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                     }
                                   },
                                   child: Container(
-                                    width: 312.0,
-                                    height: 74.0,
+                                    width: () {
+                                      if (MediaQuery.sizeOf(context).width <
+                                          kBreakpointSmall) {
+                                        return 350.0;
+                                      } else if (MediaQuery.sizeOf(context)
+                                              .width <
+                                          kBreakpointMedium) {
+                                        return 450.0;
+                                      } else {
+                                        return 520.0;
+                                      }
+                                    }(),
+                                    height: () {
+                                      if (MediaQuery.sizeOf(context).width <
+                                          kBreakpointSmall) {
+                                        return 74.0;
+                                      } else if (MediaQuery.sizeOf(context)
+                                              .width <
+                                          kBreakpointMedium) {
+                                        return 85.0;
+                                      } else {
+                                        return 90.0;
+                                      }
+                                    }(),
                                     decoration: BoxDecoration(
                                       color: valueOrDefault<Color>(
-                                        !_model.isClickedList[2]
-                                            ? const Color(0x76D9D9D9)
-                                            : const Color(0xFFD4E8D1),
-                                        const Color(0x75D9D9D9),
+                                        !_model.isClickedList
+                                                .elementAtOrNull(2)!
+                                            ? Color(0x76D9D9D9)
+                                            : Color(0xFFD4E8D1),
+                                        Color(0x75D9D9D9),
                                       ),
                                       borderRadius: BorderRadius.circular(16.0),
                                       shape: BoxShape.rectangle,
                                       border: Border.all(
-                                        color: !_model.isClickedList[2]
-                                            ? const Color(0xFFD4E8D1)
-                                            : const Color(0xFF72978F),
+                                        color: !_model.isClickedList
+                                                .elementAtOrNull(2)!
+                                            ? Color(0xFFD4E8D1)
+                                            : Color(0xFF72978F),
                                       ),
                                     ),
                                     child: Column(
@@ -683,7 +852,7 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                       children: [
                                         Padding(
                                           padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              EdgeInsetsDirectional.fromSTEB(
                                                   25.0, 0.0, 0.0, 0.0),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.max,
@@ -697,7 +866,22 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Poppins',
-                                                          fontSize: 18.0,
+                                                          fontSize: () {
+                                                            if (MediaQuery.sizeOf(
+                                                                        context)
+                                                                    .width <
+                                                                kBreakpointSmall) {
+                                                              return 18.0;
+                                                            } else if (MediaQuery
+                                                                        .sizeOf(
+                                                                            context)
+                                                                    .width <
+                                                                kBreakpointMedium) {
+                                                              return 21.0;
+                                                            } else {
+                                                              return 23.0;
+                                                            }
+                                                          }(),
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w500,
@@ -708,7 +892,7 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                         ),
                                         Padding(
                                           padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              EdgeInsetsDirectional.fromSTEB(
                                                   25.0, 0.0, 0.0, 0.0),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.max,
@@ -720,6 +904,22 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Poppins',
+                                                          fontSize: () {
+                                                            if (MediaQuery.sizeOf(
+                                                                        context)
+                                                                    .width <
+                                                                kBreakpointSmall) {
+                                                              return 14.0;
+                                                            } else if (MediaQuery
+                                                                        .sizeOf(
+                                                                            context)
+                                                                    .width <
+                                                                kBreakpointMedium) {
+                                                              return 16.0;
+                                                            } else {
+                                                              return 17.0;
+                                                            }
+                                                          }(),
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w300,
@@ -733,21 +933,16 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
                               Align(
-                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                alignment: AlignmentDirectional(0.0, 0.0),
                                 child: InkWell(
                                   splashColor: Colors.transparent,
                                   focusColor: Colors.transparent,
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
-                                    if (_model.isClickedList[3]) {
+                                    if (_model.isClickedList
+                                        .elementAtOrNull(3)!) {
                                       FFAppState().updateDataSelectedStruct(
                                         (e) => e..budgetSelected = null,
                                       );
@@ -803,21 +998,45 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                     }
                                   },
                                   child: Container(
-                                    width: 312.0,
-                                    height: 74.0,
+                                    width: () {
+                                      if (MediaQuery.sizeOf(context).width <
+                                          kBreakpointSmall) {
+                                        return 350.0;
+                                      } else if (MediaQuery.sizeOf(context)
+                                              .width <
+                                          kBreakpointMedium) {
+                                        return 450.0;
+                                      } else {
+                                        return 520.0;
+                                      }
+                                    }(),
+                                    height: () {
+                                      if (MediaQuery.sizeOf(context).width <
+                                          kBreakpointSmall) {
+                                        return 74.0;
+                                      } else if (MediaQuery.sizeOf(context)
+                                              .width <
+                                          kBreakpointMedium) {
+                                        return 85.0;
+                                      } else {
+                                        return 90.0;
+                                      }
+                                    }(),
                                     decoration: BoxDecoration(
                                       color: valueOrDefault<Color>(
-                                        !_model.isClickedList[3]
-                                            ? const Color(0x76D9D9D9)
-                                            : const Color(0xFFD4E8D1),
-                                        const Color(0x75D9D9D9),
+                                        !_model.isClickedList
+                                                .elementAtOrNull(3)!
+                                            ? Color(0x76D9D9D9)
+                                            : Color(0xFFD4E8D1),
+                                        Color(0x75D9D9D9),
                                       ),
                                       borderRadius: BorderRadius.circular(16.0),
                                       shape: BoxShape.rectangle,
                                       border: Border.all(
-                                        color: !_model.isClickedList[3]
-                                            ? const Color(0xFFD4E8D1)
-                                            : const Color(0xFF72978F),
+                                        color: !_model.isClickedList
+                                                .elementAtOrNull(3)!
+                                            ? Color(0xFFD4E8D1)
+                                            : Color(0xFF72978F),
                                       ),
                                     ),
                                     child: Column(
@@ -829,7 +1048,7 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                       children: [
                                         Padding(
                                           padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              EdgeInsetsDirectional.fromSTEB(
                                                   25.0, 0.0, 0.0, 0.0),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.max,
@@ -843,7 +1062,22 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Poppins',
-                                                          fontSize: 18.0,
+                                                          fontSize: () {
+                                                            if (MediaQuery.sizeOf(
+                                                                        context)
+                                                                    .width <
+                                                                kBreakpointSmall) {
+                                                              return 18.0;
+                                                            } else if (MediaQuery
+                                                                        .sizeOf(
+                                                                            context)
+                                                                    .width <
+                                                                kBreakpointMedium) {
+                                                              return 21.0;
+                                                            } else {
+                                                              return 23.0;
+                                                            }
+                                                          }(),
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w500,
@@ -854,7 +1088,7 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                         ),
                                         Padding(
                                           padding:
-                                              const EdgeInsetsDirectional.fromSTEB(
+                                              EdgeInsetsDirectional.fromSTEB(
                                                   25.0, 0.0, 0.0, 0.0),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.max,
@@ -866,6 +1100,22 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Poppins',
+                                                          fontSize: () {
+                                                            if (MediaQuery.sizeOf(
+                                                                        context)
+                                                                    .width <
+                                                                kBreakpointSmall) {
+                                                              return 14.0;
+                                                            } else if (MediaQuery
+                                                                        .sizeOf(
+                                                                            context)
+                                                                    .width <
+                                                                kBreakpointMedium) {
+                                                              return 16.0;
+                                                            } else {
+                                                              return 17.0;
+                                                            }
+                                                          }(),
                                                           letterSpacing: 0.0,
                                                           fontWeight:
                                                               FontWeight.w300,
@@ -879,50 +1129,90 @@ class _BudgetPageWidgetState extends State<BudgetPageWidget>
                                   ),
                                 ),
                               ),
-                            ],
+                            ]
+                                .divide(SizedBox(height: 26.0))
+                                .addToStart(SizedBox(height: 20.0))
+                                .addToEnd(SizedBox(height: 100.0)),
                           ),
-                        ].divide(const SizedBox(height: 26.0)),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      FFButtonWidget(
-                        onPressed: (_model.isSelected == false)
-                            ? null
-                            : () async {
-                                context.pushNamed('LoadApi');
-                              },
-                        text: 'NEXT',
-                        options: FFButtonOptions(
-                          width: 260.0,
-                          height: 55.0,
-                          padding: const EdgeInsets.all(0.0),
-                          iconAlignment: IconAlignment.start,
-                          iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 0.0, 0.0, 0.0),
-                          color: FlutterFlowTheme.of(context).primary,
-                          textStyle:
-                              FlutterFlowTheme.of(context).titleSmall.override(
-                                    fontFamily: 'Poppins',
-                                    color: Colors.white,
-                                    fontSize: 20.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                          elevation: 0.0,
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                      ).animateOnActionTrigger(
-                        animationsMap['buttonOnActionTriggerAnimation']!,
+                Align(
+                  alignment: AlignmentDirectional(0.0, 1.0),
+                  child: Padding(
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0),
+                    child: FFButtonWidget(
+                      onPressed: (_model.isSelected == false)
+                          ? null
+                          : () async {
+                              context.pushNamed('LoadPreferences');
+                            },
+                      text: 'NEXT',
+                      options: FFButtonOptions(
+                        width: () {
+                          if (MediaQuery.sizeOf(context).width <
+                              kBreakpointSmall) {
+                            return 260.0;
+                          } else if (MediaQuery.sizeOf(context).width <
+                              kBreakpointMedium) {
+                            return 300.0;
+                          } else if (MediaQuery.sizeOf(context).width <
+                              kBreakpointLarge) {
+                            return 320.0;
+                          } else {
+                            return 340.0;
+                          }
+                        }(),
+                        height: () {
+                          if (MediaQuery.sizeOf(context).width <
+                              kBreakpointSmall) {
+                            return 55.0;
+                          } else if (MediaQuery.sizeOf(context).width <
+                              kBreakpointMedium) {
+                            return 60.0;
+                          } else if (MediaQuery.sizeOf(context).width <
+                              kBreakpointLarge) {
+                            return 63.0;
+                          } else {
+                            return 65.0;
+                          }
+                        }(),
+                        padding: EdgeInsets.all(0.0),
+                        iconAlignment: IconAlignment.start,
+                        iconPadding:
+                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                        color: FlutterFlowTheme.of(context).primary,
+                        textStyle: FlutterFlowTheme.of(context)
+                            .titleSmall
+                            .override(
+                              fontFamily: 'Poppins',
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              fontSize: () {
+                                if (MediaQuery.sizeOf(context).width <
+                                    kBreakpointSmall) {
+                                  return 20.0;
+                                } else if (MediaQuery.sizeOf(context).width <
+                                    kBreakpointMedium) {
+                                  return 25.0;
+                                } else if (MediaQuery.sizeOf(context).width <
+                                    kBreakpointLarge) {
+                                  return 28.0;
+                                } else {
+                                  return 30.0;
+                                }
+                              }(),
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                        elevation: 0.0,
+                        borderRadius: BorderRadius.circular(30.0),
                       ),
-                    ],
+                    ).animateOnActionTrigger(
+                      animationsMap['buttonOnActionTriggerAnimation']!,
+                    ),
                   ),
                 ),
               ],

@@ -1,6 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'about_us_model.dart';
 export 'about_us_model.dart';
 
@@ -34,20 +38,26 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
         key: scaffoldKey,
         body: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
             Align(
-              alignment: const AlignmentDirectional(0.0, 0.0),
+              alignment: AlignmentDirectional(0.0, 0.0),
               child: Container(
                 width: MediaQuery.sizeOf(context).width * 1.0,
                 height: MediaQuery.sizeOf(context).height * 1.0,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF022904), Color(0xFF2D5B2F)],
+                    colors: [
+                      FlutterFlowTheme.of(context).secondaryBackground,
+                      Color(0xFF2D5B2F)
+                    ],
                     stops: [0.0, 1.0],
                     begin: AlignmentDirectional(0.0, -1.0),
                     end: AlignmentDirectional(0, 1.0),
@@ -55,14 +65,14 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                 ),
                 child: Padding(
                   padding:
-                      const EdgeInsetsDirectional.fromSTEB(24.0, 50.0, 24.0, 24.0),
+                      EdgeInsetsDirectional.fromSTEB(24.0, 50.0, 24.0, 24.0),
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
+                          padding: EdgeInsetsDirectional.fromSTEB(
                               0.0, 10.0, 0.0, 0.0),
                           child: Wrap(
                             spacing: 0.0,
@@ -75,9 +85,9 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                             clipBehavior: Clip.none,
                             children: [
                               Align(
-                                alignment: const AlignmentDirectional(-1.0, 1.0),
+                                alignment: AlignmentDirectional(-1.0, 1.0),
                                 child: Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
                                       10.0, 0.0, 0.0, 10.0),
                                   child: InkWell(
                                     splashColor: Colors.transparent,
@@ -97,7 +107,7 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                             BorderRadius.circular(20.0),
                                       ),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                        padding: EdgeInsets.all(8.0),
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(8.0),
@@ -114,7 +124,7 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                 ),
                               ),
                               Align(
-                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                alignment: AlignmentDirectional(0.0, 0.0),
                                 child: Text(
                                   'About us',
                                   style: FlutterFlowTheme.of(context)
@@ -122,7 +132,7 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .override(
                                         fontFamily: 'Poppins',
                                         color: FlutterFlowTheme.of(context)
-                                            .alternate,
+                                            .secondaryText,
                                         fontSize: 38.0,
                                         letterSpacing: 0.0,
                                       ),
@@ -141,21 +151,22 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                   .headlineSmall
                                   .override(
                                     fontFamily: 'Poppins',
-                                    color: const Color(0xFFE0E0E0),
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
                                     fontSize: 22.0,
                                     letterSpacing: 0.0,
                                   ),
                             ),
-                          ].divide(const SizedBox(height: 16.0)),
+                          ].divide(SizedBox(height: 16.0)),
                         ),
                         Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           decoration: BoxDecoration(
-                            color: const Color(0x33FFFFFF),
+                            color: Color(0x33FFFFFF),
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 24.0, 24.0, 24.0, 24.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -166,7 +177,8 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .headlineSmall
                                       .override(
                                         fontFamily: 'Poppins',
-                                        color: Colors.white,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         letterSpacing: 0.0,
                                       ),
                                 ),
@@ -176,25 +188,26 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .bodyLarge
                                       .override(
                                         fontFamily: 'Poppins',
-                                        color: Colors.white,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         fontSize: 16.0,
                                         letterSpacing: 0.0,
                                         fontWeight: FontWeight.w300,
                                         lineHeight: 1.2,
                                       ),
                                 ),
-                              ].divide(const SizedBox(height: 16.0)),
+                              ].divide(SizedBox(height: 16.0)),
                             ),
                           ),
                         ),
                         Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           decoration: BoxDecoration(
-                            color: const Color(0x33FFFFFF),
+                            color: Color(0x33FFFFFF),
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 24.0, 24.0, 24.0, 24.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -205,7 +218,8 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .headlineSmall
                                       .override(
                                         fontFamily: 'Poppins',
-                                        color: Colors.white,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         letterSpacing: 0.0,
                                         lineHeight: 1.3,
                                       ),
@@ -216,7 +230,8 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .bodyMedium
                                       .override(
                                         fontFamily: 'Poppins',
-                                        color: Colors.white,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         fontSize: 16.0,
                                         letterSpacing: 0.0,
                                         fontWeight: FontWeight.w300,
@@ -245,18 +260,18 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                     ),
                                   ],
                                 ),
-                              ].divide(const SizedBox(height: 16.0)),
+                              ].divide(SizedBox(height: 16.0)),
                             ),
                           ),
                         ),
                         Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           decoration: BoxDecoration(
-                            color: const Color(0x33FFFFFF),
+                            color: Color(0x33FFFFFF),
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 24.0, 24.0, 24.0, 24.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -267,7 +282,8 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .headlineSmall
                                       .override(
                                         fontFamily: 'Poppins',
-                                        color: Colors.white,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         letterSpacing: 0.0,
                                       ),
                                 ),
@@ -277,24 +293,25 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .bodyLarge
                                       .override(
                                         fontFamily: 'Poppins',
-                                        color: Colors.white,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         letterSpacing: 0.0,
                                         fontWeight: FontWeight.w300,
                                         lineHeight: 1.2,
                                       ),
                                 ),
-                              ].divide(const SizedBox(height: 16.0)),
+                              ].divide(SizedBox(height: 16.0)),
                             ),
                           ),
                         ),
                         Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           decoration: BoxDecoration(
-                            color: const Color(0x33FFFFFF),
+                            color: Color(0x33FFFFFF),
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 24.0, 24.0, 24.0, 24.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -305,7 +322,8 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .headlineSmall
                                       .override(
                                         fontFamily: 'Poppins',
-                                        color: Colors.white,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         letterSpacing: 0.0,
                                       ),
                                 ),
@@ -315,22 +333,23 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .bodyLarge
                                       .override(
                                         fontFamily: 'Inter',
-                                        color: Colors.white,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         letterSpacing: 0.0,
                                       ),
                                 ),
-                              ].divide(const SizedBox(height: 16.0)),
+                              ].divide(SizedBox(height: 16.0)),
                             ),
                           ),
                         ),
                         Container(
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           decoration: BoxDecoration(
-                            color: const Color(0x33FFFFFF),
+                            color: Color(0x33FFFFFF),
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 24.0, 24.0, 24.0, 24.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -341,7 +360,8 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .headlineSmall
                                       .override(
                                         fontFamily: 'Poppins',
-                                        color: Colors.white,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         letterSpacing: 0.0,
                                       ),
                                 ),
@@ -351,20 +371,21 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                       .bodyLarge
                                       .override(
                                         fontFamily: 'Poppins',
-                                        color: Colors.white,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         letterSpacing: 0.0,
                                         fontWeight: FontWeight.w300,
                                         lineHeight: 1.2,
                                       ),
                                 ),
-                              ].divide(const SizedBox(height: 16.0)),
+                              ].divide(SizedBox(height: 16.0)),
                             ),
                           ),
                         ),
                         Align(
-                          alignment: const AlignmentDirectional(0.0, 0.0),
+                          alignment: AlignmentDirectional(0.0, 0.0),
                           child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
+                            padding: EdgeInsetsDirectional.fromSTEB(
                                 0.0, 0.0, 0.0, 1.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
@@ -373,12 +394,12 @@ class _AboutUsWidgetState extends State<AboutUsWidget> {
                                 width: 200.0,
                                 height: 200.0,
                                 fit: BoxFit.fitHeight,
-                                alignment: const Alignment(0.0, 0.0),
+                                alignment: Alignment(0.0, 0.0),
                               ),
                             ),
                           ),
                         ),
-                      ].divide(const SizedBox(height: 24.0)),
+                      ].divide(SizedBox(height: 24.0)),
                     ),
                   ),
                 ),

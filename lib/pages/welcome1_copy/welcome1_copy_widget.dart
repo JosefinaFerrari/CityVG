@@ -1,6 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'welcome1_copy_model.dart';
 export 'welcome1_copy_model.dart';
 
@@ -34,10 +38,13 @@ class _Welcome1CopyWidgetState extends State<Welcome1CopyWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: const Color(0xFF022904),
+        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
         body: SafeArea(
           top: true,
           child: Column(
@@ -48,7 +55,7 @@ class _Welcome1CopyWidgetState extends State<Welcome1CopyWidget> {
                   Stack(
                     children: [
                       Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
+                        padding: EdgeInsetsDirectional.fromSTEB(
                             30.0, 20.0, 30.0, 0.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
@@ -64,7 +71,7 @@ class _Welcome1CopyWidgetState extends State<Welcome1CopyWidget> {
                 ],
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 30.0, 0.0),
+                padding: EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 30.0, 0.0),
                 child: Text(
                   'Your virtual travel buddy',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(

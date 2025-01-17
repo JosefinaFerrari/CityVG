@@ -1,17 +1,26 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import '/backend/backend.dart';
 import '/backend/schema/structs/index.dart';
 
 import '/index.dart';
+import '/main.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/lat_lng.dart';
+import '/flutter_flow/place.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import 'serialization_util.dart';
 
 export 'package:go_router/go_router.dart';
 export 'serialization_util.dart';
 
 const kTransitionInfoKey = '__transition_info__';
+
+GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
 class AppStateNotifier extends ChangeNotifier {
   AppStateNotifier._();
@@ -32,6 +41,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier, [Widget? entryPage]) =>
       initialLocation: '/',
       debugLogDiagnostics: true,
       refreshListenable: appStateNotifier,
+      navigatorKey: appNavigatorKey,
       errorBuilder: (context, state) => appStateNotifier.showSplashImage
           ? Builder(
               builder: (context) => Container(
@@ -46,7 +56,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier, [Widget? entryPage]) =>
                 ),
               ),
             )
-          : entryPage ?? const WelcomeWidget(),
+          : entryPage ?? WelcomeWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
@@ -65,32 +75,32 @@ GoRouter createRouter(AppStateNotifier appStateNotifier, [Widget? entryPage]) =>
                     ),
                   ),
                 )
-              : entryPage ?? const WelcomeWidget(),
+              : entryPage ?? WelcomeWidget(),
         ),
         FFRoute(
           name: 'BudgetPage',
           path: '/budgetPage',
-          builder: (context, params) => const BudgetPageWidget(),
+          builder: (context, params) => BudgetPageWidget(),
         ),
         FFRoute(
           name: 'Welcome',
           path: '/welcome',
-          builder: (context, params) => const WelcomeWidget(),
+          builder: (context, params) => WelcomeWidget(),
         ),
         FFRoute(
           name: 'PreferencesPage',
           path: '/preferencesPage',
-          builder: (context, params) => const PreferencesPageWidget(),
+          builder: (context, params) => PreferencesPageWidget(),
         ),
         FFRoute(
           name: 'start',
           path: '/start',
-          builder: (context, params) => const StartWidget(),
+          builder: (context, params) => StartWidget(),
         ),
         FFRoute(
           name: 'MainPage',
           path: '/mainPage',
-          builder: (context, params) => const MainPageWidget(),
+          builder: (context, params) => MainPageWidget(),
         ),
         FFRoute(
           name: 'tripDetail',
@@ -102,52 +112,51 @@ GoRouter createRouter(AppStateNotifier appStateNotifier, [Widget? entryPage]) =>
               isList: false,
               collectionNamePath: ['itineraries_api'],
             ),
+            isPreview: params.getParam(
+              'isPreview',
+              ParamType.bool,
+            ),
           ),
         ),
         FFRoute(
           name: 'ScopePage',
           path: '/scopePage',
-          builder: (context, params) => const ScopePageWidget(),
+          builder: (context, params) => ScopePageWidget(),
         ),
         FFRoute(
           name: 'PeoplePage',
           path: '/peoplePage',
-          builder: (context, params) => const PeoplePageWidget(),
+          builder: (context, params) => PeoplePageWidget(),
         ),
         FFRoute(
           name: 'Welcome1Copy',
           path: '/welcome1Copy',
-          builder: (context, params) => const Welcome1CopyWidget(),
+          builder: (context, params) => Welcome1CopyWidget(),
         ),
         FFRoute(
           name: 'daypickerPage',
           path: '/daypickerPage',
-          builder: (context, params) => const DaypickerPageWidget(),
+          builder: (context, params) => DaypickerPageWidget(),
         ),
         FFRoute(
           name: 'Settings',
           path: '/settings',
-          builder: (context, params) => const SettingsWidget(),
+          builder: (context, params) => SettingsWidget(),
         ),
         FFRoute(
           name: 'FindPage',
           path: '/findPage',
-          builder: (context, params) => const FindPageWidget(),
+          builder: (context, params) => FindPageWidget(),
         ),
         FFRoute(
           name: 'LoadPage',
           path: '/loadPage',
-          builder: (context, params) => const LoadPageWidget(),
-        ),
-        FFRoute(
-          name: 'MainPageCopy',
-          path: '/mainPageCopy',
-          builder: (context, params) => const MainPageCopyWidget(),
+          builder: (context, params) => LoadPageWidget(),
         ),
         FFRoute(
           name: 'EditItinerary',
           path: '/editItinerary',
-          builder: (context, params) => const EditItineraryWidget(),
+          builder: (context, params) => EditItineraryWidget(),
         ),
         FFRoute(
           name: 'placeDetail',
@@ -162,54 +171,118 @@ GoRouter createRouter(AppStateNotifier appStateNotifier, [Widget? entryPage]) =>
           ),
         ),
         FFRoute(
-          name: 'top10',
-          path: '/top10',
-          builder: (context, params) => const Top10Widget(),
-        ),
-        FFRoute(
-          name: 'top5',
-          path: '/top5',
-          builder: (context, params) => const Top5Widget(),
+          name: 'top3',
+          path: '/top3',
+          builder: (context, params) => Top3Widget(),
         ),
         FFRoute(
           name: 'summaryPage',
           path: '/summaryPage',
-          builder: (context, params) => const SummaryPageWidget(),
+          builder: (context, params) => SummaryPageWidget(),
         ),
         FFRoute(
           name: 'mapDirectionsTest',
           path: '/mapDirectionsTest',
-          builder: (context, params) => const MapDirectionsTestWidget(),
+          builder: (context, params) => MapDirectionsTestWidget(),
         ),
         FFRoute(
           name: 'Languages',
           path: '/languages',
-          builder: (context, params) => const LanguagesWidget(),
+          builder: (context, params) => LanguagesWidget(),
         ),
         FFRoute(
           name: 'DarkMode2',
           path: '/darkMode2',
-          builder: (context, params) => const DarkMode2Widget(),
+          builder: (context, params) => DarkMode2Widget(),
         ),
         FFRoute(
           name: 'BugReport',
           path: '/bugReport',
-          builder: (context, params) => const BugReportWidget(),
+          builder: (context, params) => BugReportWidget(),
         ),
         FFRoute(
           name: 'AboutUs',
           path: '/aboutUs',
-          builder: (context, params) => const AboutUsWidget(),
+          builder: (context, params) => AboutUsWidget(),
         ),
         FFRoute(
           name: 'SuggestIdeas',
           path: '/suggestIdeas',
-          builder: (context, params) => const SuggestIdeasWidget(),
+          builder: (context, params) => SuggestIdeasWidget(),
         ),
         FFRoute(
           name: 'LoadApi',
           path: '/loadApi',
-          builder: (context, params) => const LoadApiWidget(),
+          builder: (context, params) => LoadApiWidget(),
+        ),
+        FFRoute(
+          name: 'LoadPreferences',
+          path: '/loadPreferences',
+          builder: (context, params) => LoadPreferencesWidget(),
+        ),
+        FFRoute(
+          name: 'top10',
+          path: '/top10',
+          builder: (context, params) => Top10Widget(),
+        ),
+        FFRoute(
+          name: 'Welcome1',
+          path: '/welcome1',
+          builder: (context, params) => Welcome1Widget(),
+        ),
+        FFRoute(
+          name: 'PeoplePageCopy',
+          path: '/peoplePageCopy',
+          builder: (context, params) => PeoplePageCopyWidget(),
+        ),
+        FFRoute(
+          name: 'SettingsCopy',
+          path: '/settingsCopy',
+          builder: (context, params) => SettingsCopyWidget(),
+        ),
+        FFRoute(
+          name: 'SuggestIdeasCopy',
+          path: '/suggestIdeasCopy',
+          builder: (context, params) => SuggestIdeasCopyWidget(),
+        ),
+        FFRoute(
+          name: 'top10Copy',
+          path: '/top10Copy',
+          builder: (context, params) => Top10CopyWidget(),
+        ),
+        FFRoute(
+          name: 'placeDetailCopy',
+          path: '/placeDetailCopy',
+          builder: (context, params) => PlaceDetailCopyWidget(
+            attraction: params.getParam(
+              'attraction',
+              ParamType.DataStruct,
+              isList: false,
+              structBuilder: AttractionStruct.fromSerializableMap,
+            ),
+          ),
+        ),
+        FFRoute(
+          name: 'tripDetailCopy',
+          path: '/tripDetailCopy',
+          builder: (context, params) => TripDetailCopyWidget(
+            tripRef: params.getParam(
+              'tripRef',
+              ParamType.DocumentReference,
+              isList: false,
+              collectionNamePath: ['itineraries_api'],
+            ),
+          ),
+        ),
+        FFRoute(
+          name: 'Notifications',
+          path: '/notifications',
+          builder: (context, params) => NotificationsWidget(),
+        ),
+        FFRoute(
+          name: 'Notifications2',
+          path: '/notifications2',
+          builder: (context, params) => Notifications2Widget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
@@ -377,7 +450,7 @@ class TransitionInfo {
   final Duration duration;
   final Alignment? alignment;
 
-  static TransitionInfo appDefault() => const TransitionInfo(hasTransition: false);
+  static TransitionInfo appDefault() => TransitionInfo(hasTransition: false);
 }
 
 class RootPageContext {
