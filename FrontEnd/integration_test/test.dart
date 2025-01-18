@@ -2,8 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:city_v_g/flutter_flow/flutter_flow_drop_down.dart';
-
 import 'package:city_v_g/flutter_flow/flutter_flow_widgets.dart';
 import 'package:city_v_g/flutter_flow/flutter_flow_theme.dart';
 import 'package:city_v_g/index.dart';
